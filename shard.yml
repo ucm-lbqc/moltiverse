@@ -1,0 +1,22 @@
+name: moltiverse
+version: 0.1.0
+
+authors:
+  - Mauricio Bedoya <maurobedoyat@gmail.com>
+  - Francisco Adasme <francisco.adasme@gmail.com>
+
+dependencies:
+  chem:
+    github: franciscoadasme/chem.cr
+    branch: master
+  mm:
+    github: franciscoadasme/mm
+    branch: master
+
+targets:
+  moltiverse:
+    main: src/moltiverse.cr
+
+crystal: 1.6.0
+
+license: MIT
