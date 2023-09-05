@@ -57,3 +57,6 @@ OptionParser.parse do |parser|
       exit
     end
   end
+  parser.on("-o NAME", "--output_name=NAME", "Output folder name. Default: Same as input ligand basename") do |str|
+    output_name = str
+  end
