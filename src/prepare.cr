@@ -350,3 +350,10 @@ module Prepare
       end
       @pdb_reference = Path.new("min.lastframe.pdb").expand().to_s
     end
+    def sampling
+      # Print protocol description
+      puts sampling_protocol.describe
+      sampling_protocol.execute(self)
+    end
+  end  
+end
