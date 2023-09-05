@@ -148,3 +148,4 @@ lig = Ligand.new(ligand, keep_hydrogens, ph_target, output_name, seed_value, exp
 lig.add_h()
 lig.parameterize()
 lig.minimize()
+lig.sampling()
