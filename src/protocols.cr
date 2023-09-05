@@ -165,3 +165,128 @@ module Protocols
       def rdgyr_pairs
         (0..rdgyr_ranges.size - 2).map {|i| rdgyr_ranges[i...i + 2]}
       end
+      def execute(lig : Ligand)
+        if @time_rmsd != 0 && @dimension == 1
+          count = 0
+          type = "rmsd"
+          puts "Sampling protocol using RMSD".colorize(GREEN)
+          rmsd_pairs.each.with_index do |pair, index|
+            window = "w#{count+=1}"
+            lw_rmsd = pair[0]
+            up_rmsd = pair[1]
+            # Writting namd configuration
+            enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.namd", @time_rmsd, @time_rdgyr, window, type).to_s
+            # Writting colvars configuration
+            colvars(@metadynamics, 
+            lw_rmsd, 
+            up_rmsd,
+            false,
+            false,
+            true, 
+            false, 
+            lig.pdb_reference, 
+            lig.lig_center.x, 
+            lig.lig_center.y, 
+            lig.lig_center.z, 
+            "#{type}.#{window}.colvars").to_s
+            namd_exec = "namd2"
+            # Arguments for GPU.
+            #arguments = ["#{window}.namd", "+p", "4", "+devices", "0"]
+            arguments = ["#{type}.#{window}.namd", "+p", "4"]
+            puts "Runnning ABF on window '#{window}', with RMSD ranges from #{lw_rmsd} to #{up_rmsd}"
+            # Namd execution
+            run_namd(cmd=namd_exec, args=arguments, output_file="#{type}.#{window}.out", stage="abf", window="#{window}")
+            # Checking number of frames in every calculation.
+            dcd_name = "outeabf.#{type}.#{window}.#{lig.basename}.dcd"
+            if File.exists?(dcd_name)
+              dcd = Path.new(dcd_name).expand().to_s
+              puts "Done... #{n_frames(lig.pdb_system,dcd)} frames generated for window #{window}"
+            else
+              puts "No frames were generated in window 'w#{window}'"
+            end
+          end
+        end
+        if @time_rdgyr != 0 && @dimension == 1
+          puts "Sampling protocol using RDGYR".colorize(GREEN)
+          type = "rdgyr"
+          count = 0
+          rdgyr_pairs.each.with_index do |pair, index|
+            window = "w#{count+=1}"
+            lw_rdgyr = pair[0]
+            up_rdgyr = pair[1]
+
+            # Writting namd configuration
+            enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.namd", @time_rmsd, @time_rdgyr, window, type).to_s
+            # Writting colvars configuration
+            colvars(@metadynamics, 
+            false,
+            false,
+            lw_rdgyr, 
+            up_rdgyr,
+            false, 
+            true, 
+            lig.pdb_reference, 
+            lig.lig_center.x, 
+            lig.lig_center.y, 
+            lig.lig_center.z, 
+            "#{type}.#{window}.colvars").to_s
+            namd_exec = "namd2"
+            arguments = ["#{type}.#{window}.namd", "+p", "4"]
+            puts "Runnning ABF on window '#{window}', with RDGYR ranges from #{lw_rdgyr} to #{up_rdgyr}"
+            # Namd execution
+            run_namd(cmd=namd_exec, args=arguments, output_file="#{type}.#{window}.out", stage="abf", window="#{window}")
+            # Checking number of frames in every calculation.
+            dcd_name = "outeabf.#{type}.#{window}.#{lig.basename}.dcd"
+            if File.exists?(dcd_name)
+              dcd = Path.new(dcd_name).expand().to_s
+              puts "Done... #{n_frames(lig.pdb_system,dcd)} frames generated for window #{window}"
+            else
+              puts "No frames were generated in window #{window}"
+            end
+          end
+        end
+        if @time_rmsd != 0 && @time_rdgyr != 0 && @dimension == 2
+          count = 0
+          type = "rmsd_rdgyr"
+          puts "Sampling protocol using RMSD".colorize(GREEN)
+          rmsd_pairs.each do |pair_rmsd|
+            rdgyr_pairs.each do |pair_rdgyr|
+              window = "w#{count+=1}"
+              lw_rmsd = pair_rmsd[0]
+              up_rmsd = pair_rmsd[1]
+              lw_rdgyr = pair_rdgyr[0]
+              up_rdgyr = pair_rdgyr[1] 
+              # Writting namd configuration
+              enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.namd", @time_rmsd, @time_rdgyr, window, type).to_s
+              # Writting colvars configuration
+              colvars(@metadynamics, 
+              lw_rmsd, 
+              up_rmsd,
+              lw_rdgyr,
+              up_rdgyr,
+              true, 
+              true, 
+              lig.pdb_reference, 
+              lig.lig_center.x, 
+              lig.lig_center.y, 
+              lig.lig_center.z, 
+              "#{type}.#{window}.colvars").to_s
+              namd_exec = "namd2"
+              arguments = ["#{type}.#{window}.namd", "+p", "4"]
+              puts "Runnning ABF on window '#{window}'. RMSD ranges: #{lw_rmsd} to #{up_rmsd}. RDGYR ranges: #{lw_rdgyr} to #{up_rdgyr}"
+              # Namd execution
+              run_namd(cmd=namd_exec, args=arguments, output_file="#{type}.#{window}.out", stage="abf", window="#{window}")
+              # Checking number of frames in every calculation.
+              dcd_name = "outeabf.#{type}.#{window}.#{lig.basename}.dcd"
+              if File.exists?(dcd_name)
+                dcd = Path.new(dcd_name).expand().to_s
+                puts "Done... #{n_frames(lig.pdb_system,dcd)} frames generated for window #{window}"
+              else
+                puts "No frames were generated in window 'w#{window}'"
+              end
+            end
+          end
+        end
+      end
+    end 
+end
