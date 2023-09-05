@@ -143,3 +143,4 @@ end
 dependencies()
 
 
+protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
