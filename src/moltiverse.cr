@@ -139,3 +139,7 @@ if seed_value == "random"
   seed_value = Random.new.rand(1..10000)
 end
 
+# Check dependencies
+dependencies()
+
+
