@@ -121,3 +121,21 @@ OptionParser.parse do |parser|
     exit(1)
   end
 end
+
+# Options verification
+ph_target = 7.0 unless ph_target
+if dimension == 2 && bounds_colvars.xt != bounds_colvars.yt
+  puts "Error: Using a 2D colvars requiere the same simulation time for RMSD and RDGYR colvars.".colorize(RED)
+  puts "Check --bounds_colvars option".colorize(RED)
+  exit(1)
+end
+
+if output_name == "empty"
+  extension = "#{File.extname("#{ligand}")}"
+  output_name = "#{File.basename("#{ligand}", "#{extension}")}"
+end
+
+if seed_value == "random"
+  seed_value = Random.new.rand(1..10000)
+end
+
