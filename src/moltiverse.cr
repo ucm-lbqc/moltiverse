@@ -149,3 +149,5 @@ lig.add_h()
 lig.parameterize()
 lig.minimize()
 lig.sampling()
+
+puts "Finished process".colorize(PURPLE)
