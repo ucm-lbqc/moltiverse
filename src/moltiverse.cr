@@ -73,3 +73,12 @@ OptionParser.parse do |parser|
         end
       end
   end
+  parser.on("-w Bool", "--water=Bool", "Add explicit water to run calculations. Default: true. Options: 'true', 'false'.") do |str|
+    case str
+      when "true" then explicit_water = true
+      when "false" then explicit_water = false
+      else
+        puts "The --water value must be 'true' or 'false'"
+        exit
+      end
+  end
