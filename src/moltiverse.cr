@@ -102,3 +102,12 @@ OptionParser.parse do |parser|
     when "2" then dimension = 2
     end
   end
+  parser.on("-m BOOL", "--metadynamics=BOOL", "Add Well-tempered metadynamics to eABF sampling?. Default: false") do |str|
+    case str
+    when "true" then metadynamics = true
+    when "false" then metadynamics = false
+    else
+      puts "The --metadynamics value must be 'true' or 'false'"
+      exit
+    end
+  end
