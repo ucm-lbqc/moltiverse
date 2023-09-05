@@ -1,0 +1,91 @@
+set sys <%= system %>
+# Basis of the cell
+set a <%= a %>
+set b <%= b %>
+set c <%= c %>
+# Center of the cell
+set cx <%= cx %>
+set cy <%= cy %>
+set cz <%= cz %>
+set temperature 300
+set outputName min.${sys}
+# global configuration
+
+parmfile                        <%= topology_file %>
+ambercoor                       <%= coordinates_file %>
+#extendedSystem                  namd-temp.xsc
+temperature                     $temperature
+outputName                      $outputName
+
+# minimization
+minimization                    on
+numSteps                        1000
+amber                           on          # AMBER IN NAMD
+exclude                         scaled1-4   # AMBER IN NAMD
+1-4scaling                      0.833333    # AMBER IN NAMD
+switching                       off         # AMBER IN NAMD
+cutoff                          9           # AMBER IN NAMD
+pairListDist                    11          # AMBER IN NAMD
+LJcorrection                    on          # AMBER IN NAMD
+scnb                            2.0         # AMBER IN NAMD
+readexclusions                  yes         # AMBER IN NAMD
+ZeroMomentum                    on          # AMBER IN NAMD
+watermodel                      tip3p       # AMBER IN NAMD (TIP4P is also available)
+
+# avoid "periodic cell too small for patch grid" errors
+margin                          1
+
+# integration
+rigidBonds                      water         # AMBER IN NAMD (water or all)
+rigidTolerance                  1.0e-8        # AMBER IN NAMD  
+useSettle                       on            # AMBER IN NAMD
+timestep                        1.0
+firstTimestep                   0
+fullElectFrequency              1             # AMBER IN NAMD
+nonBondedFreq                   1             # AMBER IN NAMD
+stepsPerCycle                   10            # AMBER IN NAMD
+
+
+PME                             on            # AMBER IN NAMD
+PMETolerance                    1.0e-6        # AMBER IN NAMD
+PMEInterpOrder                  4             # AMBER IN NAMD
+FFTWUseWisdom                   no            # AMBER IN NAMD
+pmeGridSpacing                  1.0
+
+#PMEGridSizeX                    54            # Adjust this thing
+#PMEGridSizeY                    54            # Adjust this thing
+#PMEGridSizeZ                    54            # Adjust this thing
+#
+## periodic cell  
+cellBasisVector1                $a  0.0 0.0             # Adjust this thing
+cellBasisVector2                0.0 $b  0.0             # Adjust this thing
+cellBasisVector3                0.0 0.0 $c              # Adjust this thing
+cellOrigin                      $cx $cy $cz             # Adjust this thing
+
+
+# output
+binaryOutput                    yes
+binaryRestart                   yes
+outputEnergies                  500
+outputPressure                  500
+outputTiming                    500
+xstFreq                         500
+dcdFreq                         500
+restartFreq                     500
+
+# Thermostat Parameters
+langevin            on                  # AMBER IN NAMD (on or off)
+langevintemp        300                 # AMBER IN NAMD
+langevinHydrogen    off                 # AMBER IN NAMD
+langevindamping     5                   # AMBER IN NAMD
+
+# Barostat Parameters
+usegrouppressure    yes                 # AMBER IN NAMD (on or off)
+useflexiblecell     no                  # AMBER IN NAMD
+useConstantArea     no                  # AMBER IN NAMD
+langevinpiston      on                  # AMBER IN NAMD (on or off)
+langevinPistonTarget  1.01325
+langevinPistonPeriod  100.
+langevinPistonDecay   50.  
+langevinPistonTemp    $temperature
+
