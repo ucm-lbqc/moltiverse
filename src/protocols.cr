@@ -159,3 +159,9 @@ module Protocols
           end
         end
       end
+      def rmsd_pairs
+        (0..rmsd_ranges.size - 2).map {|i| rmsd_ranges[i...i + 2]}
+      end
+      def rdgyr_pairs
+        (0..rdgyr_ranges.size - 2).map {|i| rdgyr_ranges[i...i + 2]}
+      end
