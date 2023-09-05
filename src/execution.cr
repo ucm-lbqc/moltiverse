@@ -45,3 +45,35 @@ module Execution
       stderr.close
     end
   end
+  def run_namd(cmd : String, args : Array(String), output_file : String, stage : String | Colorize::Object(String), window : String)
+    success = false
+    stdout = IO::Memory.new
+    stderr = IO::Memory.new
+    logfile = File.new("#{output_file}", "w")
+    status = Process.run(cmd, args: args, output: logfile, error: stderr)
+
+    if status.success?
+    else
+      puts stderr.colorize(YELLOW)
+      count = 0
+      while count < 5
+        # TO:DO Insted of restart the simulation, try to continue it.
+        puts "Warning: Some instabilities were found in window #{window}. Re-starting the simulation.".colorize(YELLOW)
+        status = Process.run(cmd, args: args, output: logfile, error: stderr)
+        if status.success?
+          count = 6
+        else
+          count +=1
+        end
+      end
+      if status.success?
+        puts ""
+      else
+        puts "Error: The maximum attempt limit has been reached. Window '#{window}' could not be simulated correctly. Jumping to the next window.".colorize(RED)
+      end
+    end
+    logfile.close
+    stdout.close
+    stderr.close
+  end
+end
