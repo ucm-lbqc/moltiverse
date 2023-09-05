@@ -1,0 +1,152 @@
+<%- if rmsd_active -%>
+colvar {
+  name RMSD
+  width 0.05 
+  lowerWall <%= lw_rmsd %>
+  lowerboundary <%= lw_rmsd %>
+  upperWall <%= up_rmsd %>
+  upperboundary <%= up_rmsd %>
+                         
+  lowerwallconstant 30.0
+  upperwallconstant 30.0
+  
+  extendedLagrangian on
+  extendedFluctuation 0.05
+  
+  rmsd {
+    atoms {
+      atomsFile <%= pdb_reference %>
+	    atomsCol B
+	    atomsColValue 1.0
+    }
+    refpositionsfile  <%= pdb_reference %>
+  }
+}
+
+<%- end -%>
+
+<%- if rdgyr_active -%>
+colvar {
+  name GYR
+  width 0.05 
+  lowerWall <%= lw_rdgyr %>
+  lowerboundary <%= lw_rdgyr %>
+  upperWall <%= up_rdgyr %>
+  upperboundary <%= up_rdgyr %>
+                       
+  lowerwallconstant 30.0
+  upperwallconstant 30.0
+  
+  extendedLagrangian on
+  extendedFluctuation 0.05
+  
+  gyration {
+    atoms {
+      atomsFile <%= pdb_reference %>
+	    atomsCol B
+	    atomsColValue 1.0
+    }
+  }
+}
+
+<%- end -%>
+<%- if rmsd_active && !rdgyr_active -%>
+abf {
+  colvars              RMSD
+  FullSamples          5000
+  historyfreq          20000
+  writeCZARwindowFile
+}
+<%- end -%>
+
+<%- if rmsd_active && rdgyr_active -%>
+abf {
+  colvars              RMSD GYR
+  FullSamples          5000
+  historyfreq          20000
+  writeCZARwindowFile
+}
+<%- end -%>
+
+
+<%- if rdgyr_active && !rmsd_active -%>
+abf {
+  colvars              GYR
+  FullSamples          5000
+  historyfreq          20000
+  writeCZARwindowFile
+}
+<%- end -%>
+
+
+<%- if wtm && rmsd_active && !rdgyr_active -%>
+metadynamics {
+  colvars            RMSD
+  hillWeight         0.1
+  hillWidth          1
+  wellTempered       on
+  newHillFrequency   500
+  biasTemperature    1490
+}
+<%- end -%>
+
+<%- if wtm && rdgyr_active && !rmsd_active -%>
+metadynamics {
+  colvars            GYR
+  hillWeight         0.1
+  hillWidth          1
+  wellTempered       on
+  newHillFrequency   500
+  biasTemperature    1490
+}
+<%- end -%>
+
+<%- if wtm && rdgyr_active && rmsd_active -%>
+metadynamics {
+  colvars            RMSD GYR
+  hillWeight         0.1
+  hillWidth          1
+  wellTempered       on
+  newHillFrequency   500
+  biasTemperature    1490
+}
+<%- end -%>
+
+
+# To avoid ligand translation
+colvar { 
+  name translation 
+  distance { 
+    group1 { 
+      atomsFile <%= pdb_reference %>
+      atomsCol B
+      atomsColValue 1.0 
+    } 
+    group2 { 
+      dummyAtom (<%= lig_center_x %>, <%= lig_center_y %>, <%= lig_center_z %>)
+    } 
+  } 
+} 
+harmonic { 
+  colvars translation 
+  centers 0.0 
+  forceConstant 100.0 
+} 
+
+# To keep orientation
+colvar { 
+  name orientation 
+  orientation { 
+    atoms { 
+      atomsFile   <%= pdb_reference %>
+      atomsCol B
+      atomsColValue 1.0 
+    } 
+    refPositionsFile   <%= pdb_reference %>
+  } 
+} 
+harmonic { 
+  colvars orientation 
+  centers (1.0, 0.0, 0.0, 0.0)
+  forceConstant 100.0 
+} 
