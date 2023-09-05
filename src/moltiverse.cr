@@ -144,3 +144,4 @@ dependencies()
 
 
 protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
+lig = Ligand.new(ligand, keep_hydrogens, ph_target, output_name, seed_value, explicit_water, protocol_eabf1)
