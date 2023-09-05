@@ -113,3 +113,49 @@ module Protocols
       def rdgyr_ranges
         (0..@windows_rdgyr).map { |i| i * @width_rdgyr}
       end
+      def describe
+        if @dimension == 1
+          if @time_rmsd != 0 && @time_rdgyr != 0
+            puts "SAMPLING PROTOCOL using two 1D collective variables".colorize(PURPLE)
+          else
+            puts "SAMPLING PROTOCOL using a 1D collective variable".colorize(PURPLE)
+          end
+
+          puts "Range of RMSD values:               [ #{@lw_rmsd} --> #{@up_rmsd} ]" unless @lw_rmsd == 0.0 && @up_rmsd == 0.0
+          puts "Number of windows:                  [ #{@windows_rmsd} ]" unless @windows_rmsd == 0
+          puts "RMSD width per window:              [ #{@width_rmsd} ]" unless @width_rmsd.nan?
+          puts "Simulation time per window:         [ #{@time_rmsd} ns ]" unless @time_rmsd == 0
+          puts "Simulation time for RMSD colvars:   [ #{@time_rmsd * @windows_rmsd} ns ]" unless @time_rmsd == 0
+          puts ""
+          puts "Range of RDGYR values:              [ #{@lw_rdgyr} --> #{@up_rdgyr} ]" unless @lw_rdgyr  == 0 && @up_rdgyr == 0.0
+          puts "Number of windows:                  [ #{@windows_rdgyr} ]" unless @windows_rdgyr == 0
+          puts "RDGYR width per window:             [ #{@width_rdgyr} ]" unless @width_rdgyr.nan?
+          puts "Simulation time per window:         [ #{@time_rdgyr} ns ]" unless @time_rdgyr == 0
+          puts "Simulation time for RDGYR colvars:  [ #{@time_rdgyr * @windows_rdgyr} ns ]" unless @time_rdgyr == 0
+          puts ""
+          puts "Total simulation time:              [ #{(@time_rdgyr * @windows_rdgyr) + (@time_rmsd * @windows_rmsd)} ns ]" unless @time_rmsd == 0 || time_rdgyr == 0
+          if @metadynamics
+            puts "Sampling methods:                   [ WTM-eABF ]"
+          else
+            puts "Sampling methods:                   [ eABF ]"
+          end
+        end
+        if @dimension == 2
+          puts "SAMPLING PROTOCOL using a 2D collective variable".colorize(PURPLE)
+
+          puts "Range of RMSD values:               [ #{@lw_rmsd} --> #{@up_rmsd} ]"
+          puts "Number of windows:                  [ #{@windows_rmsd} ]" unless @windows_rmsd == 0
+          puts "RMSD width per window:              [ #{@width_rmsd} ]" unless @width_rmsd.nan?
+          puts "Simulation time per window:         [ #{@time_rmsd} ns ]" unless @time_rmsd == 0
+          puts ""
+          puts "Range of RDGYR values:              [ #{@lw_rdgyr} --> #{@up_rdgyr} ]" unless @lw_rdgyr  == 0 && @up_rdgyr == 0.0
+          puts "Number of windows:                  [ #{@windows_rdgyr} ]" unless @windows_rdgyr == 0
+          puts "RDGYR width per window:             [ #{@width_rdgyr} ]" unless @width_rdgyr.nan?
+          puts "Total simulation time:              [ #{(@windows_rmsd * @windows_rdgyr) * (@time_rmsd)} ns ]" unless @time_rmsd == 0 || time_rdgyr == 0
+          if @metadynamics
+            puts "Sampling methods:                   [ WTM-eABF ]"
+          else
+            puts "Sampling methods:                   [ eABF ]"
+          end
+        end
+      end
