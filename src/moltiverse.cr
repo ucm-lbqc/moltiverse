@@ -48,3 +48,12 @@ OptionParser.parse do |parser|
       exit(1)
     end
   end
+  parser.on("-k BOOL", "--keep_hydrogens=BOOL", "Keep original hydrogens. Default: true") do |str|
+    case str
+    when "true" then keep_hydrogens = true
+    when "false" then keep_hydrogens = false
+    else
+      puts "The --keep_hydrogens value must be 'true' or 'false'"
+      exit
+    end
+  end
