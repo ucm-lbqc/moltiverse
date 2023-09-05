@@ -41,3 +41,10 @@ OptionParser.parse do |parser|
     end
     ligand = str
   end
+  parser.on("-p N", "--ph=N", "Desired pH to assign protonation. Default: 7.0") do |str|
+    ph_target = str.to_f64
+    unless 0.0 <= ph_target <= 14.0
+      STDERR.puts "Error: invalid pH value: #{str}"
+      exit(1)
+    end
+  end
