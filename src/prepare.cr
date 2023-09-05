@@ -322,3 +322,31 @@ module Prepare
         puts "SYSTEM INFO: ", Chem::Structure.from_pdb(pdb_system)
       end
     end
+    def minimize
+      pdb = Chem::Structure.from_pdb(@pdb_system)
+      a, b, c = pdb.cell?.try(&.size) ||{0, 0, 0}
+      cx = pdb.coords.center.x
+      cy = pdb.coords.center.y
+      cz = pdb.coords.center.z
+      minimization(@explicit_water, @basename, @topology_file, @coordinates_file, "min.namd", a, b, c, cx, cy, cz)
+      namd_exec = "namd2"
+      arguments = ["min.namd", "+p", "4"]
+      puts "Runnning minimization..."
+      run_cmd(cmd=namd_exec, args=arguments, output_file="min.out", stage="minimization", verbose=true)
+      @basename = "min.#{@basename}"
+      new_dcd = "#{@basename}.dcd"
+      @dcd = Path.new(new_dcd).expand().to_s
+      # Write last-frame of the minimization as a reference input for next calculation.
+      pdb = Chem::Structure.from_pdb(@pdb_system)
+      Chem::DCD::Reader.open((@dcd), pdb) do |reader|
+        n_frames = reader.n_entries - 1
+        lastframe = reader.read_entry n_frames
+        puts "n frames = #{reader.n_entries}"
+        # Ligand geometrical center
+        @lig_center = lastframe['A'][1].coords.center
+        lastframe['A'][1].each_atom {|atom|
+          atom.temperature_factor = 1.0}
+        lastframe.to_pdb "min.lastframe.pdb"
+      end
+      @pdb_reference = Path.new("min.lastframe.pdb").expand().to_s
+    end
