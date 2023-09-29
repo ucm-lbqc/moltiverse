@@ -6,12 +6,14 @@ module Protocols
         def initialize(x1 : Float32, 
                       x2 : Float32, 
                       xw : Int32, 
+                      xf : Float32,
                       xt : Float32, 
                       y1 : Float32, 
                       y2 : Float32, 
                       yw : Int32,
+                      yf : Float32,
                       yt : Float32, )
-          @x1, @x2, @xw, @xt, @y1, @y2, @yw, @yt = x1, x2, xw, xt, y1, y2, yw, yt
+          @x1, @x2, @xw, @xf, @xt, @y1, @y2, @yw, @yf, @yt = x1, x2, xw, xf, xt, y1, y2, yw, yf, yt
         end
         def x1
           @x1
@@ -21,6 +23,9 @@ module Protocols
         end
         def xw
           @xw
+        end
+        def xf
+          @xf
         end
         def xt
           @xt
@@ -34,6 +39,9 @@ module Protocols
         def yw
           @yw
         end
+        def yf
+          @yf
+        end
         def yt
           @yt
         end
@@ -44,12 +52,14 @@ module Protocols
       @up_rmsd : Float32
       @windows_rmsd : Int32
       @time_rmsd : Float32
+      @wallconstant_force_rmsd : Float32
       @width_rmsd : Float32
 
       @lw_rdgyr : Float32
       @up_rdgyr : Float32
       @windows_rdgyr : Int32
       @time_rdgyr : Float32
+      @wallconstant_force_rdgyr : Float32
       @width_rdgyr : Float32
       @metadynamics : Bool
       @dimension : Int32
@@ -61,11 +71,13 @@ module Protocols
         @lw_rmsd = bounds_colvars.x1
         @up_rmsd = bounds_colvars.x2
         @windows_rmsd = bounds_colvars.xw
+        @wallconstant_force_rmsd = bounds_colvars.xf
         @time_rmsd = bounds_colvars.xt
         
         @lw_rdgyr = bounds_colvars.y1
         @up_rdgyr = bounds_colvars.y2
         @windows_rdgyr = bounds_colvars.yw
+        @wallconstant_force_rdgyr = bounds_colvars.yf
         @time_rdgyr = bounds_colvars.yt
 
         @width_rmsd = (@up_rmsd - @lw_rmsd) / @windows_rmsd
@@ -94,6 +106,12 @@ module Protocols
       end
       def width_rdgyr
         @width_rdgyr
+      end
+      def wallconstant_force_rmsd
+        @wallconstant_force_rmsd
+      end
+      def wallconstant_force_rdgyr
+        @wallconstant_force_rdgyr
       end
       def time_rmsd
         @time_rmsd
