@@ -12,6 +12,8 @@ dependencies:
   mm:
     github: franciscoadasme/mm
     branch: master
+  hclust:
+    github: franciscoadasme/hclust
 
 targets:
   moltiverse:
