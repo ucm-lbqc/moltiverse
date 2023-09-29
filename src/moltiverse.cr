@@ -136,8 +136,8 @@ if output_name == "empty"
   output_name = "#{File.basename("#{ligand}", "#{extension}")}"
 end
 
-if seed_value == "random"
-  seed_value = Random.new.rand(1..10000)
+if random_coords == "random"
+  random_coords = Random.new.rand(1..10000)
 end
 
 # Check dependencies
@@ -145,7 +145,7 @@ dependencies()
 
 
 protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
-lig = Ligand.new(ligand, keep_hydrogens, ph_target, output_name, seed_value, explicit_water, protocol_eabf1)
+lig = Ligand.new(ligand, keep_hydrogens, ph_target, output_name, random_coords, explicit_water, protocol_eabf1)
 lig.add_h()
 lig.parameterize()
 lig.minimize()
