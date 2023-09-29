@@ -279,13 +279,15 @@ module Protocols
               # Writting namd configuration
               enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.namd", @time_rmsd, window, type).to_s
               # Writting colvars configuration
+              # wallconstant_force for 2D must be fixed in the following fuction.
               colvars(@metadynamics, 
               lw_rmsd, 
               up_rmsd,
               lw_rdgyr,
               up_rdgyr,
               true, 
-              true, 
+              true,
+              @wallconstant_force_rmsd,
               lig.pdb_reference, 
               lig.lig_center.x, 
               lig.lig_center.y, 
