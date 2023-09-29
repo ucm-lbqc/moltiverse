@@ -3,8 +3,7 @@ module Dependencies
     dependencies = {
     "obabel"=>true, 
     "namd2"=>true, 
-    "rdkit"=>true, 
-    "parmed"=>true, 
+    "rdkit"=>true,  
     "antechamber"=>true, 
     "parmchk2"=>true, 
     "tleap"=>true}
