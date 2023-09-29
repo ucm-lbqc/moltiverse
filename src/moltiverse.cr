@@ -25,7 +25,7 @@ include Dependencies
 ligand = ""
 ph_target = 7.0
 keep_hydrogens = true
-seed_value = "no"
+random_coords = false
 explicit_water = false
 output_name = "empty"
 bounds_colvars = BoundsColvars.new(0.0, 10.0, 20, 2, 0, 0, 0, 0)
