@@ -61,15 +61,15 @@ OptionParser.parse do |parser|
   parser.on("-o NAME", "--output_name=NAME", "Output folder name. Default: Same as input ligand basename") do |str|
     output_name = str
   end
-  parser.on("-s N", "--seed=N", "Seed to randomize the initial ligand structure. Default: random. Options: 'random', any integer or 'no'.") do |str|
+  parser.on("-r N", "--random=N", "Randomize the initial ligand structure?. Default: no. Options: 'yes' or 'no'.") do |str|
     case str
-      when "no" then seed_value = str.to_s
-      when "random" then seed_value = str.to_s
+      when "no" then random_coords = false
+      when "yes" then random_coords = true
       else
         begin
-          seed_value = str.to_i32
+          random_coords = str.to_b
         rescue exception
-          puts "The --seed option must be an integer"
+          puts "The --random option must be 'yes' or 'no'"
           exit
         end
       end
