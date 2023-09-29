@@ -159,7 +159,7 @@ module Prepare
       File.write outfile, <<-SCRIPT
       from rdkit import Chem
       from rdkit.Chem import AllChem
-      import parmed as pmd
+      #import parmed as pmd
       import subprocess
       import os
       import shutil
@@ -270,12 +270,12 @@ module Prepare
       cmd = f"./run_leap.sh"
       run_silent(cmd, "Running Leap")
       #print("Running ParmEd...")
-      # Parmed format file conversion single ligand
-      amber_ligand = pmd.load_file('#{basename}.prmtop', xyz='#{basename}.inpcrd')
-      amber_ligand.save('#{basename}.psf', overwrite=True)
-      amber_ligand.save('#{basename}.top', overwrite=True)
-      amber_ligand.save('#{basename}.gro', overwrite=True)
-      amber_ligand.save('#{basename}.pqr', overwrite=True)
+      ## Parmed format file conversion single ligand
+      #amber_ligand = pmd.load_file('#{basename}.prmtop', xyz='#{basename}.inpcrd')
+      #amber_ligand.save('#{basename}.psf', overwrite=True)
+      #amber_ligand.save('#{basename}.top', overwrite=True)
+      #amber_ligand.save('#{basename}.gro', overwrite=True)
+      #amber_ligand.save('#{basename}.pqr', overwrite=True)
       
       SCRIPT
       parmed_exec = "python"
