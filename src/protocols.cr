@@ -277,7 +277,7 @@ module Protocols
               lw_rdgyr = pair_rdgyr[0]
               up_rdgyr = pair_rdgyr[1] 
               # Writting namd configuration
-              enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.namd", @time_rmsd, @time_rdgyr, window, type).to_s
+              enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.namd", @time_rmsd, window, type).to_s
               # Writting colvars configuration
               colvars(@metadynamics, 
               lw_rmsd, 
