@@ -34,13 +34,13 @@ module Dependencies
       puts "rdkit ✘".colorize(RED)
     end
     # ParmEd in python
-    begin
-      library = "import importlib;importlib.import_module('parmed')"
-      run_cmd(cmd="python", args=["-c", "#{library}"], output_file=Nil, stage="parmed ✔".colorize(GREEN), verbose=false)
-    rescue exception
-      dependencies["parmed"] = false
-      puts "parmed ✘".colorize(RED)
-    end
+    #begin
+    #  library = "import importlib;importlib.import_module('parmed')"
+    #  run_cmd(cmd="python", args=["-c", "#{library}"], output_file=Nil, stage="parmed ✔".colorize(GREEN), verbose=false)
+    #rescue exception
+    #  dependencies["parmed"] = false
+    #  puts "parmed ✘".colorize(RED)
+    #end
 
     # Antechamber
     begin
