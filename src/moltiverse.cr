@@ -28,9 +28,10 @@ keep_hydrogens = true
 random_coords = false
 explicit_water = false
 output_name = "empty"
-bounds_colvars = BoundsColvars.new(0.0, 10.0, 20, 2, 0, 0, 0, 0)
+bounds_colvars = BoundsColvars.new(0, 0, 0, 0, 0, 0, 10.0, 40, 50.0, 1.0)
 dimension = 1
 metadynamics = false
+wall_constant = 50.0
 
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
