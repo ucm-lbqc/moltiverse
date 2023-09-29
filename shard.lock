@@ -4,6 +4,10 @@ shards:
     git: https://github.com/franciscoadasme/chem.cr.git
     version: 0.6.0+git.commit.ba6eb4958324998d43c77a176034073ebd748fd2
 
+  hclust:
+    git: https://github.com/franciscoadasme/hclust.git
+    version: 1.0.0
+
   mm:
     git: https://github.com/franciscoadasme/mm.git
     version: 0.1.0+git.commit.24425b36dd870a7c379d730f779f1bcacb178a4e
