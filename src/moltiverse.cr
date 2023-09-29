@@ -83,16 +83,16 @@ OptionParser.parse do |parser|
         exit
       end
   end
-  parser.on("-b FLOAT", "--bounds_colvars=FLOAT", "Lower and upper limits for colvars [Å], the number of windows and the time for every window: 'x1,x2,wx,tx,y1,y2,wy,ty' where x,y are the RMSD and RDGYR collective variables limits, 'w', and 't' is the number of windows and time for each collective variable. e.g. '0.0,8.0,16,2,0,0,0,0'") do |str|
+  parser.on("-b FLOAT", "--bounds_colvars=FLOAT", "Lower and upper limits for colvars [Å], the number of windows, the wall constant (f) and the time for every window: 'x1,x2,wx,fx,tx,y1,y2,wy,fy,ty' where x,y are the RMSD and RDGYR collective variables limits, 'w', and 't' is the number of windows and time for each collective variable. e.g. '0.0,8.0,16,50,2,0,0,0,0,0'") do |str|
     dict_opts = str.split(",")
-    abort "Error: The 'bounds_colvars' option must be 6 values separated by ','. #{dict_opts.size} values were given.".colorize(RED) unless dict_opts.size == 8
+    abort "Error: The 'bounds_colvars' option must be 10 values separated by ','. #{dict_opts.size} values were given.".colorize(RED) unless dict_opts.size == 10
     dict_opts.map do |str|
       if str.empty?
-        abort "Error: The 'bounds_colvars' option must be 6 values separated by ','. The following values: #{dict_opts} were given.".colorize(RED)
+        abort "Error: The 'bounds_colvars' option must be 10 values separated by ','. The following values: #{dict_opts} were given.".colorize(RED)
       end
     end
-    dict = str.split(",")[0..7].map &.to_f32
-    bounds_colvars = BoundsColvars.new(dict[0],dict[1],dict[2].to_i32,dict[3],dict[4],dict[5],dict[6].to_i32,dict[7])
+    dict = str.split(",")[0..9].map &.to_f32
+    bounds_colvars = BoundsColvars.new(dict[0],dict[1],dict[2].to_i32,dict[3],dict[4],dict[5],dict[6],dict[7].to_i32,dict[8],dict[9])
   end
   parser.on("-d INT", "--dimension=INT", "Colvars dimension. 
     If dimension = 1 and --bounds_colvars are defined for both collective variables, 
