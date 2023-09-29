@@ -16,7 +16,7 @@ include Execution
 
 module Prepare
   class Ligand
-    def initialize(file : String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, seed : Int32 | String, explicit_water : Bool, sampling_protocol : SamplingProtocol)
+    def initialize(file : String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, random_coords : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol)
       unless File.exists?(file)
           STDERR.puts "Error: ligand file not found: #{file}"
           exit(1)
@@ -36,7 +36,7 @@ module Prepare
       @lig_center = Spatial::Vec3.new(0,0,0)
       @pdb_reference = "empty"
       @explicit_water = explicit_water
-      @seed = seed
+      @random_coords = random_coords
       @sampling_protocol = sampling_protocol
       @time_rmsd = sampling_protocol.time_rmsd
       @time_rdgyr = sampling_protocol.time_rdgyr
@@ -88,8 +88,8 @@ module Prepare
     def explicit_water
       @explicit_water
     end
-    def seed
-      @seed
+    def random_coords
+      @random_coords
     end
     def sampling_protocol
       @sampling_protocol
@@ -163,10 +163,10 @@ module Prepare
       import subprocess
       import os
       import shutil
-      if "#{@seed}" == "no":
-        seed = False
+      if "#{@random_coords}" == "no":
+        random_coords = False
       else:
-        seed = int("#{@seed}")
+        random_coords = int("#{@random_coords}")
       water = "#{water}"
     
       def run_silent(command, basename):
@@ -190,7 +190,7 @@ module Prepare
       print("Bonds : ", nbonds)
       print("Rbonds: ", nrot)
       print("Charge: ", charge)
-      if seed:
+      if random_coords:
         # Generating random conformer from smiles:
         print("Generating random conformer from smiles code:")
         smiles = Chem.MolToSmiles(starting, allHsExplicit=True)
@@ -198,13 +198,13 @@ module Prepare
         ps = Chem.SmilesParserParams()
         ps.removeHs = False
         new = Chem.MolFromSmiles(smiles,ps)
-        AllChem.EmbedMolecule(new, randomSeed=seed)
+        AllChem.EmbedMolecule(new, Seed=random_coords)
         print("Data generated from smiles code:")
         smiles_natoms = Chem.rdchem.Mol.GetNumAtoms(new)
         smiles_nrot = Chem.rdMolDescriptors.CalcNumRotatableBonds(new)
         smiles_nbonds = new.GetNumBonds()
         smiles_charge = Chem.GetFormalCharge(new)
-        print("Seed : ", seed)
+        print("Random coords : ", random_coords)
         print("Atoms : ", smiles_natoms)
         print("Bonds : ", smiles_nbonds)
         print("Rbonds: ", smiles_nrot)
