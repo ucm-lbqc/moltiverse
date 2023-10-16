@@ -21,6 +21,7 @@ module Prepare
       @file = Path.new(file).expand.to_s
       @extension = "#{File.extname("#{file}")}"
       @basename = "#{File.basename("#{@file}", "#{@extension}")}"
+      @smile = smile
       @keep_hydrogens = keep_hydrogens
       @ph = ph
       @output_name = output_name
@@ -41,6 +42,11 @@ module Prepare
     def file
       @file
     end
+
+    def smile
+      @smile
+    end
+
     def keep_hydrogens
       @keep_hydrogens
     end
@@ -104,6 +110,25 @@ module Prepare
         Dir.mkdir(@output_name)
         Dir.cd(@output_name)
       end
+      if @smile
+        @basename = "#{@output_name}"
+        obabel = "obabel"
+        args1 = ["-:#{smile}", "-h", "--gen3D", "-O", "#{@basename}.mol"]
+        puts "Running openbabel convertion..."
+        run_cmd(cmd = obabel, args = args1, output_file = Nil, stage = "SMILE code converted to .mol format ✔".colorize(GREEN), verbose = false)
+        @format = "mol"
+        @extension = ".mol"
+        @file = Path.new("#{@basename}#{@extension}").expand.to_s
+        @charge = Chem::Structure.read(@file).formal_charge
+        puts "Molecule charge: #{@charge}"
+      else
+        @path = Path.new(@file).expand.parent
+        @format = "#{@extension.split(".")[1]}"
+        @basename = "#{File.basename("#{@file}", "#{@extension}")}"
+      end
+    end
+
+    def add_h
       # 1. This stage cheks if hydrogens must be preserved, if so, only convert the file to .pdb using openbabel.
       # This must be done because RDKit does not read the formal charge  correctly when, possibly, connectivities and
       # charge in the last column of atoms do not specify the atom partial charges.
