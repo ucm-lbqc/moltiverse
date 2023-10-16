@@ -9,8 +9,8 @@ set cy <%= cy %>
 set cz <%= cz %>
 set temperature 300
 set outputName min.${sys}
-# global configuration
 
+# global configuration
 parmfile                        <%= topology_file %>
 ambercoor                       <%= coordinates_file %>
 #extendedSystem                  namd-temp.xsc
@@ -74,18 +74,18 @@ dcdFreq                         500
 restartFreq                     500
 
 # Thermostat Parameters
-langevin            on                  # AMBER IN NAMD (on or off)
-langevintemp        300                 # AMBER IN NAMD
-langevinHydrogen    off                 # AMBER IN NAMD
-langevindamping     5                   # AMBER IN NAMD
+langevin                        on                  # AMBER IN NAMD (on or off)
+langevintemp                    300                 # AMBER IN NAMD
+langevinHydrogen                off                 # AMBER IN NAMD
+langevindamping                 5                   # AMBER IN NAMD
 
 # Barostat Parameters
-usegrouppressure    yes                 # AMBER IN NAMD (on or off)
-useflexiblecell     no                  # AMBER IN NAMD
-useConstantArea     no                  # AMBER IN NAMD
-langevinpiston      on                  # AMBER IN NAMD (on or off)
-langevinPistonTarget  1.01325
-langevinPistonPeriod  100.
-langevinPistonDecay   50.  
-langevinPistonTemp    $temperature
+usegrouppressure                yes                 # AMBER IN NAMD (on or off)
+useflexiblecell                 no                  # AMBER IN NAMD
+useConstantArea                 no                  # AMBER IN NAMD
+langevinpiston                  on                  # AMBER IN NAMD (on or off)
+langevinPistonTarget            1.01325
+langevinPistonPeriod            100.
+langevinPistonDecay             50.  
+langevinPistonTemp              $temperature
 
