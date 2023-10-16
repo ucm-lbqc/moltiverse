@@ -121,6 +121,13 @@ module Prepare
       @lig_center
     end
     def add_h
+
+    def working_dir
+      @working_dir
+    end
+
+    def proccess_input
+      Dir.cd(@working_dir)
       puts "The output folder name will be: #{@output_name}"
       if Dir.exists?("#{@output_name}")
         Dir.cd(@output_name)
