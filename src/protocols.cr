@@ -142,12 +142,14 @@ module Protocols
           puts "Range of RMSD values:               [ #{@lw_rmsd} --> #{@up_rmsd} ]" unless @lw_rmsd == 0.0 && @up_rmsd == 0.0
           puts "Number of windows:                  [ #{@windows_rmsd} ]" unless @windows_rmsd == 0
           puts "RMSD width per window:              [ #{@width_rmsd} ]" unless @width_rmsd.nan?
+          puts "Wallconstant for RMSD colvars:      [ #{@wallconstant_force_rmsd} ]" unless @wallconstant_force_rmsd.nan?
           puts "Simulation time per window:         [ #{@time_rmsd} ns ]" unless @time_rmsd == 0
           puts "Simulation time for RMSD colvars:   [ #{@time_rmsd * @windows_rmsd} ns ]" unless @time_rmsd == 0
           puts ""
           puts "Range of RDGYR values:              [ #{@lw_rdgyr} --> #{@up_rdgyr} ]" unless @lw_rdgyr  == 0 && @up_rdgyr == 0.0
           puts "Number of windows:                  [ #{@windows_rdgyr} ]" unless @windows_rdgyr == 0
           puts "RDGYR width per window:             [ #{@width_rdgyr} ]" unless @width_rdgyr.nan?
+          puts "Wallconstant for RDGYR colvars:     [ #{@wallconstant_force_rdgyr} ]" unless @wallconstant_force_rdgyr.nan?
           puts "Simulation time per window:         [ #{@time_rdgyr} ns ]" unless @time_rdgyr == 0
           puts "Simulation time for RDGYR colvars:  [ #{@time_rdgyr * @windows_rdgyr} ns ]" unless @time_rdgyr == 0
           puts ""
@@ -164,11 +166,13 @@ module Protocols
           puts "Range of RMSD values:               [ #{@lw_rmsd} --> #{@up_rmsd} ]"
           puts "Number of windows:                  [ #{@windows_rmsd} ]" unless @windows_rmsd == 0
           puts "RMSD width per window:              [ #{@width_rmsd} ]" unless @width_rmsd.nan?
+          puts "Wallconstant for RMSD colvars:      [ #{@wallconstant_force_rmsd} ]" unless @wallconstant_force_rmsd.nan?
           puts "Simulation time per window:         [ #{@time_rmsd} ns ]" unless @time_rmsd == 0
           puts ""
           puts "Range of RDGYR values:              [ #{@lw_rdgyr} --> #{@up_rdgyr} ]" unless @lw_rdgyr  == 0 && @up_rdgyr == 0.0
           puts "Number of windows:                  [ #{@windows_rdgyr} ]" unless @windows_rdgyr == 0
           puts "RDGYR width per window:             [ #{@width_rdgyr} ]" unless @width_rdgyr.nan?
+          puts "Wallconstant for RDGYR colvars:     [ #{@wallconstant_force_rdgyr} ]" unless @wallconstant_force_rdgyr.nan?
           puts "Total simulation time:              [ #{(@windows_rmsd * @windows_rdgyr) * (@time_rmsd)} ns ]" unless @time_rmsd == 0 || time_rdgyr == 0
           if @metadynamics
             puts "Sampling methods:                   [ WTM-eABF ]"
