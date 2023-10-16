@@ -59,18 +59,14 @@ OptionParser.parse do |parser|
   parser.on("-o NAME", "--output_name=NAME", "Output folder name. Default: Same as input ligand basename") do |str|
     output_name = str
   end
-  parser.on("-r N", "--random=N", "Randomize the initial ligand structure?. Default: no. Options: 'yes' or 'no'.") do |str|
+  parser.on("-r N", "--random=N", "Randomize the initial ligand structure?. Default: no. Options: 'true' or 'false'.") do |str|
     case str
-      when "no" then random_coords = false
-      when "yes" then random_coords = true
-      else
-        begin
-          random_coords = str.to_b
-        rescue exception
-          puts "The --random option must be 'yes' or 'no'"
-          exit
-        end
-      end
+    when "false" then random_coords = false
+    when "true"  then random_coords = true
+    else
+      puts "The --random option must be 'true' or 'false'"
+      exit
+    end
   end
   parser.on("-w Bool", "--water=Bool", "Add explicit water to run calculations. Default: true. Options: 'true', 'false'.") do |str|
     case str
