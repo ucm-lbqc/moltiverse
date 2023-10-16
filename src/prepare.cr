@@ -16,11 +16,10 @@ include Execution
 
 module Prepare
   class Ligand
-    def initialize(file : String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, random_coords : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol)
-      @file = Path.new(file).expand().to_s
-      @path = Path.new(file).expand().parent()
-      @extension = "#{File.extname("#{@file}")}"
-      @format = "#{@extension.split(".")[1]}"
+    def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, random_coords : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, working_dir : String)
+      @working_dir = working_dir
+      @file = Path.new(file).expand.to_s
+      @extension = "#{File.extname("#{file}")}"
       @basename = "#{File.basename("#{@file}", "#{@extension}")}"
       @keep_hydrogens = keep_hydrogens
       @ph = ph
