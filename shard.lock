@@ -2,11 +2,11 @@ version: 2.0
 shards:
   chem:
     git: https://github.com/franciscoadasme/chem.cr.git
-    version: 0.6.0+git.commit.ba6eb4958324998d43c77a176034073ebd748fd2
+    version: 0.6.0+git.commit.f244c7263fd36e63e8c7de296ad6f117a929a1ba
 
   hclust:
     git: https://github.com/franciscoadasme/hclust.git
-    version: 1.0.0
+    version: 1.0.0+git.commit.acf28efaa999c91cd2cb222b4b7283588f3a71d0
 
   mm:
     git: https://github.com/franciscoadasme/mm.git
