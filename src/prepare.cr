@@ -29,7 +29,7 @@ module Prepare
       @coordinates_file = "empty"
       @pdb_system = "empty"
       @dcd = "empty"
-      @lig_center = Spatial::Vec3.new(0,0,0)
+      @lig_center = Spatial::Vec3.new(0, 0, 0)
       @pdb_reference = "empty"
       @explicit_water = explicit_water
       @random_coords = random_coords
@@ -37,8 +37,10 @@ module Prepare
       @time_rmsd = sampling_protocol.time_rmsd
       @time_rdgyr = sampling_protocol.time_rdgyr
     end
+
     @time_rmsd : Float32
     @time_rdgyr : Float32
+
     def file
       @file
     end
@@ -50,54 +52,71 @@ module Prepare
     def keep_hydrogens
       @keep_hydrogens
     end
+
     def path
       @path
     end
+
     def extension
       @extension
     end
+
     def format
       @format
     end
+
     def ph
       @ph
     end
+
     def basename
       @basename
     end
+
     def charge
       @charge
     end
+
     def output_name
       @output_name
     end
+
     def topology_file
       @topology_file
     end
+
     def coordinates_file
       @coordinates_file
     end
+
     def pdb_system
       @pdb_system
     end
+
     def dcd
       @dcd
     end
+
     def pdb_reference
       @pdb_reference
     end
+
     def explicit_water
       @explicit_water
     end
+
     def random_coords
       @random_coords
     end
+
     def sampling_protocol
       @sampling_protocol
     end
+
     def time_rmsd
       @sampling_protocol.time_rmsd
     end
+
     def lig_center
       @lig_center
     end
@@ -135,7 +154,7 @@ module Prepare
       # TO:DO 1. Proper conversion to read adecuately the formal charge. Extremely important for tleap parameterization.
       # TO:DO 2. Test antechamber to use as input the mol2 file. Require a formal charge especification?
       # TO:DO 3. If keep_hydrogens == yes and input file is a PDB, ask the user to specify the formal charge, and use it for
-      # tleap parameterization. 
+      # tleap parameterization.
       if @keep_hydrogens
         obabel = "obabel"
         args1 = ["-i", "#{@format}", "#{@file}", "-O", "#{@basename}.pdb",]
@@ -307,13 +326,13 @@ module Prepare
         top_file = "#{@basename}.prmtop"
         coord_file = "#{@basename}.inpcrd"
         if File.exists?(top_file)
-          @topology_file = Path.new(top_file).expand().to_s
+          @topology_file = Path.new(top_file).expand.to_s
         else
           puts "Topology file was not generated. Check the *.out log files."
           exit
         end
         if File.exists?(coord_file)
-          @coordinates_file = Path.new(coord_file).expand().to_s
+          @coordinates_file = Path.new(coord_file).expand.to_s
         else
           puts "Coordinates file was not generated. Check the *.out log files."
           exit
@@ -327,13 +346,13 @@ module Prepare
         coord_file = "#{@basename}_solv.inpcrd"
         @pdb_system = "#{@basename}_solv.pdb"
         if File.exists?(top_file)
-          @topology_file = Path.new(top_file).expand().to_s
+          @topology_file = Path.new(top_file).expand.to_s
         else
           puts "Topology file was not generated. Check the *.out log files."
           exit
         end
         if File.exists?(coord_file)
-          @coordinates_file = Path.new(coord_file).expand().to_s
+          @coordinates_file = Path.new(coord_file).expand.to_s
         else
           puts "Coordinates file was not generated. Check the *.out log files."
           exit
@@ -342,9 +361,10 @@ module Prepare
         puts "SYSTEM INFO: ", Chem::Structure.from_pdb(pdb_system)
       end
     end
+
     def minimize
       pdb = Chem::Structure.from_pdb(@pdb_system)
-      a, b, c = pdb.cell?.try(&.size) ||{0, 0, 0}
+      a, b, c = pdb.cell?.try(&.size) || {0, 0, 0}
       cx = pdb.coords.center.x
       cy = pdb.coords.center.y
       cz = pdb.coords.center.z
@@ -355,25 +375,26 @@ module Prepare
       run_cmd(cmd=namd_exec, args=arguments, output_file="min.out", stage="minimization", verbose=true)
       @basename = "min.#{@basename}"
       new_dcd = "#{@basename}.dcd"
-      @dcd = Path.new(new_dcd).expand().to_s
+      @dcd = Path.new(new_dcd).expand.to_s
       # Write last-frame of the minimization as a reference input for next calculation.
       pdb = Chem::Structure.from_pdb(@pdb_system)
       Chem::DCD::Reader.open((@dcd), pdb) do |reader|
         n_frames = reader.n_entries - 1
         lastframe = reader.read_entry n_frames
-        puts "n frames = #{reader.n_entries}"
+        # puts "n frames = #{reader.n_entries}"
         # Ligand geometrical center
         @lig_center = lastframe['A'][1].coords.center
         lastframe['A'][1].each_atom {|atom|
           atom.temperature_factor = 1.0}
         lastframe.to_pdb "min.lastframe.pdb"
       end
-      @pdb_reference = Path.new("min.lastframe.pdb").expand().to_s
+      @pdb_reference = Path.new("min.lastframe.pdb").expand.to_s
     end
+
     def sampling
       # Print protocol description
       puts sampling_protocol.describe
       sampling_protocol.execute(self)
     end
-  end  
+  end
 end
