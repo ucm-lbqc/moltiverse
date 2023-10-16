@@ -1,10 +1,9 @@
 set sys <%= system %>
 set window <%= window %>
 set temperature 300
-set outputName outeabf.${sys}
 set prevBaseName ${sys}
-set outputName outeabf.${window}.${sys}
-set time 0.1
+set outputName outeabf.${type}.${window}.${sys}
+set time <%= time %>
 set dt 2.0
 
 # global configuration
