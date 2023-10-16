@@ -30,7 +30,7 @@ module Execution
       stdout = IO::Memory.new
       stderr = IO::Memory.new
       if typeof(output_file) == String
-        logfile = File.new("min.out", "w")
+        logfile = File.new("#{output_file}", "w")
         status = Process.run(cmd, args: args, output: logfile, error: stderr)
         if status.success?
         else
