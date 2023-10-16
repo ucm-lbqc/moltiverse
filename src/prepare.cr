@@ -164,6 +164,7 @@ module Prepare
       if @keep_hydrogens
         File.copy("#{@file}", "original_keep_hydrogens#{extension}")
         obabel = "obabel"
+        args1 = ["-i", "#{@format}", "#{@file}", "-O", "#{@basename}.mol"]
         puts "Running openbabel convertion..."
         run_cmd(cmd = obabel, args = args1, output_file = Nil, stage = "File converted to .mol format ✔".colorize(GREEN), verbose = false)
         @basename = "#{@basename}"
@@ -180,8 +181,10 @@ module Prepare
         @extension = ".mol"
       end
       new_file = "#{@basename}#{@extension}"
-      @file = Path.new(new_file).expand().to_s
-      @path = Path.new(new_file).expand().parent()
+      @file = Path.new(new_file).expand.to_s
+      @path = Path.new(new_file).expand.parent
+      @charge = Chem::Structure.read(@file).formal_charge
+      puts "Molecule charge: #{@charge}"
       # TO:DO Add a proper convertion from other formats. mol, mol2, sdf, when the --keep_hydrogens = true options is used.
       #begin
       #  @charge = Chem::Structure.from_pdb(@file).formal_charge()
