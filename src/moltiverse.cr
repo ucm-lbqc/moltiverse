@@ -130,10 +130,6 @@ if output_name == "empty"
   output_name = "#{File.basename("#{ligand}", "#{extension}")}"
 end
 
-if random_coords == "random"
-  random_coords = Random.new.rand(1..10000)
-end
-
 # Check dependencies
 dependencies()
 
