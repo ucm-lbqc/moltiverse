@@ -33,6 +33,7 @@ module Execution
         logfile = File.new("#{output_file}", "w")
         status = Process.run(cmd, args: args, output: logfile, error: stderr)
         if status.success?
+          puts stage
         else
           puts stderr.colorize(:red)
         end
