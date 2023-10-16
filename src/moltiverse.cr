@@ -118,6 +118,14 @@ OptionParser.parse do |parser|
   end
 end
 
+def read_smi(file_path : String)
+  # file = File.open(file_path, "r")
+  lines = File.read_lines(file_path).map do |line|
+    line.split(" ", limit: 2)
+  end
+  lines
+end
+
 # Options verification
 ph_target = 7.0 unless ph_target
 if dimension == 2 && bounds_colvars.xt != bounds_colvars.yt
