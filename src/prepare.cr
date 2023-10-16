@@ -185,14 +185,6 @@ module Prepare
       @path = Path.new(new_file).expand.parent
       @charge = Chem::Structure.read(@file).formal_charge
       puts "Molecule charge: #{@charge}"
-      # TO:DO Add a proper convertion from other formats. mol, mol2, sdf, when the --keep_hydrogens = true options is used.
-      #begin
-      #  @charge = Chem::Structure.from_pdb(@file).formal_charge()
-      #  puts "charge chem.cr: #{@charge}"
-      #rescue exception
-      #    puts "File #{@file} could not be read. If the option --keep_hydrogens = true, make sure that the original file is a PDB.".colorize(RED)
-      #  exit
-      #end
     end
     def parameterize
       outfile = "rdkit_leap.py"
