@@ -10,8 +10,6 @@ set dt 2.0
 # global configuration
 parmfile                        <%= topology_file %>
 ambercoor                       <%= coordinates_file %>
-#extendedSystem                  <%= system %>.xsc
-#temperature                     $temperature
 outputName                      $outputName
 binCoordinates                  $prevBaseName.restart.coor
 binVelocities                   $prevBaseName.restart.vel
@@ -19,10 +17,6 @@ extendedSystem                  $prevBaseName.restart.xsc
 
 # time configuration (timestep 2 fs)
 numSteps                        [expr int($time * 1e6 / $dt)]
-
-# minimization
-#minimization                    on
-#numSteps                        1000
 amber                           on          # AMBER IN NAMD
 exclude                         scaled1-4   # AMBER IN NAMD
 1-4scaling                      0.833333    # AMBER IN NAMD
@@ -80,7 +74,6 @@ langevinPistonTarget  1.01325
 langevinPistonPeriod  100.
 langevinPistonDecay   50.  
 langevinPistonTemp    $temperature
-
 wrapAll                         no # deactivated in free energy calculations.
 
 # colvars
