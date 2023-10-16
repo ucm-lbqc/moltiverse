@@ -213,9 +213,12 @@ module Protocols
             lig.lig_center.z, 
             "#{type}.#{window}.colvars").to_s
             namd_exec = "namd2"
-            # Arguments for GPU.
-            #arguments = ["#{window}.namd", "+p", "4", "+devices", "0"]
-            arguments = ["#{type}.#{window}.namd", "+p", "4"]
+            # Arguments for GPU and CPU
+            if lig.explicit_water
+              arguments = ["#{type}.#{window}.namd", "+p", "4", "+devices", "0"]
+            else
+              arguments = ["#{type}.#{window}.namd", "+p", "4"]
+            end
             puts "Runnning ABF on window '#{window}', with RMSD ranges from #{lw_rmsd} to #{up_rmsd}"
             # Namd execution
             run_namd(cmd=namd_exec, args=arguments, output_file="#{type}.#{window}.out", stage="abf", window="#{window}")
@@ -255,7 +258,12 @@ module Protocols
             lig.lig_center.z, 
             "#{type}.#{window}.colvars").to_s
             namd_exec = "namd2"
-            arguments = ["#{type}.#{window}.namd", "+p", "4"]
+            # Arguments for GPU and CPU
+            if lig.explicit_water
+              arguments = ["#{type}.#{window}.namd", "+p", "4", "+devices", "0"]
+            else
+              arguments = ["#{type}.#{window}.namd", "+p", "4"]
+            end
             puts "Runnning ABF on window '#{window}', with RDGYR ranges from #{lw_rdgyr} to #{up_rdgyr}"
             # Namd execution
             run_namd(cmd=namd_exec, args=arguments, output_file="#{type}.#{window}.out", stage="abf", window="#{window}")
@@ -298,7 +306,12 @@ module Protocols
               lig.lig_center.z, 
               "#{type}.#{window}.colvars").to_s
               namd_exec = "namd2"
-              arguments = ["#{type}.#{window}.namd", "+p", "4"]
+              # Arguments for GPU and CPU
+              if lig.explicit_water
+                arguments = ["#{type}.#{window}.namd", "+p", "4", "+devices", "0"]
+              else
+                arguments = ["#{type}.#{window}.namd", "+p", "4"]
+              end
               puts "Runnning ABF on window '#{window}'. RMSD ranges: #{lw_rmsd} to #{up_rmsd}. RDGYR ranges: #{lw_rdgyr} to #{up_rdgyr}"
               # Namd execution
               run_namd(cmd=namd_exec, args=arguments, output_file="#{type}.#{window}.out", stage="abf", window="#{window}")
