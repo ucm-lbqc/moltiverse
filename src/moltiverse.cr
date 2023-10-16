@@ -5,7 +5,6 @@ module Moltiverse
   # TODO: Put your code here
 end
 
-
 require "chem"
 require "option_parser"
 require "./prepare.cr"
@@ -19,7 +18,6 @@ include Prepare
 include Chem::Spatial
 include Coloring
 include Dependencies
-
 
 # Define defaults values for parser variables.
 ligand = ""
@@ -51,7 +49,7 @@ OptionParser.parse do |parser|
   end
   parser.on("-k BOOL", "--keep_hydrogens=BOOL", "Keep original hydrogens. Default: true") do |str|
     case str
-    when "true" then keep_hydrogens = true
+    when "true"  then keep_hydrogens = true
     when "false" then keep_hydrogens = false
     else
       puts "The --keep_hydrogens value must be 'true' or 'false'"
@@ -76,12 +74,12 @@ OptionParser.parse do |parser|
   end
   parser.on("-w Bool", "--water=Bool", "Add explicit water to run calculations. Default: true. Options: 'true', 'false'.") do |str|
     case str
-      when "true" then explicit_water = true
-      when "false" then explicit_water = false
-      else
-        puts "The --water value must be 'true' or 'false'"
-        exit
-      end
+    when "true"  then explicit_water = true
+    when "false" then explicit_water = false
+    else
+      puts "The --water value must be 'true' or 'false'"
+      exit
+    end
   end
   parser.on("-b FLOAT", "--bounds_colvars=FLOAT", "Lower and upper limits for colvars [Å], the number of windows, the wall constant (f) and the time for every window: 'x1,x2,wx,fx,tx,y1,y2,wy,fy,ty' where x,y are the RMSD and RDGYR collective variables limits, 'w', and 't' is the number of windows and time for each collective variable. e.g. '0.0,8.0,16,50,2,0,0,0,0,0'") do |str|
     dict_opts = str.split(",")
@@ -94,9 +92,9 @@ OptionParser.parse do |parser|
     dict = str.split(",")[0..9].map &.to_f32
     bounds_colvars = BoundsColvars.new(dict[0],dict[1],dict[2].to_i32,dict[3],dict[4],dict[5],dict[6],dict[7].to_i32,dict[8],dict[9])
   end
-  parser.on("-d INT", "--dimension=INT", "Colvars dimension. 
-    If dimension = 1 and --bounds_colvars are defined for both collective variables, 
-    will be executed 2 one dimensional protocols. If dimension = 2, 
+  parser.on("-d INT", "--dimension=INT", "Colvars dimension.
+    If dimension = 1 and --bounds_colvars are defined for both collective variables,
+    will be executed 2 one dimensional protocols. If dimension = 2,
     will be executed a two dimensional protocol. Defaults : '1'") do |str|
     case str
     when "1" then dimension = 1
@@ -105,7 +103,7 @@ OptionParser.parse do |parser|
   end
   parser.on("-m BOOL", "--metadynamics=BOOL", "Add Well-tempered metadynamics to eABF sampling?. Default: false") do |str|
     case str
-    when "true" then metadynamics = true
+    when "true"  then metadynamics = true
     when "false" then metadynamics = false
     else
       puts "The --metadynamics value must be 'true' or 'false'"
