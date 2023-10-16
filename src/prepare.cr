@@ -186,6 +186,19 @@ module Prepare
       @charge = Chem::Structure.read(@file).formal_charge
       puts "Molecule charge: #{@charge}"
     end
+
+    def randomize_structure
+      if random_coords
+        obabel = "obabel"
+        args1 = ["-i", "#{@format}", "#{@file}", "-o", "mol", "-O", "#{@basename}_rand.mol", "-e", "--gen3D", "--medium"]
+        puts "Running openbabel structure randomization..."
+        run_cmd(cmd = obabel, args = args1, output_file = Nil, stage = "Structure randomization ✔".colorize(GREEN), verbose = false)
+        @extension = ".mol"
+        @basename = "#{@basename}_rand"
+        @format = "mol"
+      end
+    end
+
     def parameterize
       outfile = "rdkit_leap.py"
       # Convert "water" variable to yes or no for python.
