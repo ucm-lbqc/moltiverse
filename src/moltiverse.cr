@@ -86,7 +86,7 @@ OptionParser.parse do |parser|
       end
     end
     dict = str.split(",")[0..9].map &.to_f32
-    bounds_colvars = BoundsColvars.new(dict[0],dict[1],dict[2].to_i32,dict[3],dict[4],dict[5],dict[6],dict[7].to_i32,dict[8],dict[9])
+    bounds_colvars = BoundsColvars.new(dict[0], dict[1], dict[2].to_i32, dict[3], dict[4], dict[5], dict[6], dict[7].to_i32, dict[8], dict[9])
   end
   parser.on("-d INT", "--dimension=INT", "Colvars dimension.
     If dimension = 1 and --bounds_colvars are defined for both collective variables,
