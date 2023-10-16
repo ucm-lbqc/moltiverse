@@ -120,7 +120,6 @@ module Prepare
     def lig_center
       @lig_center
     end
-    def add_h
 
     def working_dir
       @working_dir
@@ -163,27 +162,23 @@ module Prepare
       # TO:DO 3. If keep_hydrogens == yes and input file is a PDB, ask the user to specify the formal charge, and use it for
       # tleap parameterization.
       if @keep_hydrogens
+        File.copy("#{@file}", "original_keep_hydrogens#{extension}")
         obabel = "obabel"
-        args1 = ["-i", "#{@format}", "#{@file}", "-O", "#{@basename}.pdb",]
         puts "Running openbabel convertion..."
-        run_cmd(cmd=obabel, args=args1, output_file=Nil, stage="converting to pdb with connectivities", verbose=true)
-        puts "Converted"
+        run_cmd(cmd = obabel, args = args1, output_file = Nil, stage = "File converted to .mol format ✔".colorize(GREEN), verbose = false)
         @basename = "#{@basename}"
-        @format = "pdb"
-        @extension = ".pdb"
-        File.copy("#{basename}#{extension}", "original_keep_hydrogens#{extension}")
+        @format = "mol"
+        @extension = ".mol"
       else
+        File.copy("#{@file}", "original_no-keep_hydrogens#{extension}")
         obabel = "obabel"
-        args1 = ["-i", "#{@format}", "#{@file}", "-O", "#{@basename}_h.pdb", "-p", "#{@ph}"]
+        args1 = ["-i", "#{@format}", "#{@file}", "-O", "#{@basename}_h.mol", "-p", "#{@ph}"]
         puts "Running openbabel convertion..."
-        run_cmd(cmd=obabel, args=args1, output_file=Nil, stage="hydrogen addition", verbose=true)
-        puts "Converted"
+        run_cmd(cmd = obabel, args = args1, output_file = Nil, stage = "Hydrogen addition ✔".colorize(GREEN), verbose = false)
         @basename = "#{@basename}_h"
-        @format = "pdb"
-        @extension = ".pdb"
-        File.copy("#{@basename}.pdb", "original_no-keep_hydrogens#{extension}")
+        @format = "mol"
+        @extension = ".mol"
       end
-
       new_file = "#{@basename}#{@extension}"
       @file = Path.new(new_file).expand().to_s
       @path = Path.new(new_file).expand().parent()
