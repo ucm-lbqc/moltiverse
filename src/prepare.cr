@@ -293,7 +293,7 @@ module Prepare
       namd_exec = "namd2"
       arguments = ["min.namd", "+p", "4"]
       puts "Runnning minimization..."
-      run_cmd(cmd=namd_exec, args=arguments, output_file="min.out", stage="minimization", verbose=true)
+      run_cmd(cmd = namd_exec, args = arguments, output_file = "min.out", stage = "Minimization done ✔".colorize(GREEN), verbose = false)
       @basename = "min.#{@basename}"
       new_dcd = "#{@basename}.dcd"
       @dcd = Path.new(new_dcd).expand.to_s
