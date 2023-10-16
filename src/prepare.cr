@@ -246,14 +246,25 @@ module Prepare
           puts "Coordinates file was not generated. Check the *.out log files."
           exit
         end
-        @basename = "#{@basename}"
+        @basename = "#{@basename}_prep_solv"
         @pdb_system = "#{@basename}.pdb"
-        puts "SYSTEM INFO: ".colorize(PURPLE), Chem::Structure.from_pdb(@pdb_system)
-      end
-      if water == "yes"
-        top_file = "#{@basename}_solv.prmtop"
-        coord_file = "#{@basename}_solv.inpcrd"
-        @pdb_system = "#{@basename}_solv.pdb"
+        puts "SYSTEM INFO: ".colorize(GREEN), Chem::Structure.from_pdb(@pdb_system)
+      else
+        outfile = "tleap.in"
+        File.write outfile, <<-SCRIPT
+        source leaprc.gaff2
+        LIG = loadmol2 "#{basename}_prep.mol2"
+        loadamberparams "#{basename}_prep.frcmod"
+        saveAmberParm LIG "#{basename}_prep.prmtop" "#{basename}_prep.inpcrd"
+        savePdb LIG "#{basename}_prep.pdb"
+        quit
+        SCRIPT
+        tleap_exec = "tleap"
+        arguments = ["-s", "-f", "#{outfile}", ">", "#{basename}_tleap.out"]
+        run_cmd(cmd = tleap_exec, args = arguments, output_file = Nil, stage = "Parameterization stage 3 ✔".colorize(GREEN), verbose = false)
+        # Verify if topology and coordinates file were generated.
+        top_file = "#{@basename}_prep.prmtop"
+        coord_file = "#{@basename}_prep.inpcrd"
         if File.exists?(top_file)
           @topology_file = Path.new(top_file).expand.to_s
         else
@@ -266,8 +277,9 @@ module Prepare
           puts "Coordinates file was not generated. Check the *.out log files."
           exit
         end
-        @basename = "#{@basename}_solv"
-        puts "SYSTEM INFO: ", Chem::Structure.from_pdb(pdb_system)
+        @basename = "#{@basename}_prep"
+        @pdb_system = "#{@basename}.pdb"
+        puts "SYSTEM INFO: ".colorize(GREEN), Chem::Structure.from_pdb(@pdb_system)
       end
     end
 
