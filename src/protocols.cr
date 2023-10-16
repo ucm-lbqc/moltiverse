@@ -134,9 +134,9 @@ module Protocols
       def describe
         if @dimension == 1
           if @time_rmsd != 0 && @time_rdgyr != 0
-            puts "SAMPLING PROTOCOL using two 1D collective variables".colorize(PURPLE)
+            puts "SAMPLING PROTOCOL using two 1D collective variables".colorize(GREEN)
           else
-            puts "SAMPLING PROTOCOL using a 1D collective variable".colorize(PURPLE)
+            puts "SAMPLING PROTOCOL using a 1D collective variable".colorize(GREEN)
           end
 
           puts "Range of RMSD values:               [ #{@lw_rmsd} --> #{@up_rmsd} ]" unless @lw_rmsd == 0.0 && @up_rmsd == 0.0
