@@ -21,6 +21,7 @@ include Dependencies
 
 # Define defaults values for parser variables.
 ligand = ""
+extension = ""
 ph_target = 7.0
 keep_hydrogens = true
 random_coords = false
@@ -125,6 +126,7 @@ if dimension == 2 && bounds_colvars.xt != bounds_colvars.yt
   exit(1)
 end
 
+extension = "#{File.extname("#{ligand}")}"
 if output_name == "empty"
   extension = "#{File.extname("#{ligand}")}"
   output_name = "#{File.basename("#{ligand}", "#{extension}")}"
