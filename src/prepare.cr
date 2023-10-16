@@ -17,10 +17,6 @@ include Execution
 module Prepare
   class Ligand
     def initialize(file : String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, random_coords : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol)
-      unless File.exists?(file)
-          STDERR.puts "Error: ligand file not found: #{file}"
-          exit(1)
-      end
       @file = Path.new(file).expand().to_s
       @path = Path.new(file).expand().parent()
       @extension = "#{File.extname("#{@file}")}"
