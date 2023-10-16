@@ -142,13 +142,29 @@ end
 
 # Check dependencies
 dependencies()
-
-
-protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
-lig = Ligand.new(ligand, keep_hydrogens, ph_target, output_name, random_coords, explicit_water, protocol_eabf1)
-lig.add_h()
-lig.parameterize()
-lig.minimize()
-lig.sampling()
-
-puts "Finished process".colorize(PURPLE)
+working_dir = Dir.current
+if extension == ".smi"
+  puts "The output name for the folders will be overwritten for the names of the molecules in the .smi file.".colorize(YELLOW)
+  smiles = read_smi(ligand)
+  smiles.each do |line|
+    smile_code, name = line
+    puts "SMILE:"
+    puts smile_code.colorize(AQUA)
+    protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
+    lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, name, random_coords, explicit_water, protocol_eabf1, working_dir)
+    lig.proccess_input
+    lig.randomize_structure
+    lig.parameterize
+    lig.minimize
+    lig.sampling
+  end
+else
+  protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
+  lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, random_coords, explicit_water, protocol_eabf1, working_dir)
+  lig.add_h
+  lig.randomize_structure
+  lig.parameterize
+  lig.minimize
+  lig.sampling
+end
+puts "Process completed".colorize(PURPLE)
