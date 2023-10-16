@@ -305,8 +305,9 @@ module Prepare
         # puts "n frames = #{reader.n_entries}"
         # Ligand geometrical center
         @lig_center = lastframe['A'][1].coords.center
-        lastframe['A'][1].each_atom {|atom|
-          atom.temperature_factor = 1.0}
+        lastframe['A'][1].each_atom { |atom|
+          atom.temperature_factor = 1.0
+        }
         lastframe.to_pdb "min.lastframe.pdb"
       end
       @pdb_reference = Path.new("min.lastframe.pdb").expand.to_s
