@@ -1,3 +1,5 @@
+t_start_full = Time.monotonic
+
 # TODO: Write documentation for `Moltiverse`
 module Moltiverse
   VERSION = "0.1.0"
@@ -157,6 +159,23 @@ if extension == ".smi"
     lig.parameterize
     lig.minimize
     lig.sampling
+  File.open("#{output_name}.log", "w") do |log|
+      new_output_name = "#{output_name}_#{name}"
+      t_start = Time.monotonic
+      t1 = Time.monotonic
+      t2 = Time.monotonic
+      t1 = Time.monotonic
+      t2 = Time.monotonic
+      t1 = Time.monotonic
+      t2 = Time.monotonic
+      t1 = Time.monotonic
+      t2 = Time.monotonic
+      t1 = Time.monotonic
+      t2 = Time.monotonic
+      t1 = Time.monotonic
+      t2 = Time.monotonic
+      t_final = Time.monotonic
+      log.print("#{name},total_time,#{t_final - t_start}\n")
   end
 else
   protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
@@ -168,3 +187,12 @@ else
   lig.sampling
 end
 puts "Process completed".colorize(PURPLE)
+
+extension = "#{File.extname("#{ligand}")}"
+output_proc_time = "#{File.basename("#{ligand}", "#{extension}")}"
+
+t_end_full = Time.monotonic
+Dir.cd(main_dir)
+File.open("#{output_name}_proc_time.txt", "w") do |log|
+  log.print("#{output_proc_time}#{extension},#{t_end_full - t_start_full}")
+end
