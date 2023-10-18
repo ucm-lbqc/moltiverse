@@ -18,6 +18,7 @@ module Prepare
   class Ligand
     def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, random_coords : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, working_dir : String)
       @working_dir = working_dir
+      @main_dir = main_dir
       @file = Path.new(file).expand.to_s
       @extension = "#{File.extname("#{file}")}"
       @basename = "#{File.basename("#{@file}", "#{@extension}")}"
@@ -121,19 +122,25 @@ module Prepare
       @lig_center
     end
 
+    def main_dir
+      @main_dir
+    end
+
     def working_dir
       @working_dir
     end
 
     def proccess_input
-      Dir.cd(@working_dir)
+      Dir.cd(@main_dir)
       puts "The output folder name will be: #{@output_name}"
       if Dir.exists?("#{@output_name}")
         Dir.cd(@output_name)
+        @working_dir = Dir.current
       else
         puts "Creating folder #{@output_name}"
         Dir.mkdir(@output_name)
         Dir.cd(@output_name)
+        @working_dir = Dir.current
       end
       if @smile
         @basename = "#{@output_name}"
