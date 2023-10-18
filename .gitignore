@@ -1,2 +1,13 @@
 /lib/
 /bin/
+/src/clustering_rdgyr.cr
+/src/clustering_rmsd.cr
+/src/clustering_rmsd_crystals.cr
+/src/rdgyr.cr
+/src/rmsd_moltiverse.cr
+/src/rmsd_moltiverse_pdbs.cr
+/src/rmsd_sdf.cr
+/src/test_clustering.cr
+
+
+
