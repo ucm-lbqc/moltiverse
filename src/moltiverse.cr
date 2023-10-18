@@ -33,6 +33,7 @@ bounds_colvars = BoundsColvars.new(0, 0, 0, 0, 0, 0, 10.0, 40, 80.0, 1.0)
 dimension = 1
 metadynamics = false
 wall_constant = 80.0
+n_confs = 50
 
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
@@ -107,6 +108,13 @@ OptionParser.parse do |parser|
     else
       puts "The --metadynamics value must be 'true' or 'false'"
       exit
+    end
+  end
+  parser.on("-n N", "--number_of_conformers=N", "Desired number of conformers to generate. Default: 50") do |str|
+    n_confs = str.to_i32
+    unless 1 <= n_confs <= 4000
+      STDERR.puts "Error: invalid n value: #{str}"
+      exit(1)
     end
   end
   parser.on("-h", "--help", "Show this help") do
@@ -188,12 +196,13 @@ if extension == ".smi"
   end
 else
   protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
-  lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, random_coords, explicit_water, protocol_eabf1, working_dir)
+  lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, random_coords, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
   lig.add_h
   lig.randomize_structure
   lig.parameterize
   lig.minimize
   lig.sampling
+  lig.clustering
 end
 puts "Process completed".colorize(PURPLE)
 
