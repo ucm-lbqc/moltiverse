@@ -17,10 +17,10 @@ include Execution
 
 module Prepare
   class Ligand
-    def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, random_coords : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, working_dir : String)
-      @working_dir = working_dir
+    def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, random_coords : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
       @main_dir = main_dir
       @n_confs = n_confs
+      @output_frequency = output_frequency
       @file = Path.new(file).expand.to_s
       @extension = "#{File.extname("#{file}")}"
       @basename = "#{File.basename("#{@file}", "#{@extension}")}"
@@ -134,6 +134,10 @@ module Prepare
 
     def n_confs
       @n_confs
+    end
+
+    def output_frequency
+      @output_frequency
     end
 
     def proccess_input
