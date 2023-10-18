@@ -34,6 +34,7 @@ dimension = 1
 metadynamics = false
 wall_constant = 80.0
 n_confs = 50
+output_frequency = 5000
 
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
@@ -114,6 +115,13 @@ OptionParser.parse do |parser|
     n_confs = str.to_i32
     unless 1 <= n_confs <= 4000
       STDERR.puts "Error: invalid n value: #{str}"
+      exit(1)
+    end
+  end
+  parser.on("-f N", "--frequency=N", "Output frequency to write frames and log files in the sampling. Default: 5000") do |str|
+    output_frequency = str.to_i32
+    unless 1 <= n_confs <= 100000
+      STDERR.puts "Error: invalid frequency value: #{str}"
       exit(1)
     end
   end
