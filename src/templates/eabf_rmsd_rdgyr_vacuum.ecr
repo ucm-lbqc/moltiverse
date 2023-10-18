@@ -58,12 +58,12 @@ gbis                            off
 # output
 binaryOutput                    yes
 binaryRestart                   yes
-outputEnergies                  5000
-outputPressure                  5000
-outputTiming                    5000
-xstFreq                         5000
-dcdFreq                         5000
-restartFreq                     5000
+outputEnergies                  <%= output_frequency %>
+outputPressure                  <%= output_frequency %>
+outputTiming                    <%= output_frequency %>
+xstFreq                         <%= output_frequency %>
+dcdFreq                         <%= output_frequency %>
+restartFreq                     <%= output_frequency %>
 wrapAll                         no # deactivated in free energy calculations.
 
 # colvars
