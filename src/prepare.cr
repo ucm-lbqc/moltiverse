@@ -6,6 +6,7 @@ require "./analysis.cr"
 require "colorize"
 require "./colors.cr"
 require "./execution.cr"
+require "hclust"
 
 include Namdconf
 include Chem
@@ -19,6 +20,7 @@ module Prepare
     def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, random_coords : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, working_dir : String)
       @working_dir = working_dir
       @main_dir = main_dir
+      @n_confs = n_confs
       @file = Path.new(file).expand.to_s
       @extension = "#{File.extname("#{file}")}"
       @basename = "#{File.basename("#{@file}", "#{@extension}")}"
@@ -128,6 +130,10 @@ module Prepare
 
     def working_dir
       @working_dir
+    end
+
+    def n_confs
+      @n_confs
     end
 
     def proccess_input
@@ -324,6 +330,43 @@ module Prepare
       # Print protocol description
       puts sampling_protocol.describe
       sampling_protocol.execute(self)
+    end
+
+    def clustering
+      structure = Chem::Structure.from_pdb(@pdb_system)
+      frames : Array(Chem::Structure) = [] of Chem::Structure
+      Dir["#{@working_dir}/out*.dcd"].each do |dcd|
+        Chem::DCD::Reader.open((dcd), structure) do |reader|
+          n_frames = reader.n_entries - 1
+          (0..n_frames).each do |frame|
+            st = reader.read_entry frame
+            frames.push(st)
+          end
+        end
+      end
+      puts "Analyzing #{frames.size} total structures generated in the sampling stage..."
+      dism = HClust::DistanceMatrix.new(frames.size) { |a, b|
+        frames[a].coords.rmsd frames[b].coords, minimize: true
+      }
+      dendrogram = HClust.linkage(dism, :single)
+      clusters = dendrogram.flatten(count: @n_confs)
+
+      centroids = clusters.map do |idxs|
+        idxs[dism[idxs].centroid]
+      end
+      # Write centroids
+      count = 0
+      puts "Centroids:"
+      centroids.each do |centroid|
+        count += 1
+        puts "Centroid: #{centroid} RDGYR: #{frames[centroid].coords.rdgyr}"
+        frames[centroid].to_pdb("centroid_#{count}.pdb")
+      end
+      File.open("rmsd_matrix.dat", "w") do |log|
+        dism.to_a.each do |rmsd|
+          log.print("#{rmsd}\n")
+        end
+      end
     end
   end
 end
