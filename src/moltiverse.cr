@@ -148,34 +148,43 @@ working_dir = Dir.current
 if extension == ".smi"
   puts "The output name for the folders will be overwritten for the names of the molecules in the .smi file.".colorize(YELLOW)
   smiles = read_smi(ligand)
-  smiles.each do |line|
-    smile_code, name = line
-    puts "SMILE:"
-    puts smile_code.colorize(AQUA)
-    protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
     lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, name, random_coords, explicit_water, protocol_eabf1, working_dir)
-    lig.proccess_input
-    lig.randomize_structure
-    lig.parameterize
-    lig.minimize
-    lig.sampling
   File.open("#{output_name}.log", "w") do |log|
+    smiles.each do |line|
+      smile_code, name = line
       new_output_name = "#{output_name}_#{name}"
+      puts "SMILE:"
+      puts smile_code.colorize(AQUA)
+      protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
+      lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, random_coords, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
       t_start = Time.monotonic
       t1 = Time.monotonic
+      lig.proccess_input
       t2 = Time.monotonic
+      log.print("#{name},process_time,#{t2 - t1}\n")
       t1 = Time.monotonic
+      lig.randomize_structure
       t2 = Time.monotonic
+      log.print("#{name},randomization_time,#{t2 - t1}\n")
       t1 = Time.monotonic
+      lig.parameterize
       t2 = Time.monotonic
+      log.print("#{name},parameterization_time,#{t2 - t1}\n")
       t1 = Time.monotonic
+      lig.minimize
       t2 = Time.monotonic
+      log.print("#{name},minimization_time,#{t2 - t1}\n")
       t1 = Time.monotonic
+      lig.sampling
       t2 = Time.monotonic
+      log.print("#{name},sampling_time,#{t2 - t1}\n")
       t1 = Time.monotonic
+      lig.clustering
       t2 = Time.monotonic
+      log.print("#{name},clustering_time,#{t2 - t1}\n")
       t_final = Time.monotonic
       log.print("#{name},total_time,#{t_final - t_start}\n")
+    end
   end
 else
   protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
