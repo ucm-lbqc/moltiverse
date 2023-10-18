@@ -160,11 +160,10 @@ end
 
 # Check dependencies
 dependencies()
-working_dir = Dir.current
+main_dir = Dir.current
 if extension == ".smi"
   puts "The output name for the folders will be overwritten for the names of the molecules in the .smi file.".colorize(YELLOW)
   smiles = read_smi(ligand)
-    lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, name, random_coords, explicit_water, protocol_eabf1, working_dir)
   File.open("#{output_name}.log", "w") do |log|
     smiles.each do |line|
       smile_code, name = line
