@@ -1,6 +1,6 @@
 # Moltiverse
 
-Moltiverse is a command-line application for generating molecule conformers.
+Moltiverse is a command-line application for generating molecule conformers using enhanced sampling methods.
 
 ## Installation
 
