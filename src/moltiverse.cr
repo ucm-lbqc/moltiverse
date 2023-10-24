@@ -211,7 +211,7 @@ else
   lig.sampling
   lig.clustering
 end
-puts "Process completed".colorize(PURPLE)
+puts "Process completed".colorize(GREEN)
 
 extension = "#{File.extname("#{ligand}")}"
 output_proc_time = "#{File.basename("#{ligand}", "#{extension}")}"
