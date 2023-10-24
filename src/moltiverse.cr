@@ -38,7 +38,7 @@ output_frequency = 5000
 
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
-  parser.on("-l FILE", "--ligand=FILE", "Input ligand file [PDB, MOL or MOL2]") do |str|
+  parser.on("-l FILE", "--ligand=FILE", "Input ligand file [SMI, PDB, MOL, MOL2]") do |str|
     unless File.exists?(str)
       STDERR.puts "Error: ligand file not found: #{str}"
       exit(1)
@@ -64,7 +64,7 @@ OptionParser.parse do |parser|
   parser.on("-o NAME", "--output_name=NAME", "Output folder name. Default: Same as input ligand basename") do |str|
     output_name = str
   end
-  parser.on("-r N", "--random=N", "Randomize the initial ligand structure?. Default: no. Options: 'true' or 'false'.") do |str|
+  parser.on("-r N", "--random=N", "Randomize the initial ligand structure?. Default: false. Options: 'true' or 'false'.") do |str|
     case str
     when "false" then random_coords = false
     when "true"  then random_coords = true
@@ -73,7 +73,7 @@ OptionParser.parse do |parser|
       exit
     end
   end
-  parser.on("-w Bool", "--water=Bool", "Add explicit water to run calculations. Default: true. Options: 'true', 'false'.") do |str|
+  parser.on("-w Bool", "--water=Bool", "Add explicit water to run calculations. Default: false. Options: 'true', 'false'.") do |str|
     case str
     when "true"  then explicit_water = true
     when "false" then explicit_water = false
