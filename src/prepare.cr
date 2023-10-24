@@ -365,13 +365,23 @@ module Prepare
       centroids.each do |centroid|
         count += 1
         puts "Centroid: #{centroid} RDGYR: #{frames[centroid].coords.rdgyr}"
-        frames[centroid].to_pdb("centroid_#{count}.pdb")
       end
-      File.open("rmsd_matrix.dat", "w") do |log|
-        dism.to_a.each do |rmsd|
-          log.print("#{rmsd}\n")
-        end
+      # Write centroids to sdf
+      centroids_structures = clusters.map do |idxs|
+        frames[idxs[dism[idxs].centroid]]
       end
+      centroids_structures.to_sdf "#{@output_name}.sdf"
+      # The following block writes the total sampling matrix to a text file.
+      # TO:DO Add optional function to write it, since a total of 20000
+      # structures generates an rmsd matrix of ~ 3-4 GB in size.
+      # Clustering and writing files, including the rmsd matrix takes about
+      # 20 minutes using the same 20000 structures.
+
+      # File.open("rmsd_matrix.dat", "w") do |log|
+      #  dism.to_a.each do |rmsd|
+      #    log.print("#{rmsd}\n")
+      #  end
+      # end
     end
   end
 end
