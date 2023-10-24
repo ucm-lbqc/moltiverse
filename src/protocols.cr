@@ -248,8 +248,8 @@ module Protocols
           if lig.explicit_water
             arguments = ["#{type}.#{window}.namd", "+p", "4", "+devices", "0"]
           else
-            # arguments = ["#{type}.#{window}.namd", "+p", "4", "+setcpuaffinity"]
-            arguments = ["#{type}.#{window}.namd"]
+            arguments = ["#{type}.#{window}.namd", "+p", "4", "+setcpuaffinity"]
+            # arguments = ["#{type}.#{window}.namd"]
           end
           puts "Runnning ABF on window '#{window}', with RMSD ranges from #{lw_rmsd} to #{up_rmsd}"
           # Namd execution
@@ -294,8 +294,8 @@ module Protocols
           if lig.explicit_water
             arguments = ["#{type}.#{window}.namd", "+p", "4", "+devices", "0"]
           else
-            # arguments = ["#{type}.#{window}.namd", "+p", "4", "+setcpuaffinity"]
-            arguments = ["#{type}.#{window}.namd"]
+            arguments = ["#{type}.#{window}.namd", "+p", "4", "+setcpuaffinity"]
+            # arguments = ["#{type}.#{window}.namd"]
           end
           puts "Runnning ABF on window '#{window}', with RDGYR ranges from #{lw_rdgyr} to #{up_rdgyr}"
           # Namd execution
@@ -343,8 +343,8 @@ module Protocols
             if lig.explicit_water
               arguments = ["#{type}.#{window}.namd", "+p", "4", "+devices", "0"]
             else
-              # arguments = ["#{type}.#{window}.namd", "+p", "4", "+setcpuaffinity"]
-              arguments = ["#{type}.#{window}.namd"]
+              arguments = ["#{type}.#{window}.namd", "+p", "4", "+setcpuaffinity"]
+              # arguments = ["#{type}.#{window}.namd"]
             end
             puts "Runnning ABF on window '#{window}'. RMSD ranges: #{lw_rmsd} to #{up_rmsd}. RDGYR ranges: #{lw_rdgyr} to #{up_rdgyr}"
             # Namd execution
