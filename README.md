@@ -19,7 +19,10 @@ External software:
 **NOTE**: This application is still under development and is not ready for production. 
 Please note that we have not yet released a version or documentation. But stay tuned, we will do it soon ;).
 
+Check the [data](/data) directory. There you will find a [bash file](/data/run.sh) and an [SMI](/data/molecules.smi) file. The SMI format contains several lines of SMILE code to encode molecules, and an assigned name for that molecule in the right column. You can change this and use whatever you like.
+You can access the SMILE codes from [PubChem](https://pubchem.ncbi.nlm.nih.gov/).
 
+This command will run the whole protocol and create a folder for each molecule in the SMI file. Inside each folder you will find the final conformers written in an SDF file.
 
 ## Citing
 
