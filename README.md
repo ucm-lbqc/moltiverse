@@ -1,4 +1,4 @@
-# moltiverse
+# Moltiverse
 
 Moltiverse is a command-line application for generating molecule conformers.
 
