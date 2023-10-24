@@ -133,20 +133,20 @@ harmonic {
   forceConstant 100.0 
 } 
 
-# To keep orientation
-colvar { 
-  name orientation 
-  orientation { 
-    atoms { 
-      atomsFile   <%= pdb_reference %>
-      atomsCol B
-      atomsColValue 1.0 
-    } 
-    refPositionsFile   <%= pdb_reference %>
-  } 
-} 
-harmonic { 
-  colvars orientation 
-  centers (1.0, 0.0, 0.0, 0.0)
-  forceConstant 100.0 
-} 
+## To keep orientation
+#colvar { 
+#  name orientation 
+#  orientation { 
+#    atoms { 
+#      atomsFile   <%= pdb_reference %>
+#      atomsCol B
+#      atomsColValue 1.0 
+#    } 
+#    refPositionsFile   <%= pdb_reference %>
+#  } 
+#} 
+#harmonic { 
+#  colvars orientation 
+#  centers (1.0, 0.0, 0.0, 0.0)
+#  forceConstant 100.0 
+#} 
