@@ -338,6 +338,7 @@ module Prepare
     end
 
     def clustering
+      puts "Performing structure clustering".colorize(GREEN)
       structure = Chem::Structure.from_pdb(@pdb_system)
       frames : Array(Chem::Structure) = [] of Chem::Structure
       Dir["#{@working_dir}/out*.dcd"].each do |dcd|
@@ -361,7 +362,7 @@ module Prepare
       end
       # Write centroids
       count = 0
-      puts "Centroids:"
+      puts "Centroids"
       centroids.each do |centroid|
         count += 1
         puts "Centroid: #{centroid} RDGYR: #{frames[centroid].coords.rdgyr}"
