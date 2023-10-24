@@ -44,6 +44,6 @@ targets:
   clustering_rmsd_crystals:
     main: src/clustering_rmsd_crystals.cr
 
-crystal: 1.6.0
+crystal: 1.10.1
 
 license: MIT
