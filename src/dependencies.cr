@@ -26,21 +26,21 @@ module Dependencies
     end
 
     # Rdkit in python
-    begin
-      library = "import importlib;importlib.import_module('rdkit')"
-      run_cmd(cmd="python", args=["-c", "#{library}"], output_file=Nil, stage="rdkit ✔".colorize(GREEN), verbose=false)
-    rescue exception
-      dependencies["rdkit"] = false
-      puts "rdkit ✘".colorize(RED)
-    end
-    # ParmEd in python
-    #begin
-    #  library = "import importlib;importlib.import_module('parmed')"
-    #  run_cmd(cmd="python", args=["-c", "#{library}"], output_file=Nil, stage="parmed ✔".colorize(GREEN), verbose=false)
-    #rescue exception
-    #  dependencies["parmed"] = false
-    #  puts "parmed ✘".colorize(RED)
-    #end
+    # begin
+    #   library = "import importlib;importlib.import_module('rdkit')"
+    #   run_cmd(cmd="python", args=["-c", "#{library}"], output_file=Nil, stage="rdkit ✔".colorize(GREEN), verbose=false)
+    # rescue exception
+    #   dependencies["rdkit"] = false
+    #   puts "rdkit ✘".colorize(RED)
+    # end
+    #  ParmEd in python
+    # begin
+    #   library = "import importlib;importlib.import_module('parmed')"
+    #   run_cmd(cmd="python", args=["-c", "#{library}"], output_file=Nil, stage="parmed ✔".colorize(GREEN), verbose=false)
+    # rescue exception
+    #   dependencies["parmed"] = false
+    #   puts "parmed ✘".colorize(RED)
+    # end
 
     # Antechamber
     begin
