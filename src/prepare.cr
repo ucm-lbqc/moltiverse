@@ -255,13 +255,13 @@ module Prepare
           @topology_file = Path.new(top_file).expand.to_s
         else
           puts "Topology file was not generated. Check the *.out log files."
-          exit
+          exit(1)
         end
         if File.exists?(coord_file)
           @coordinates_file = Path.new(coord_file).expand.to_s
         else
           puts "Coordinates file was not generated. Check the *.out log files."
-          exit
+          exit(1)
         end
         @basename = "#{@basename}_prep_solv"
         @pdb_system = "#{@basename}.pdb"
@@ -286,13 +286,13 @@ module Prepare
           @topology_file = Path.new(top_file).expand.to_s
         else
           puts "Topology file was not generated. Check the *.out log files."
-          exit
+          exit(1)
         end
         if File.exists?(coord_file)
           @coordinates_file = Path.new(coord_file).expand.to_s
         else
           puts "Coordinates file was not generated. Check the *.out log files."
-          exit
+          exit(1)
         end
         @basename = "#{@basename}_prep"
         @pdb_system = "#{@basename}.pdb"
