@@ -1,18 +1,33 @@
 # moltiverse
 
-TODO: Write a description here
+Moltiverse is a command-line application for generating molecule conformers.
 
 ## Installation
 
-TODO: Write installation instructions here
+```
+shards install
+```
+
+## Requirements
+External software:
+- [OpenBabel](https://openbabel.org)
+- [Namd](https://www.ks.uiuc.edu/Research/namd/)
+- [Ambertools](https://ambermd.org/AmberTools.php)
 
 ## Usage
 
-TODO: Write usage instructions here
+**NOTE**: This application is still under development and is not ready for production. 
+Please note that we have not yet released a version or documentation. But stay tuned, we will do it soon ;).
 
-## Development
 
-TODO: Write development instructions here
+
+## Citing
+
+If you use `moltiverse` in your research, please consider citing the
+following article:
+
+    To be added
+
 
 ## Contributing
 
