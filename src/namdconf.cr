@@ -11,7 +11,7 @@ module Namdconf
     File.write output_file, content
   end
 
-  def enhanced_sampling(explicit_water : Bool, system : String, topology_file : String, coordinates_file : String, output_file : String, time : Float32, window : String, type : String, output_frequency : Int32)
+  def enhanced_sampling(explicit_water : Bool, system : String, topology_file : String, coordinates_file : String, output_file : String, time : Float32, window : String, variant : String, type : String, output_frequency : Int32)
     if explicit_water
       content = ECR.render "./src/templates/eabf_rmsd_rdgyr_water.ecr"
     else
@@ -20,7 +20,7 @@ module Namdconf
     File.write output_file, content
   end
 
-  def colvars(wtm : Bool, lw_rmsd : Float32 | Bool, up_rmsd : Float32 | Bool, lw_rdgyr : Float32 | Bool, up_rdgyr : Float32 | Bool, rmsd_active : Bool, rdgyr_active : Bool, wallconstant : Float32 | Bool, pdb_reference : String, lig_center_x : Float64, lig_center_y : Float64, lig_center_z : Float64, output_file : String)
+  def colvars(wtm : Bool, lw_rmsd : Float32 | Bool, up_rmsd : Float32 | Bool, lw_rdgyr : Float32 | Bool, up_rdgyr : Float32 | Bool, rmsd_active : Bool, rdgyr_active : Bool, wallconstant : Float32 | Bool, pdb_reference : String, lig_center_x : Float64, lig_center_y : Float64, lig_center_z : Float64, output_file : String, fullsamples : Int32)
     content = ECR.render "./src/templates/colvars.ecr"
     File.write output_file, content
   end
