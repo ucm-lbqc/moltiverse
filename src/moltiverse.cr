@@ -31,10 +31,13 @@ explicit_water = false
 output_name = "empty"
 bounds_colvars = BoundsColvars.new(0, 0, 0, 0, 0, 0, 10.0, 40, 80.0, 1.0)
 dimension = 1
-metadynamics = false
-wall_constant = 80.0
+metadynamics = true
 n_confs = 50
 output_frequency = 5000
+fullsamples = 500
+n_variants = 1
+threshold_rmsd_variants = 5.0
+spacing_rdgyr_variants = 0.05
 
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
@@ -102,7 +105,7 @@ OptionParser.parse do |parser|
     when "2" then dimension = 2
     end
   end
-  parser.on("-m BOOL", "--metadynamics=BOOL", "Add Well-tempered metadynamics to eABF sampling?. Default: false") do |str|
+  parser.on("-m BOOL", "--metadynamics=BOOL", "Add metadynamics to eABF sampling?. Default: true") do |str|
     case str
     when "true"  then metadynamics = true
     when "false" then metadynamics = false
@@ -118,12 +121,25 @@ OptionParser.parse do |parser|
       exit(1)
     end
   end
-  parser.on("-f N", "--frequency=N", "Output frequency to write frames and log files in the sampling. Default: 5000") do |str|
+  parser.on("-f N", "--frequency=N", "Output frequency to write frames and log files in the sampling stage. Default: 5000") do |str|
     output_frequency = str.to_i32
     unless 1 <= n_confs <= 100000
       STDERR.puts "Error: invalid frequency value: #{str}"
       exit(1)
     end
+  end
+  parser.on("-s N", "--fullsamples=N", "FullSamples setting for ABF calculations. Default: 500") do |str|
+    fullsamples = str.to_i32
+  end
+  parser.on("-v N", "--variants=N", "Number of initial conformations of the ligand to use as input in every window. Default: 10") do |str|
+    n_variants = str.to_i32
+    # TO:DO fix to check if the input is integer.
+  end
+  parser.on("-t N", "--threshold_rmsd_variants=N", "Upper threshold for RMSD between variants. Default: 5") do |str|
+    threshold_rmsd_variants = str.to_f64
+  end
+  parser.on("-g N", "--spacing_rdgyr_variants=N", "Spacing to reduce RDGYR between variants when it reaches the upper limit. Default: 0.05") do |str|
+    spacing_rdgyr_variants = str.to_f64
   end
   parser.on("-h", "--help", "Show this help") do
     puts parser
@@ -137,7 +153,6 @@ OptionParser.parse do |parser|
 end
 
 def read_smi(file_path : String)
-  # file = File.open(file_path, "r")
   lines = File.read_lines(file_path).map do |line|
     line.split(" ", limit: 2)
   end
@@ -162,50 +177,40 @@ end
 dependencies()
 main_dir = Dir.current
 if extension == ".smi"
-  puts "The output name for the folders will be overwritten for the names of the molecules in the .smi file.".colorize(YELLOW)
+  puts "Output folders will have the format: 'output_name'_'smi_ligand_name'".colorize(YELLOW)
   smiles = read_smi(ligand)
-  File.open("#{output_name}.log", "w") do |log|
+  File.open("#{output_name}_time_per_stage.log", "w") do |log|
     smiles.each do |line|
       smile_code, name = line
       new_output_name = "#{output_name}_#{name}"
       puts "SMILE:"
       puts smile_code.colorize(AQUA)
-      protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
-      lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, random_coords, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
       t_start = Time.monotonic
-      t1 = Time.monotonic
-      lig.proccess_input
-      t2 = Time.monotonic
-      log.print("#{name},process_time,#{t2 - t1}\n")
-      t1 = Time.monotonic
-      lig.randomize_structure
-      t2 = Time.monotonic
-      log.print("#{name},randomization_time,#{t2 - t1}\n")
-      t1 = Time.monotonic
-      lig.parameterize
-      t2 = Time.monotonic
-      log.print("#{name},parameterization_time,#{t2 - t1}\n")
-      t1 = Time.monotonic
-      lig.minimize
-      t2 = Time.monotonic
-      log.print("#{name},minimization_time,#{t2 - t1}\n")
-      t1 = Time.monotonic
-      lig.sampling
-      t2 = Time.monotonic
-      log.print("#{name},sampling_time,#{t2 - t1}\n")
-      t1 = Time.monotonic
-      lig.clustering
-      t2 = Time.monotonic
-      log.print("#{name},clustering_time,#{t2 - t1}\n")
-      t_final = Time.monotonic
-      log.print("#{name},total_time,#{t_final - t_start}\n")
+      success, proccess_time = lig.proccess_input
+      if success
+        log.print("#{name},proccess_time,#{proccess_time}\n")
+        extend_structure_time = lig.extend_structure
+        log.print("#{name},structure_spreading_time,#{extend_structure_time}\n")
+        parameterization_time = lig.parameterize
+        log.print("#{name},parameterization_time,#{parameterization_time}\n")
+        minimization_time = lig.minimize
+        log.print("#{name},minimization_time,#{minimization_time}\n")
+        sampling_time = lig.sampling
+        log.print("#{name},sampling_time,#{sampling_time}\n")
+        clustering_time = lig.clustering
+        log.print("#{name},clustering_time,#{clustering_time}\n")
+        t_final = Time.monotonic
+        log.print("#{name},total_time,#{t_final - t_start}\n")
+      else
+        log.print("#{name},failed\n")
+      end
     end
   end
 else
-  protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension)
-  lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, random_coords, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
+  protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples)
+  lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
   lig.add_h
-  lig.randomize_structure
+  lig.extend_structure
   lig.parameterize
   lig.minimize
   lig.sampling
@@ -218,6 +223,6 @@ output_proc_time = "#{File.basename("#{ligand}", "#{extension}")}"
 
 t_end_full = Time.monotonic
 Dir.cd(main_dir)
-File.open("#{output_name}_proc_time.txt", "w") do |log|
+File.open("#{output_name}_total_proc_time.txt", "w") do |log|
   log.print("#{output_proc_time}#{extension},#{t_end_full - t_start_full}")
 end
