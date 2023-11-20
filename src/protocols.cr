@@ -214,7 +214,7 @@ module Protocols
         puts ""
         puts "Total simulation time:              [ #{(@time_rdgyr * @windows_rdgyr) + (@time_rmsd * @windows_rmsd)} ns ]" unless @time_rmsd == 0 || time_rdgyr == 0
         if @metadynamics
-          puts "Sampling methods:                   [ WTM-eABF ]"
+          puts "Sampling methods:                   [ M-eABF ]"
         else
           puts "Sampling methods:                   [ eABF ]"
         end
@@ -237,7 +237,7 @@ module Protocols
         puts "Wallconstant for RDGYR colvars:     [ #{@wallconstant_force_rdgyr} ]" unless @wallconstant_force_rdgyr.nan?
         puts "Total simulation time:              [ #{(@windows_rmsd * @windows_rdgyr) * (@time_rmsd)} ns ]" unless @time_rmsd == 0 || time_rdgyr == 0
         if @metadynamics
-          puts "Sampling methods:                   [ WTM-eABF ]"
+          puts "Sampling methods:                   [ M-eABF ]"
         else
           puts "Sampling methods:                   [ eABF ]"
         end
