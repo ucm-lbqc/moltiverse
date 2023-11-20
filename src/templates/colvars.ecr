@@ -53,7 +53,7 @@ colvar {
 <%- if rmsd_active && !rdgyr_active -%>
 abf {
   colvars              RMSD
-  FullSamples          5000
+  FullSamples          <%= fullsamples %>
   historyfreq          20000
   writeCZARwindowFile
 }
@@ -62,7 +62,7 @@ abf {
 <%- if rmsd_active && rdgyr_active -%>
 abf {
   colvars              RMSD GYR
-  FullSamples          5000
+  FullSamples          <%= fullsamples %>
   historyfreq          20000
   writeCZARwindowFile
 }
@@ -72,7 +72,7 @@ abf {
 <%- if rdgyr_active && !rmsd_active -%>
 abf {
   colvars              GYR
-  FullSamples          5000
+  FullSamples          <%= fullsamples %>
   historyfreq          20000
   writeCZARwindowFile
 }
@@ -82,33 +82,33 @@ abf {
 <%- if wtm && rmsd_active && !rdgyr_active -%>
 metadynamics {
   colvars            RMSD
-  hillWeight         0.1
-  hillWidth          1
-  wellTempered       on
-  newHillFrequency   500
-  biasTemperature    1490
+  hillWeight         0.5
+  hillWidth          1.0
+  #wellTempered       on
+  newHillFrequency   100
+  #biasTemperature    1490
 }
 <%- end -%>
 
 <%- if wtm && rdgyr_active && !rmsd_active -%>
 metadynamics {
   colvars            GYR
-  hillWeight         0.1
-  hillWidth          1
-  wellTempered       on
-  newHillFrequency   500
-  biasTemperature    1490
+  hillWeight         0.5
+  hillWidth          1.0
+  #wellTempered       on
+  newHillFrequency   100
+  #biasTemperature    1000
 }
 <%- end -%>
 
 <%- if wtm && rdgyr_active && rmsd_active -%>
 metadynamics {
   colvars            RMSD GYR
-  hillWeight         0.1
-  hillWidth          1
-  wellTempered       on
-  newHillFrequency   500
-  biasTemperature    1490
+  hillWeight         0.5
+  hillWidth          1.0
+  #wellTempered       on
+  newHillFrequency   100
+  #biasTemperature    1490
 }
 <%- end -%>
 
@@ -133,20 +133,21 @@ harmonic {
   forceConstant 100.0 
 } 
 
+<%- if wtm && rdgyr_active && rmsd_active -%>
 ## To keep orientation
-#colvar { 
-#  name orientation 
-#  orientation { 
-#    atoms { 
-#      atomsFile   <%= pdb_reference %>
-#      atomsCol B
-#      atomsColValue 1.0 
-#    } 
-#    refPositionsFile   <%= pdb_reference %>
-#  } 
-#} 
-#harmonic { 
-#  colvars orientation 
-#  centers (1.0, 0.0, 0.0, 0.0)
-#  forceConstant 100.0 
-#} 
+  name orientation 
+  orientation { 
+    atoms { 
+      atomsFile   <%= pdb_reference %>
+      atomsCol B
+      atomsColValue 1.0 
+    } 
+    refPositionsFile   <%= pdb_reference %>
+  } 
+} 
+harmonic { 
+  colvars orientation 
+  centers (1.0, 0.0, 0.0, 0.0)
+  forceConstant 100.0 
+} 
+<%- end -%>
