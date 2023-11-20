@@ -148,6 +148,8 @@ module Prepare
     end
 
     def proccess_input
+      t1 = Time.monotonic
+      success = false
       Dir.cd(@main_dir)
       puts "The output folder name will be: #{@output_name}"
       if Dir.exists?("#{@output_name}")
@@ -168,13 +170,24 @@ module Prepare
         @format = "mol"
         @extension = ".mol"
         @file = Path.new("#{@basename}#{@extension}").expand.to_s
-        @charge = Chem::Structure.read(@file).formal_charge
-        puts "Molecule charge: #{@charge}"
+        begin
+          @charge = Chem::Structure.read(@file).formal_charge
+          puts "Molecule charge: #{@charge}"
+          success = true
+        rescue exception
+          puts "Could not read the file: #{@basename}.mol".colorize(RED)
+          puts "Please check the input SMILE code:"
+          puts @smile.colorize(AQUA)
+          # exit(1)
+        end
       else
         @path = Path.new(@file).expand.parent
         @format = "#{@extension.split(".")[1]}"
         @basename = "#{File.basename("#{@file}", "#{@extension}")}"
       end
+      t2 = Time.monotonic
+      time = t2 - t1
+      return success, time
     end
 
     def add_h
@@ -238,9 +251,12 @@ module Prepare
         @format = "mol"
         @extended_mol = "#{@basename}.mol"
       end
+      t2 = Time.monotonic
+      t2 - t1
     end
 
     def parameterize
+      t1 = Time.monotonic
       # Convert to PDB after add_h and structure randomization and write PDB without connectivities
       new_pdb = Chem::Structure.read("#{@basename}#{@extension}")
       new_pdb.to_pdb("#{@basename}.pdb", bonds: :none)
@@ -322,9 +338,13 @@ module Prepare
         @pdb_system = "#{@basename}.pdb"
         puts "SYSTEM INFO: ".colorize(GREEN), Chem::Structure.from_pdb(@pdb_system)
       end
+      t2 = Time.monotonic
+      t2 - t1
     end
 
     def minimize
+      t1 = Time.monotonic
+      # Minimize the first random configuration.
       pdb = Chem::Structure.from_pdb(@pdb_system)
       a, b, c = pdb.cell?.try(&.size) || {0, 0, 0}
       cx = pdb.coords.center.x
@@ -353,12 +373,17 @@ module Prepare
         lastframe.to_pdb "min.lastframe.pdb"
       end
       @pdb_reference = Path.new("min.lastframe.pdb").expand.to_s
+      t2 = Time.monotonic
+      t2 - t1
     end
 
     def sampling
+      t1 = Time.monotonic
       # Print protocol description
       puts sampling_protocol.describe
       sampling_protocol.execute(self)
+      t2 = Time.monotonic
+      t2 - t1
     end
 
     def clustering
@@ -407,6 +432,8 @@ module Prepare
       #    log.print("#{rmsd}\n")
       #  end
       # end
+      t2 = Time.monotonic
+      t2 - t1
     end
   end
 end
