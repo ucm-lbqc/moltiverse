@@ -422,6 +422,46 @@ module Prepare
       clustering_result = clusters.map do |idxs|
         structures[idxs[dism[idxs].centroid]]
       end
+      clustering_result
+    end
+
+    def clustering
+      t1 = Time.monotonic
+      puts "Performing structure clustering".colorize(GREEN)
+      # Clustering all the frames
+      # structure = Chem::Structure.from_pdb(@pdb_system)
+      # frames : Array(Chem::Structure) = [] of Chem::Structure
+      # Dir["#{@working_dir}/out*.dcd"].each do |dcd|
+      #  Chem::DCD::Reader.open((dcd), structure) do |reader|
+      #    n_frames = reader.n_entries - 1
+      #    (0..n_frames).each do |frame|
+      #      st = reader.read_entry frame
+      #      frames.push(st)
+      #    end
+      #  end
+      # end
+      # puts "Analyzing #{frames.size} total structures generated in the sampling stage..."
+      # dism = HClust::DistanceMatrix.new(frames.size) { |a, b|
+      #  frames[a].coords.rmsd frames[b].coords, minimize: true
+      # }
+      # dendrogram = HClust.linkage(dism, :single)
+      # clusters = dendrogram.flatten(count: @n_confs)
+      #
+      # centroids = clusters.map do |idxs|
+      #  idxs[dism[idxs].centroid]
+      # end
+      # # Write centroids
+      # count = 0
+      # puts "Centroids"
+      # centroids.each do |centroid|
+      #  count += 1
+      #  puts "Centroid: #{centroid} RDGYR: #{frames[centroid].coords.rdgyr}"
+      # end
+      # # Write centroids to sdf
+      # centroids_structures = clusters.map do |idxs|
+      #  frames[idxs[dism[idxs].centroid]]
+      # end
+      # centroids_structures.to_sdf "#{@output_name}.sdf"
       # The following block writes the total sampling matrix to a text file.
       # TO:DO Add optional function to write it, since a total of 20000
       # structures generates an rmsd matrix of ~ 3-4 GB in size.
