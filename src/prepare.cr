@@ -353,7 +353,6 @@ module Prepare
       minimization(@explicit_water, @basename, @topology_file, @coordinates_file, "min.namd", a, b, c, cx, cy, cz)
       namd_exec = "namd2"
       arguments = ["min.namd", "+p", "4", "+setcpuaffinity"]
-      # arguments = ["min.namd"]
       puts "Runnning minimization..."
       run_cmd(cmd = namd_exec, args = arguments, output_file = "min.out", stage = "Minimization done ✔".colorize(GREEN), verbose = false)
       @basename = "min.#{@basename}"
@@ -364,7 +363,6 @@ module Prepare
       Chem::DCD::Reader.open((@dcd), pdb) do |reader|
         n_frames = reader.n_entries - 1
         lastframe = reader.read_entry n_frames
-        # puts "n frames = #{reader.n_entries}"
         # Ligand geometrical center
         @lig_center = lastframe['A'][1].coords.center
         lastframe['A'][1].each_atom { |atom|
@@ -381,6 +379,7 @@ module Prepare
       t1 = Time.monotonic
       # Print protocol description
       puts sampling_protocol.describe
+      # Generate variants, and perform sampling
       sampling_protocol.execute(self)
       t2 = Time.monotonic
       t2 - t1
