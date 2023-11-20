@@ -252,20 +252,46 @@ module Protocols
       (0..rdgyr_ranges.size - 2).map { |i| rdgyr_ranges[i...i + 2] }
     end
 
+    def create_variants(n_variants : Int32, threshold_rmsd_variants : Float64, mol_ref : String)
+      variants_array : Array(String) = [] of String
+      iterations = 100
+      # Create first variant and store it in variants_array
+      variant_1 = babel_random_mol_to_pdb(mol_ref, "v1.pdb")
+      variants_array.push(Path.new("v1.pdb").expand.to_s)
+      variant_decoy = babel_random_mol_to_pdb(mol_ref, "decoy.pdb")
+      # Define the initial RMSD between variants
+      # This value will generate variants with at least that RMSD.
+      # But the value is iteratively reduced and adjusted if neccessary.
+      # Start creation of the second ... and the following variants checking condition of RMSD spanning.
+      (2..n_variants).each do |v|
+        min_rmsd = 0.0
+        iteration = 0
+        while min_rmsd <= threshold_rmsd_variants
+          iteration += 1
+          if iteration > iterations
+            threshold_rmsd_variants -= 0.1
+            iteration = 0
+            puts "Reducing RMSD threshold to #{threshold_rmsd_variants.round(4)}...".colorize(YELLOW)
           end
-          puts "Runnning ABF on window '#{window}', with RMSD ranges from #{lw_rmsd} to #{up_rmsd}"
-          # Namd execution
-          run_namd(cmd = namd_exec, args = arguments, output_file = "#{type}.#{window}.out", stage = "abf", window = "#{window}")
-          # Checking number of frames in every calculation.
-          dcd_name = "outeabf.#{type}.#{window}.#{lig.basename}.dcd"
-          if File.exists?(dcd_name)
-            dcd = Path.new(dcd_name).expand.to_s
-            puts "Done... #{n_frames(lig.pdb_system, dcd)} frames generated for window #{window}"
-          else
-            puts "No frames were generated in window 'w#{window}'"
+          variant_decoy = babel_random_mol_to_pdb(mol_ref, "decoy.pdb")
+          index = 0
+          rmsd_list : Array(Float64) = [] of Float64
+          variants_array.each do |live_variant|
+            live_variant_st = Chem::Structure.from_pdb(live_variant)
+            rmsd = live_variant_st.coords.rmsd(variant_decoy.coords, minimize: true)
+            # puts "RMSD: #{rmsd}"
+            rmsd_list.push(rmsd)
           end
+          min_rmsd = rmsd_list.min
         end
+        puts "MAX RSMD: #{threshold_rmsd_variants.round(4)}. VARIANT #{v}. ITERATION #{iteration}"
+        variant_decoy.to_pdb("v#{v}.pdb", bonds: :none)
+        variants_array.push(Path.new("v#{v}.pdb").expand.to_s)
       end
+      puts "Final RMSD threshold: #{threshold_rmsd_variants.round(4)}"
+      variants_array
+    end
+
     def execute(lig : Ligand)
       variants : Array(String) = [] of String
       # #if @time_rmsd != 0 && @dimension == 1
@@ -317,63 +343,39 @@ module Protocols
         puts "Sampling protocol using RDGYR".colorize(GREEN)
         type = "rdgyr"
         count = 0
-        rdgyr_pairs.each.with_index do |pair, index|
+        # Variants generation
+        # This block code add the variants strategy to start every window with
+        # a different random coordinate of the ligand using openbabel.
+        min_lastframe = Chem::Structure.from_pdb("min.lastframe.pdb")
+        time_per_variant = @time_rdgyr / @n_variants
+
+        if @n_variants >= 2
+          puts "Creating variants: ".colorize(GREEN)
+          puts "Reference mol: #{lig.extended_mol}"
+          variants = create_variants(@n_variants, @threshold_rmsd_variants, lig.extended_mol)
+        else
+          File.copy("min.lastframe.pdb", "v1.pdb")
+          variants.push(Path.new("v1.pdb").expand.to_s)
+        end
+
+        # # Minimization of all the variants before the sampling stage
+        # puts "Minimization of variants: ".colorize(GREEN)
+        # variants.each.with_index do |_, index|
+        #  variant = "v#{index += 1}"
+        #  minimize_variant(lig.explicit_water, "#{variant}.pdb", lig.topology_file)
+        # end
+        rdgyr_pairs.each do |pair|
           window = "w#{count += 1}"
           lw_rdgyr = pair[0]
           up_rdgyr = pair[1]
-
-          # Writting namd configuration
-          enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.namd", @time_rdgyr, window, type, lig.output_frequency).to_s
-          # Writting colvars configuration
-          colvars(@metadynamics,
-            false,
-            false,
-            lw_rdgyr,
-            up_rdgyr,
-            false,
-            true,
-            @wallconstant_force_rdgyr,
-            lig.pdb_reference,
-            lig.lig_center.x,
-            lig.lig_center.y,
-            lig.lig_center.z,
-            "#{type}.#{window}.colvars").to_s
-          namd_exec = "namd2"
-          # Arguments for GPU and CPU
-          if lig.explicit_water
-            arguments = ["#{type}.#{window}.namd", "+p", "4", "+devices", "0"]
-          else
-            arguments = ["#{type}.#{window}.namd", "+p", "4", "+setcpuaffinity"]
-            # arguments = ["#{type}.#{window}.namd"]
-          end
-          puts "Runnning ABF on window '#{window}', with RDGYR ranges from #{lw_rdgyr} to #{up_rdgyr}"
-          # Namd execution
-          run_namd(cmd = namd_exec, args = arguments, output_file = "#{type}.#{window}.out", stage = "abf", window = "#{window}")
-          # Checking number of frames in every calculation.
-          dcd_name = "outeabf.#{type}.#{window}.#{lig.basename}.dcd"
-          if File.exists?(dcd_name)
-            dcd = Path.new(dcd_name).expand.to_s
-            puts "Done... #{n_frames(lig.pdb_system, dcd)} frames generated for window #{window}"
-          else
-            puts "No frames were generated in window #{window}"
-          end
-        end
-      end
-      if @time_rmsd != 0 && @time_rdgyr != 0 && @dimension == 2
-        count = 0
-        type = "rmsd_rdgyr"
-        puts "Sampling protocol using RMSD".colorize(GREEN)
-        rmsd_pairs.each do |pair_rmsd|
-          rdgyr_pairs.each do |pair_rdgyr|
-            window = "w#{count += 1}"
-            lw_rmsd = pair_rmsd[0]
-            up_rmsd = pair_rmsd[1]
-            lw_rdgyr = pair_rdgyr[0]
-            up_rdgyr = pair_rdgyr[1]
+          variants.each.with_index do |variant_path, index|
+            variant = "v#{index += 1}"
             # Writting namd configuration
-            enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.namd", @time_rmsd, window, type, lig.output_frequency).to_s
+            # enhanced_sampling(lig.explicit_water, "min.#{variant}", lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
+            enhanced_sampling(lig.explicit_water, "#{lig.basename}", lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
             # Writting colvars configuration
-            # wallconstant_force for 2D must be fixed in the following fuction.
+            st_variant = Chem::Structure.from_pdb(variant_path)
+            variant_center = st_variant.coords.center
             colvars(@metadynamics,
               false,
               false,
@@ -391,21 +393,102 @@ module Protocols
             namd_exec = "namd2"
             # Arguments for GPU and CPU
             if lig.explicit_water
-              arguments = ["#{type}.#{window}.namd", "+p", "4", "+devices", "0"]
+              arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4", "+devices", "0"]
             else
-              arguments = ["#{type}.#{window}.namd", "+p", "4", "+setcpuaffinity"]
+              # arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4", "+setcpuaffinity"]
+              arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4"]
               # arguments = ["#{type}.#{window}.namd"]
             end
-            puts "Runnning ABF on window '#{window}'. RMSD ranges: #{lw_rmsd} to #{up_rmsd}. RDGYR ranges: #{lw_rdgyr} to #{up_rdgyr}"
+            puts "Runnning ABF on window '#{window}', variant '#{variant}' with RDGYR ranges from #{lw_rdgyr} to #{up_rdgyr}"
             # Namd execution
-            run_namd(cmd = namd_exec, args = arguments, output_file = "#{type}.#{window}.out", stage = "abf", window = "#{window}")
+            run_namd(cmd = namd_exec, args = arguments, output_file = "#{type}.#{window}.#{variant}.out", stage = "abf", window = "#{window}")
             # Checking number of frames in every calculation.
-            dcd_name = "outeabf.#{type}.#{window}.#{lig.basename}.dcd"
+            dcd_name = "outeabf.#{type}.#{window}.#{variant}.dcd"
             if File.exists?(dcd_name)
               dcd = Path.new(dcd_name).expand.to_s
-              puts "Done... #{n_frames(lig.pdb_system, dcd)} frames generated for window #{window}"
+              puts "Done... #{n_frames(lig.pdb_system, dcd)} frames generated for window #{window}, variant #{variant}"
             else
-              puts "No frames were generated in window 'w#{window}'"
+              puts "No frames were generated in window #{window}"
+            end
+          end
+        end
+      end
+      if @time_rmsd != 0 && @time_rdgyr != 0 && @dimension == 2
+        count = 0
+        type = "rmsd_rdgyr"
+        puts "Sampling protocol using RMSD".colorize(GREEN)
+        # Variants generation
+        # Variants
+        # This block code add the variants strategy to start every window with
+        # a different random coordinate of the ligand generated previously
+        # with openbabel.
+        # 10 initial variants will be generated, which will be the input for each window.
+        min_lastframe = Chem::Structure.from_pdb("min.lastframe.pdb")
+        time_per_variant = @time_rmsd / @n_variants
+
+        if @n_variants >= 2
+          puts "Creating variants: ".colorize(GREEN)
+          variants = create_variants(@n_variants, @threshold_rmsd_variants, lig.extended_mol)
+        else
+          File.copy("min.lastframe.pdb", "v1.pdb")
+          variants.push(Path.new("v1.pdb").expand.to_s)
+        end
+        # # Minimization of all the variants before the sampling stage
+        # puts "Minimization of variants: ".colorize(GREEN)
+        # variants.each.with_index do |_, index|
+        #  variant = "v#{index += 1}"
+        #  minimize_variant(lig.explicit_water, "#{variant}.pdb", lig.topology_file)
+        # end
+        rmsd_pairs.each do |pair_rmsd|
+          rdgyr_pairs.each do |pair_rdgyr|
+            window = "w#{count += 1}"
+            lw_rmsd = pair_rmsd[0]
+            up_rmsd = pair_rmsd[1]
+            lw_rdgyr = pair_rdgyr[0]
+            up_rdgyr = pair_rdgyr[1]
+            variants.each.with_index do |variant_path, index|
+              variant = "v#{index += 1}"
+              # Writting namd configuration
+              # enhanced_sampling(lig.explicit_water, "min.#{variant}", lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
+              enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
+              # Writting colvars configuration
+              st_variant = Chem::Structure.from_pdb(variant_path)
+              variant_center = st_variant.coords.center
+              # wallconstant_force for 2D must be fixed in the following function.
+              colvars(@metadynamics,
+                lw_rmsd,
+                up_rmsd,
+                lw_rdgyr,
+                up_rdgyr,
+                true,
+                true,
+                @wallconstant_force_rmsd,
+                variant_path,
+                variant_center.x,
+                variant_center.y,
+                variant_center.z,
+                "#{type}.#{window}.#{variant}.colvars",
+                @fullsamples).to_s
+              namd_exec = "namd2"
+              # Arguments for GPU and CPU
+              if lig.explicit_water
+                arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4", "+devices", "0"]
+              else
+                # arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4", "+setcpuaffinity"]
+                arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4"]
+                # arguments = ["#{type}.#{window}.namd"]
+              end
+              puts "Runnning ABF on window '#{window}', variant '#{variant}'. RMSD ranges: #{lw_rmsd} to #{up_rmsd}. RDGYR ranges: #{lw_rdgyr} to #{up_rdgyr}"
+              # Namd execution
+              run_namd(cmd = namd_exec, args = arguments, output_file = "#{type}.#{window}.out", stage = "abf", window = "#{window}")
+              # Checking number of frames in every calculation.
+              dcd_name = "outeabf.#{type}.#{window}.#{variant}.dcd"
+              if File.exists?(dcd_name)
+                dcd = Path.new(dcd_name).expand.to_s
+                puts "Done... #{n_frames(lig.pdb_system, dcd)} frames generated for window #{window}, variant #{variant}"
+              else
+                puts "No frames were generated in window '#{window}'"
+              end
             end
           end
         end
