@@ -162,7 +162,7 @@ module Prepare
       if @smile
         @basename = "#{@output_name}"
         obabel = "obabel"
-        args1 = ["-:#{smile}", "-h", "--gen3D", "-O", "#{@basename}.mol"]
+        args1 = ["-:#{@smile}", "-h", "--gen3D", "-O", "#{@basename}.mol"]
         puts "Running openbabel convertion..."
         run_cmd(cmd = obabel, args = args1, output_file = Nil, stage = "SMILE code converted to .mol format ✔".colorize(GREEN), verbose = false)
         @format = "mol"
