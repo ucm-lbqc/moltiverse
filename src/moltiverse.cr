@@ -26,7 +26,7 @@ ligand = ""
 extension = ""
 ph_target = 7.0
 keep_hydrogens = true
-random_coords = false
+extend_molecule = true
 explicit_water = false
 output_name = "empty"
 bounds_colvars = BoundsColvars.new(0, 0, 0, 0, 0, 0, 10.0, 40, 80.0, 1.0)
@@ -64,10 +64,10 @@ OptionParser.parse do |parser|
   parser.on("-o NAME", "--output_name=NAME", "Output folder name. Default: Same as input ligand basename") do |str|
     output_name = str
   end
-  parser.on("-r N", "--random=N", "Randomize the initial ligand structure?. Default: false. Options: 'true' or 'false'.") do |str|
+  parser.on("-e N", "--extend=N", "Extend the initial ligand structure?. Default: true. Options: 'true' or 'false'.") do |str|
     case str
-    when "false" then random_coords = false
-    when "true"  then random_coords = true
+    when "false" then extend_molecule = false
+    when "true"  then extend_molecule = true
     else
       puts "The --random option must be 'true' or 'false'"
       exit
