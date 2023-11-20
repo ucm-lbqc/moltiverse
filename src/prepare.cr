@@ -19,7 +19,7 @@ include Execution
 
 module Prepare
   class Ligand
-    def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, random_coords : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
+    def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, extend_molecule : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
       @main_dir = main_dir
       @n_confs = n_confs
       @output_frequency = output_frequency
@@ -34,10 +34,11 @@ module Prepare
       @coordinates_file = "empty"
       @pdb_system = "empty"
       @dcd = "empty"
+      @extended_mol = "empty"
       @lig_center = Spatial::Vec3.new(0, 0, 0)
       @pdb_reference = "empty"
       @explicit_water = explicit_water
-      @random_coords = random_coords
+      @extend_molecule = extend_molecule
       @sampling_protocol = sampling_protocol
       @time_rmsd = sampling_protocol.time_rmsd
       @time_rdgyr = sampling_protocol.time_rdgyr
@@ -110,8 +111,8 @@ module Prepare
       @explicit_water
     end
 
-    def random_coords
-      @random_coords
+    def extend_molecule
+      @extend_molecule
     end
 
     def sampling_protocol
@@ -140,6 +141,10 @@ module Prepare
 
     def output_frequency
       @output_frequency
+    end
+
+    def extended_mol
+      @extended_mol
     end
 
     def proccess_input
@@ -206,15 +211,32 @@ module Prepare
       puts "Molecule charge: #{@charge}"
     end
 
-    def randomize_structure
-      if random_coords
-        obabel = "obabel"
-        args1 = ["-i", "#{@format}", "#{@file}", "-o", "mol", "-O", "#{@basename}_rand.mol", "-e", "--gen3D", "--medium"]
-        puts "Running openbabel structure randomization..."
-        run_cmd(cmd = obabel, args = args1, output_file = Nil, stage = "Structure randomization ✔".colorize(GREEN), verbose = false)
+    def extend_structure
+      t1 = Time.monotonic
+      if extend_molecule
+        iterations = 600
+        variant_1 = babel_random_mol_to_mol(@file, "decoy.mol")
+        max_rdgyr = variant_1.coords.rdgyr
+        puts "Spreading the molecule structure".colorize(GREEN)
+        puts "Initial RDGYR: #{max_rdgyr}"
+        # Create first variant in 600 iterations.
+        # The best one will be saved in the variants_st_array.
+        (0..iterations).each do |iteration|
+          variant_decoy = babel_random_mol_to_mol(@file, "decoy.mol")
+          actual_rdgyr = variant_decoy.coords.rdgyr
+          if actual_rdgyr > max_rdgyr && actual_rdgyr < 15.0
+            variant_1 = variant_decoy
+            max_rdgyr = actual_rdgyr
+            puts "MAX RDGYR #{max_rdgyr.round(4)}. ITERATION #{iteration}"
+          end
+        end
+
+        variant_1.to_mol("#{@basename}_rand.mol")
+        puts "RDGYR of the conformation: #{max_rdgyr}".colorize(GREEN)
         @extension = ".mol"
         @basename = "#{@basename}_rand"
         @format = "mol"
+        @extended_mol = "#{@basename}.mol"
       end
     end
 
