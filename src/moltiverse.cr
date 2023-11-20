@@ -185,6 +185,8 @@ if extension == ".smi"
       new_output_name = "#{output_name}_#{name}"
       puts "SMILE:"
       puts smile_code.colorize(AQUA)
+      protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples)
+      lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
       t_start = Time.monotonic
       success, proccess_time = lig.proccess_input
       if success
