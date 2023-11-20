@@ -17,7 +17,6 @@ binVelocities                   $prevBaseName.restart.vel
 extendedSystem                  $prevBaseName.restart.xsc
 
 # time configuration (timestep 2 fs)
-numSteps                        [expr int($time * 1e6 / $dt)]
 amber                           on          # AMBER IN NAMD
 exclude                         scaled1-4   # AMBER IN NAMD
 1-4scaling                      0.833333    # AMBER IN NAMD
@@ -69,7 +68,8 @@ wrapAll                         no # deactivated in free energy calculations.
 
 # colvars
 colvars                         on
-colvarsConfig                   ${type}.${window}.colvars
+colvarsConfig                   ${type}.${window}.${variant}.colvars
+
 # Execution 
 minimize                        100
 reinitvels                      $temperature
