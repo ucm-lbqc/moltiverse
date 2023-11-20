@@ -71,3 +71,6 @@ wrapAll                         no # deactivated in free energy calculations.
 colvars                         on
 colvarsConfig                   ${type}.${window}.colvars
 # Execution 
+minimize                        100
+reinitvels                      $temperature
+run                             [expr int($time * 1e6 / $dt)]
