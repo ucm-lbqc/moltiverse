@@ -1,4 +1,6 @@
 require "./namdconf.cr"
+require "./utilities.cr"
+include Utilities
 
 # Define colvar bounds, windows and time for the collective variables.
 module Protocols
@@ -74,10 +76,19 @@ module Protocols
     @metadynamics : Bool
     @dimension : Int32
 
+    @n_variants : Int32
+    @threshold_rmsd_variants : Float64
+    @spacing_rdgyr_variants : Float64
+    @fullsamples : Int32
+
     def initialize(
       @bounds_colvars : BoundsColvars,
       @metadynamics : Bool,
-      @dimension : Int32
+      @dimension : Int32,
+      @n_variants : Int32,
+      @threshold_rmsd_variants : Float64,
+      @spacing_rdgyr_variants : Float64,
+      @fullsamples : Int32
     )
       @lw_rmsd = bounds_colvars.x1
       @up_rmsd = bounds_colvars.x2
@@ -141,6 +152,22 @@ module Protocols
 
     def time_rdgyr
       @time_rdgyr
+    end
+
+    def n_variants
+      @n_variants
+    end
+
+    def threshold_rmsd_variants
+      @threshold_rmsd_variants
+    end
+
+    def spacing_rdgyr_variants
+      @spacing_rdgyr_variants
+    end
+
+    def fullsamples
+      @fullsamples
     end
 
     def metadynamics
@@ -326,18 +353,19 @@ module Protocols
             # Writting colvars configuration
             # wallconstant_force for 2D must be fixed in the following fuction.
             colvars(@metadynamics,
-              lw_rmsd,
-              up_rmsd,
+              false,
+              false,
               lw_rdgyr,
               up_rdgyr,
+              false,
               true,
-              true,
-              @wallconstant_force_rmsd,
-              lig.pdb_reference,
-              lig.lig_center.x,
-              lig.lig_center.y,
-              lig.lig_center.z,
-              "#{type}.#{window}.colvars").to_s
+              @wallconstant_force_rdgyr,
+              variant_path,
+              variant_center.x,
+              variant_center.y,
+              variant_center.z,
+              "#{type}.#{window}.#{variant}.colvars",
+              @fullsamples).to_s
             namd_exec = "namd2"
             # Arguments for GPU and CPU
             if lig.explicit_water
