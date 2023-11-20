@@ -385,41 +385,43 @@ module Prepare
       t2 - t1
     end
 
-    def clustering
-      puts "Performing structure clustering".colorize(GREEN)
-      structure = Chem::Structure.from_pdb(@pdb_system)
-      frames : Array(Chem::Structure) = [] of Chem::Structure
-      Dir["#{@working_dir}/out*.dcd"].each do |dcd|
-        Chem::DCD::Reader.open((dcd), structure) do |reader|
-          n_frames = reader.n_entries - 1
-          (0..n_frames).each do |frame|
-            st = reader.read_entry frame
-            frames.push(st)
+    def grouping(frames : Array(Chem::Structure), groups : Array(Array(Chem::Structure)))
+      count = 0
+      grupito : Array(Chem::Structure) = [] of Chem::Structure
+      frames.each_with_index do |st, index|
+        grupito.push(st)
+        if grupito.size >= 3
+          dism = HClust::DistanceMatrix.new(grupito.size) { |a, b|
+            grupito[a].coords.rmsd grupito[b].coords, minimize: true
+          }
+          span = dism.to_a.max - dism.to_a.min
+          if span > 1.5 || grupito.size >= 200
+            count += 1
+            puts "Group #{count} with #{grupito.size} structures and span of #{span} Å created"
+            groups.push(grupito)
+            grupito = [] of Chem::Structure
           end
         end
       end
-      puts "Analyzing #{frames.size} total structures generated in the sampling stage..."
-      dism = HClust::DistanceMatrix.new(frames.size) { |a, b|
-        frames[a].coords.rmsd frames[b].coords, minimize: true
+      groups.push(grupito)
+      groups
+    end
+
+    def subclustering(structures : Array(Chem::Structure), n_clusters : Int32)
+      clustering_result : Array(Chem::Structure) = [] of Chem::Structure
+
+      dism = HClust::DistanceMatrix.new(structures.size) { |a, b|
+        structures[a].coords.rmsd structures[b].coords, minimize: true
       }
       dendrogram = HClust.linkage(dism, :single)
-      clusters = dendrogram.flatten(count: @n_confs)
-
+      clusters = dendrogram.flatten(count: n_clusters)
+      # Get centroid indexes
       centroids = clusters.map do |idxs|
         idxs[dism[idxs].centroid]
       end
-      # Write centroids
-      count = 0
-      puts "Centroids"
-      centroids.each do |centroid|
-        count += 1
-        puts "Centroid: #{centroid} RDGYR: #{frames[centroid].coords.rdgyr}"
+      clustering_result = clusters.map do |idxs|
+        structures[idxs[dism[idxs].centroid]]
       end
-      # Write centroids to sdf
-      centroids_structures = clusters.map do |idxs|
-        frames[idxs[dism[idxs].centroid]]
-      end
-      centroids_structures.to_sdf "#{@output_name}.sdf"
       # The following block writes the total sampling matrix to a text file.
       # TO:DO Add optional function to write it, since a total of 20000
       # structures generates an rmsd matrix of ~ 3-4 GB in size.
@@ -431,6 +433,81 @@ module Prepare
       #    log.print("#{rmsd}\n")
       #  end
       # end
+      #
+      # Clustering by groups
+      structure = Chem::Structure.from_pdb(@pdb_system)
+      frames : Array(Chem::Structure) = [] of Chem::Structure
+      groups_array : Array(Array(Chem::Structure)) = [] of Array(Chem::Structure)
+
+      Dir["#{@working_dir}/out*.dcd"].each do |dcd|
+        Chem::DCD::Reader.open((dcd), structure) do |reader|
+          n_frames = reader.n_entries - 1
+          (0..n_frames).each do |frame|
+            st = reader.read_entry frame
+            frames.push(st)
+          end
+        end
+      end
+      puts "Analyzing #{frames.size} total structures generated in the sampling stage..."
+
+      puts "Grouping structures..."
+      groups = grouping(frames, groups_array)
+
+      puts "Performing the first clustering by groups..."
+      first_clustering : Array(Chem::Structure) = [] of Chem::Structure
+      groups.each do |grupito|
+        if grupito.size >= 3
+          dism = HClust::DistanceMatrix.new(grupito.size) { |a, b|
+            grupito[a].coords.rmsd grupito[b].coords, minimize: true
+          }
+          span = dism.to_a.max - dism.to_a.min
+          if span <= 1.5 && grupito.size >= 5
+            clustering_result = subclustering(grupito, 5)
+            clustering_result.each do |st|
+              first_clustering.push(st)
+            end
+          elsif span > 1.5 && span <= 2.5 && grupito.size >= 10
+            clustering_result = subclustering(grupito, 10)
+            clustering_result.each do |st|
+              first_clustering.push(st)
+            end
+          elsif span > 2.5 && span <= 3.75 && grupito.size >= 15
+            clustering_result = subclustering(grupito, 15)
+            clustering_result.each do |st|
+              first_clustering.push(st)
+            end
+          elsif span > 3.75 && span <= 5.0 && grupito.size >= 20
+            clustering_result = subclustering(grupito, 20)
+            clustering_result.each do |st|
+              first_clustering.push(st)
+            end
+          elsif span > 5.0 && span <= 7.5 && grupito.size >= 30
+            clustering_result = subclustering(grupito, 30)
+            clustering_result.each do |st|
+              first_clustering.push(st)
+            end
+          else
+            grupito.each do |st|
+              first_clustering.push(st)
+            end
+          end
+        else
+          grupito.each do |st|
+            first_clustering.push(st)
+          end
+        end
+      end
+
+      puts "Performing the second clustering by groups..."
+      puts "Analyzing #{first_clustering.size} structures"
+      second_clustering = subclustering(first_clustering, @n_confs)
+      second_clustering.to_sdf "#{@output_name}.sdf"
+      if second_clustering.size != @n_confs
+        puts "Warning: The number of molecule conformers generated is different from the requested ensemble.".colorize(YELLOW)
+      end
+      puts "#{second_clustering.size} conformers were generated".colorize(GREEN)
+      puts "Output file: #{output_name}.sdf".colorize(TURQUOISE)
+      puts "_____________________________________________________".colorize(YELLOW)
       t2 = Time.monotonic
       t2 - t1
     end
