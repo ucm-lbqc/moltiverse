@@ -252,38 +252,6 @@ module Protocols
       (0..rdgyr_ranges.size - 2).map { |i| rdgyr_ranges[i...i + 2] }
     end
 
-    def execute(lig : Ligand)
-      if @time_rmsd != 0 && @dimension == 1
-        count = 0
-        type = "rmsd"
-        puts "Sampling protocol using RMSD".colorize(GREEN)
-        rmsd_pairs.each.with_index do |pair, index|
-          window = "w#{count += 1}"
-          lw_rmsd = pair[0]
-          up_rmsd = pair[1]
-          # Writting namd configuration
-          enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.namd", @time_rmsd, window, type, lig.output_frequency).to_s
-          # Writting colvars configuration
-          colvars(@metadynamics,
-            lw_rmsd,
-            up_rmsd,
-            false,
-            false,
-            true,
-            false,
-            @wallconstant_force_rmsd,
-            lig.pdb_reference,
-            lig.lig_center.x,
-            lig.lig_center.y,
-            lig.lig_center.z,
-            "#{type}.#{window}.colvars").to_s
-          namd_exec = "namd2"
-          # Arguments for GPU and CPU
-          if lig.explicit_water
-            arguments = ["#{type}.#{window}.namd", "+p", "4", "+devices", "0"]
-          else
-            arguments = ["#{type}.#{window}.namd", "+p", "4", "+setcpuaffinity"]
-            # arguments = ["#{type}.#{window}.namd"]
           end
           puts "Runnning ABF on window '#{window}', with RMSD ranges from #{lw_rmsd} to #{up_rmsd}"
           # Namd execution
@@ -298,6 +266,53 @@ module Protocols
           end
         end
       end
+    def execute(lig : Ligand)
+      variants : Array(String) = [] of String
+      # #if @time_rmsd != 0 && @dimension == 1
+      # #  count = 0
+      # #  type = "rmsd"
+      # #  puts "Sampling protocol using RMSD".colorize(GREEN)
+      # #  rmsd_pairs.each.with_index do |pair, index|
+      # #    window = "w#{count += 1}"
+      # #    lw_rmsd = pair[0]
+      # #    up_rmsd = pair[1]
+      # #    # Writting namd configuration
+      # #    enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.namd", @time_rmsd, window, type, lig.output_frequency).to_s
+      # #    # Writting colvars configuration
+      # #    colvars(@metadynamics,
+      # #      lw_rmsd,
+      # #      up_rmsd,
+      # #      false,
+      # #      false,
+      # #      true,
+      # #      false,
+      # #      @wallconstant_force_rmsd,
+      # #      lig.pdb_reference,
+      # #      lig.lig_center.x,
+      # #      lig.lig_center.y,
+      # #      lig.lig_center.z,
+      # #      "#{type}.#{window}.colvars").to_s
+      # #    namd_exec = "namd2"
+      # #    # Arguments for GPU and CPU
+      # #    if lig.explicit_water
+      # #      arguments = ["#{type}.#{window}.namd", "+p", "4", "+devices", "0"]
+      # #    else
+      # #      arguments = ["#{type}.#{window}.namd", "+p", "4", "+setcpuaffinity"]
+      # #      # arguments = ["#{type}.#{window}.namd"]
+      # #    end
+      # #    puts "Runnning ABF on window '#{window}', with RMSD ranges from #{lw_rmsd} to #{up_rmsd}"
+      # #    # Namd execution
+      # #    run_namd(cmd = namd_exec, args = arguments, output_file = "#{type}.#{window}.out", stage = "abf", window = "#{window}")
+      # #    # Checking number of frames in every calculation.
+      # #    dcd_name = "outeabf.#{type}.#{window}.#{lig.basename}.dcd"
+      # #    if File.exists?(dcd_name)
+      # #      dcd = Path.new(dcd_name).expand.to_s
+      # #      puts "Done... #{n_frames(lig.pdb_system, dcd)} frames generated for window #{window}"
+      # #    else
+      # #      puts "No frames were generated in window 'w#{window}'"
+      # #    end
+      # #  end
+      # #end
       if @time_rdgyr != 0 && @dimension == 1
         puts "Sampling protocol using RDGYR".colorize(GREEN)
         type = "rdgyr"
