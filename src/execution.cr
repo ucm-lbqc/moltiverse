@@ -25,7 +25,7 @@ module Execution
       end
       stdout.close
       stderr.close
-    # If verbose is equal to false
+      # If verbose is equal to false
     else
       stdout = IO::Memory.new
       stderr = IO::Memory.new
@@ -46,6 +46,7 @@ module Execution
       stderr.close
     end
   end
+
   def run_namd(cmd : String, args : Array(String), output_file : String, stage : String | Colorize::Object(String), window : String)
     success = false
     stdout = IO::Memory.new
@@ -64,7 +65,7 @@ module Execution
         if status.success?
           count = 6
         else
-          count +=1
+          count += 1
         end
       end
       if status.success?
@@ -77,4 +78,3 @@ module Execution
     stdout.close
     stderr.close
   end
-end
