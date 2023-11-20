@@ -1,1 +1,0 @@
-../bin/moltiverse -l molecules.smi -o TEST_MOLECULE -n 250 -f 1000 --random true --water false --metadynamics true --bounds_colvars '0,0,0,0,0,0.0,4.0,8,60,0.1'
