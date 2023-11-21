@@ -227,12 +227,12 @@ module Prepare
     def extend_structure
       t1 = Time.monotonic
       if extend_molecule
-        iterations = 600
+        iterations = 1000
         variant_1 = babel_random_mol_to_mol(@file, "decoy.mol")
         max_rdgyr = variant_1.coords.rdgyr
         puts "Spreading the molecule structure".colorize(GREEN)
         puts "Initial RDGYR: #{max_rdgyr}"
-        # Create first variant in 600 iterations.
+        # Create first variant in 1000 iterations.
         # The best one will be saved in the variants_st_array.
         (0..iterations).each do |iteration|
           variant_decoy = babel_random_mol_to_mol(@file, "decoy.mol")
