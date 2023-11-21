@@ -1,7 +1,7 @@
 <%- if rmsd_active -%>
 colvar {
   name RMSD
-  width 0.05 
+  width <%= bin_width %> 
   lowerWall <%= lw_rmsd %>
   lowerboundary <%= lw_rmsd %>
   upperWall <%= up_rmsd %>
@@ -11,7 +11,7 @@ colvar {
   upperwallconstant <%= wallconstant %>
   
   extendedLagrangian on
-  extendedFluctuation 0.05
+  extendedFluctuation <%= bin_width %> 
   
   rmsd {
     atoms {
@@ -28,7 +28,7 @@ colvar {
 <%- if rdgyr_active -%>
 colvar {
   name GYR
-  width 0.05 
+  width <%= bin_width %> 
   lowerWall <%= lw_rdgyr %>
   lowerboundary <%= lw_rdgyr %>
   upperWall <%= up_rdgyr %>
@@ -38,7 +38,7 @@ colvar {
   upperwallconstant <%= wallconstant %>
   
   extendedLagrangian on
-  extendedFluctuation 0.05
+  extendedFluctuation <%= bin_width %> 
   
   gyration {
     atoms {
