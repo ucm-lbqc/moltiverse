@@ -35,6 +35,7 @@ metadynamics = true
 n_confs = 250
 output_frequency = 500
 fullsamples = 500
+bin_width = 0.05
 n_variants = 1
 threshold_rmsd_variants = 5.0
 spacing_rdgyr_variants = 0.05
@@ -131,6 +132,9 @@ OptionParser.parse do |parser|
   parser.on("-s N", "--fullsamples=N", "FullSamples setting for ABF calculations. Default: 500") do |str|
     fullsamples = str.to_i32
   end
+  parser.on("-u N", "--bin_width=N", "Bin width setting for ABF calculations. Default: 0.05") do |str|
+    bin_width = str.to_f64
+  end
   parser.on("-v N", "--variants=N", "Number of initial conformations of the ligand to use as input in every window. Default: 10") do |str|
     n_variants = str.to_i32
     # TO:DO fix to check if the input is integer.
@@ -185,7 +189,7 @@ if extension == ".smi"
       new_output_name = "#{output_name}_#{name}"
       puts "SMILE:"
       puts smile_code.colorize(AQUA)
-      protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples)
+      protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
       lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
       t_start = Time.monotonic
       success, proccess_time = lig.proccess_input
@@ -209,7 +213,7 @@ if extension == ".smi"
     end
   end
 else
-  protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples)
+  protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
   lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
   lig.add_h
   lig.extend_structure

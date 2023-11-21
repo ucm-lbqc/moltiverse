@@ -88,7 +88,8 @@ module Protocols
       @n_variants : Int32,
       @threshold_rmsd_variants : Float64,
       @spacing_rdgyr_variants : Float64,
-      @fullsamples : Int32
+      @fullsamples : Int32,
+      @bin_width : Float64
     )
       @lw_rmsd = bounds_colvars.x1
       @up_rmsd = bounds_colvars.x2
@@ -168,6 +169,10 @@ module Protocols
 
     def fullsamples
       @fullsamples
+    end
+
+    def bin_width
+      @bin_width
     end
 
     def metadynamics
@@ -389,7 +394,7 @@ module Protocols
               variant_center.y,
               variant_center.z,
               "#{type}.#{window}.#{variant}.colvars",
-              @fullsamples).to_s
+              @fullsamples, @bin_width).to_s
             namd_exec = "namd2"
             # Arguments for GPU and CPU
             if lig.explicit_water
@@ -468,7 +473,7 @@ module Protocols
                 variant_center.y,
                 variant_center.z,
                 "#{type}.#{window}.#{variant}.colvars",
-                @fullsamples).to_s
+                @fullsamples, @bin_width).to_s
               namd_exec = "namd2"
               # Arguments for GPU and CPU
               if lig.explicit_water

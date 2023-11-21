@@ -20,7 +20,7 @@ module Namdconf
     File.write output_file, content
   end
 
-  def colvars(wtm : Bool, lw_rmsd : Float32 | Bool, up_rmsd : Float32 | Bool, lw_rdgyr : Float32 | Bool, up_rdgyr : Float32 | Bool, rmsd_active : Bool, rdgyr_active : Bool, wallconstant : Float32 | Bool, pdb_reference : String, lig_center_x : Float64, lig_center_y : Float64, lig_center_z : Float64, output_file : String, fullsamples : Int32)
+  def colvars(wtm : Bool, lw_rmsd : Float32 | Bool, up_rmsd : Float32 | Bool, lw_rdgyr : Float32 | Bool, up_rdgyr : Float32 | Bool, rmsd_active : Bool, rdgyr_active : Bool, wallconstant : Float32 | Bool, pdb_reference : String, lig_center_x : Float64, lig_center_y : Float64, lig_center_z : Float64, output_file : String, fullsamples : Int32, bin_width : Float64)
     content = ECR.render "./src/templates/colvars.ecr"
     File.write output_file, content
   end
