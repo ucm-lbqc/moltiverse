@@ -49,8 +49,10 @@ end
 puts "Read #{frames.size} structures"
 
 puts "Calculating RMSD..."
+pos = frames.map &.coords.center_at_origin.to_a
 dism = HClust::DistanceMatrix.new(frames.size) do |i, j|
-  frames[i].coords.rmsd frames[j].coords
+  _, rmsd = Chem::Spatial.qcp(pos[i], pos[j])
+  rmsd
 end
 
 puts "Clustering..."
