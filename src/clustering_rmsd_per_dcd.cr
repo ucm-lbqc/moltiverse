@@ -33,18 +33,10 @@ OptionParser.parse do |parser|
   end
 end
 
+puts "Reading DCD files..."
 structure = Chem::Structure.from_pdb(ref_pdb)
-frames = [] of Chem::Structure
-
-puts "Reading dcd files..."
-Dir["#{dcds_path}/out*.dcd"].each do |dcd|
-  Chem::DCD::Reader.open((dcd), structure) do |reader|
-    n_frames = reader.n_entries - 1
-    (0..n_frames).each do |frame|
-      st = reader.read_entry frame
-      frames.push(st)
-    end
-  end
+frames = Dir["#{dcds_path}/out*.dcd"].flat_map do |path|
+  Array(Chem::Structure).from_dcd path, structure
 end
 puts "Read #{frames.size} structures"
 
