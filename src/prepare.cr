@@ -239,14 +239,13 @@ module Prepare
         (0...iterations).concurrent_each(System.cpu_count) do |iteration|
           tempfile = File.tempfile(".mol")
           variant_decoy = babel_random_mol_to_mol(@file, tempfile.path)
+          tempfile.delete
           actual_rdgyr = variant_decoy.coords.rdgyr
           if actual_rdgyr > max_rdgyr && actual_rdgyr < 15.0
             variant_1 = variant_decoy
             max_rdgyr = actual_rdgyr
             puts "MAX RDGYR #{max_rdgyr.round(4)}. ITERATION #{iteration}"
           end
-        ensure
-          tempfile.delete
         end
 
         variant_1.to_mol("#{@basename}_rand.mol")
