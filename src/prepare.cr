@@ -375,12 +375,12 @@ module Prepare
       t2 - t1
     end
 
-    def sampling
+    def sampling(parallel workers : Int? = nil, procs : Int = 4)
       t1 = Time.monotonic
       # Print protocol description
       puts sampling_protocol.describe
       # Generate variants, and perform sampling
-      sampling_protocol.execute(self)
+      sampling_protocol.execute(self, workers, procs)
       t2 = Time.monotonic
       t2 - t1
     end

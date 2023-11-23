@@ -40,7 +40,8 @@ bin_width = 0.05
 n_variants = 1
 threshold_rmsd_variants = 5.0
 spacing_rdgyr_variants = 0.05
-
+parallel_runs = nil
+cores_per_run = 4
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
   parser.on("-l FILE", "--ligand=FILE", "Input ligand file [SMI, PDB, MOL, MOL2]") do |str|
@@ -150,6 +151,12 @@ OptionParser.parse do |parser|
     puts parser
     exit
   end
+  parser.on("--cores-per-run=N", "Number of cores per NAMD run. Default: 4") do |str|
+    cores_per_run = str.to_i.clamp 1..System.cpu_count
+  end
+  parser.on("--parallel=N", "Number of parallel NAMD runs. Default: CPU cores / cores per run") do |str|
+    parallel = str.to_i.clamp 1..System.cpu_count
+  end
   parser.invalid_option do |flag|
     STDERR.puts "ERROR: #{flag} is not a valid option."
     STDERR.puts parser
@@ -202,7 +209,7 @@ if extension == ".smi"
         log.print("#{name},parameterization_time,#{parameterization_time}\n")
         minimization_time = lig.minimize
         log.print("#{name},minimization_time,#{minimization_time}\n")
-        sampling_time = lig.sampling
+        sampling_time = lig.sampling parallel_runs, cores_per_run
         log.print("#{name},sampling_time,#{sampling_time}\n")
         clustering_time = lig.clustering
         log.print("#{name},clustering_time,#{clustering_time}\n")
@@ -220,7 +227,7 @@ else
   lig.extend_structure
   lig.parameterize
   lig.minimize
-  lig.sampling
+  lig.sampling parallel_runs, cores_per_run
   lig.clustering
 end
 puts "Process completed".colorize(GREEN)
