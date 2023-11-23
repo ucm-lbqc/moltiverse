@@ -371,8 +371,8 @@ module Protocols
         # end
         combinations = rdgyr_pairs.cartesian_product(variants)
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
-        combinations.concurrent_each(workers) do |(pair, variant_path)|
-          window = "w#{(count += 1) % variants.size + 1}"
+        combinations.each.with_index.concurrent_each(workers) do |(pair, variant_path), i|
+          window = "w#{i % variants.size + 1}"
           lw_rdgyr = pair[0]
           up_rdgyr = pair[1]
           index = variants.index! variant_path
@@ -447,8 +447,8 @@ module Protocols
         # end
         combinations = rmsd_pairs.cartesian_product(rdgyr_pairs, variants)
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
-        combinations.concurrent_each(workers) do |(pair_rmsd, pair_rdgyr, variant_path)|
-          window = "w#{(count += 1) % variants.size + 1}"
+        combinations.each.with_index.concurrent_each(workers) do |(pair_rmsd, pair_rdgyr, variant_path), i|
+          window = "w#{i % variants.size + 1}"
           lw_rmsd = pair_rmsd[0]
           up_rmsd = pair_rmsd[1]
           lw_rdgyr = pair_rdgyr[0]
