@@ -347,7 +347,7 @@ module Protocols
       if @time_rdgyr != 0 && @dimension == 1
         puts "Sampling protocol using RDGYR".colorize(GREEN)
         type = "rdgyr"
-        count = 0
+        count = -1
         # Variants generation
         # This block code add the variants strategy to start every window with
         # a different random coordinate of the ligand using openbabel.
@@ -372,7 +372,7 @@ module Protocols
         combinations = rdgyr_pairs.cartesian_product(variants)
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
         combinations.concurrent_each(workers) do |(pair, variant_path)|
-          window = "w#{count += 1}"
+          window = "w#{(count += 1) % variants.size + 1}"
           lw_rdgyr = pair[0]
           up_rdgyr = pair[1]
           index = variants.index! variant_path
@@ -420,7 +420,7 @@ module Protocols
         end
       end
       if @time_rmsd != 0 && @time_rdgyr != 0 && @dimension == 2
-        count = 0
+        count = -1
         type = "rmsd_rdgyr"
         puts "Sampling protocol using RMSD".colorize(GREEN)
         # Variants generation
@@ -448,7 +448,7 @@ module Protocols
         combinations = rmsd_pairs.cartesian_product(rdgyr_pairs, variants)
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
         combinations.concurrent_each(workers) do |(pair_rmsd, pair_rdgyr, variant_path)|
-          window = "w#{count += 1}"
+          window = "w#{(count += 1) % variants.size + 1}"
           lw_rmsd = pair_rmsd[0]
           up_rmsd = pair_rmsd[1]
           lw_rdgyr = pair_rdgyr[0]
