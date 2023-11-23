@@ -297,7 +297,7 @@ module Protocols
       variants_array
     end
 
-    def execute(lig : Ligand, procs : Int = 4)
+    def execute(lig : Ligand, parallel workers : Int? = nil, procs : Int = 4)
       variants : Array(String) = [] of String
       # #if @time_rmsd != 0 && @dimension == 1
       # #  count = 0
@@ -370,8 +370,8 @@ module Protocols
         #  minimize_variant(lig.explicit_water, "#{variant}.pdb", lig.topology_file)
         # end
         combinations = rdgyr_pairs.cartesian_product(variants)
-        workers = Math.min(combinations.size, System.cpu_count)
-        combinations.concurrent_each(workers // procs) do |(pair, variant_path)|
+        workers ||= Math.min(combinations.size, System.cpu_count) // procs
+        combinations.concurrent_each(workers) do |(pair, variant_path)|
           window = "w#{count += 1}"
           lw_rdgyr = pair[0]
           up_rdgyr = pair[1]
@@ -446,8 +446,8 @@ module Protocols
         #  minimize_variant(lig.explicit_water, "#{variant}.pdb", lig.topology_file)
         # end
         combinations = rmsd_pairs.cartesian_product(rdgyr_pairs, variants)
-        workers = Math.min(combinations.size, System.cpu_count)
-        combinations.concurrent_each(workers // procs) do |(pair_rmsd, pair_rdgyr, variant_path)|
+        workers ||= Math.min(combinations.size, System.cpu_count) // procs
+        combinations.concurrent_each(workers) do |(pair_rmsd, pair_rdgyr, variant_path)|
           window = "w#{count += 1}"
           lw_rmsd = pair_rmsd[0]
           up_rmsd = pair_rmsd[1]
