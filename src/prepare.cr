@@ -228,20 +228,25 @@ module Prepare
       t1 = Time.monotonic
       if extend_molecule
         iterations = 1000
-        variant_1 = babel_random_mol_to_mol(@file, "decoy.mol")
+        tempfile = File.tempfile(".mol")
+        variant_1 = babel_random_mol_to_mol(@file, tempfile.path)
+        tempfile.delete
         max_rdgyr = variant_1.coords.rdgyr
         puts "Spreading the molecule structure".colorize(GREEN)
         puts "Initial RDGYR: #{max_rdgyr}"
         # Create first variant in 1000 iterations.
         # The best one will be saved in the variants_st_array.
         (0...iterations).concurrent_each(System.cpu_count) do |iteration|
-          variant_decoy = babel_random_mol_to_mol(@file, "decoy.mol")
+          tempfile = File.tempfile(".mol")
+          variant_decoy = babel_random_mol_to_mol(@file, tempfile.path)
           actual_rdgyr = variant_decoy.coords.rdgyr
           if actual_rdgyr > max_rdgyr && actual_rdgyr < 15.0
             variant_1 = variant_decoy
             max_rdgyr = actual_rdgyr
             puts "MAX RDGYR #{max_rdgyr.round(4)}. ITERATION #{iteration}"
           end
+        ensure
+          tempfile.delete
         end
 
         variant_1.to_mol("#{@basename}_rand.mol")
