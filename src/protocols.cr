@@ -297,7 +297,7 @@ module Protocols
       variants_array
     end
 
-    def execute(lig : Ligand)
+    def execute(lig : Ligand, procs : Int = 4)
       variants : Array(String) = [] of String
       # #if @time_rmsd != 0 && @dimension == 1
       # #  count = 0
@@ -371,7 +371,7 @@ module Protocols
         # end
         combinations = rdgyr_pairs.cartesian_product(variants)
         workers = Math.min(combinations.size, System.cpu_count)
-        combinations.concurrent_each(workers) do |(pair, variant_path)|
+        combinations.concurrent_each(workers // procs) do |(pair, variant_path)|
           window = "w#{count += 1}"
           lw_rdgyr = pair[0]
           up_rdgyr = pair[1]
@@ -400,10 +400,10 @@ module Protocols
           namd_exec = "namd2"
           # Arguments for GPU and CPU
           if lig.explicit_water
-            arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4", "+devices", "0"]
+            arguments = ["#{type}.#{window}.#{variant}.namd", "+p", procs.to_s, "+devices", "0"]
           else
-            # arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4", "+setcpuaffinity"]
-            arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4"]
+            # arguments = ["#{type}.#{window}.#{variant}.namd", "+p", procs.to_s1, "+setcpuaffinity"]
+            arguments = ["#{type}.#{window}.#{variant}.namd", "+p", procs.to_s]
             # arguments = ["#{type}.#{window}.namd"]
           end
           puts "Runnning ABF on window '#{window}', variant '#{variant}' with RDGYR ranges from #{lw_rdgyr} to #{up_rdgyr}"
@@ -447,7 +447,7 @@ module Protocols
         # end
         combinations = rmsd_pairs.cartesian_product(rdgyr_pairs, variants)
         workers = Math.min(combinations.size, System.cpu_count)
-        combinations.concurrent_each(workers) do |(pair_rmsd, pair_rdgyr, variant_path)|
+        combinations.concurrent_each(workers // procs) do |(pair_rmsd, pair_rdgyr, variant_path)|
           window = "w#{count += 1}"
           lw_rmsd = pair_rmsd[0]
           up_rmsd = pair_rmsd[1]
@@ -479,10 +479,10 @@ module Protocols
           namd_exec = "namd2"
           # Arguments for GPU and CPU
           if lig.explicit_water
-            arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4", "+devices", "0"]
+            arguments = ["#{type}.#{window}.#{variant}.namd", "+p", procs.to_s, "+devices", "0"]
           else
-            # arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4", "+setcpuaffinity"]
-            arguments = ["#{type}.#{window}.#{variant}.namd", "+p", "4"]
+            # arguments = ["#{type}.#{window}.#{variant}.namd", "+p", procs.to_s, "+setcpuaffinity"]
+            arguments = ["#{type}.#{window}.#{variant}.namd", "+p", procs.to_s]
             # arguments = ["#{type}.#{window}.namd"]
           end
           puts "Runnning ABF on window '#{window}', variant '#{variant}'. RMSD ranges: #{lw_rmsd} to #{up_rmsd}. RDGYR ranges: #{lw_rdgyr} to #{up_rdgyr}"
