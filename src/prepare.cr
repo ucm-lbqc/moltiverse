@@ -234,7 +234,7 @@ module Prepare
         puts "Initial RDGYR: #{max_rdgyr}"
         # Create first variant in 1000 iterations.
         # The best one will be saved in the variants_st_array.
-        (0..iterations).each do |iteration|
+        (0...iterations).concurrent_each(System.cpu_count) do |iteration|
           variant_decoy = babel_random_mol_to_mol(@file, "decoy.mol")
           actual_rdgyr = variant_decoy.coords.rdgyr
           if actual_rdgyr > max_rdgyr && actual_rdgyr < 15.0
