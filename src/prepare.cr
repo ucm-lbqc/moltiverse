@@ -19,7 +19,7 @@ include Execution
 
 module Prepare
   class Ligand
-    def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float32 | Float64, output_name : String, extend_molecule : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
+    def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float64 | Float64, output_name : String, extend_molecule : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
       @main_dir = main_dir
       @n_confs = n_confs
       @output_frequency = output_frequency
@@ -44,8 +44,8 @@ module Prepare
       @time_rdgyr = sampling_protocol.colvars[1].simulation_time
     end
 
-    @time_rmsd : Float32
-    @time_rdgyr : Float32
+    @time_rmsd : Float64
+    @time_rdgyr : Float64
 
     def file
       @file

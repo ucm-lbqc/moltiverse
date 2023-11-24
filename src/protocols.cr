@@ -5,16 +5,16 @@ include Utilities
 # Define colvar bounds, windows and time for the collective variables.
 module Protocols
   class BoundsColvars
-    def initialize(x1 : Float32,
-                   x2 : Float32,
+    def initialize(x1 : Float64,
+                   x2 : Float64,
                    xw : Int32,
-                   xf : Float32,
-                   xt : Float32,
-                   y1 : Float32,
-                   y2 : Float32,
+                   xf : Float64,
+                   xt : Float64,
+                   y1 : Float64,
+                   y2 : Float64,
                    yw : Int32,
-                   yf : Float32,
-                   yt : Float32)
+                   yf : Float64,
+                   yt : Float64)
       @x1, @x2, @xw, @xf, @xt, @y1, @y2, @yw, @yf, @yt = x1, x2, xw, xf, xt, y1, y2, yw, yf, yt
     end
 
