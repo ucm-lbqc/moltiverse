@@ -124,7 +124,7 @@ OptionParser.parse do |parser|
       exit(1)
     end
   end
-  parser.on("-f N", "--frequency=N", "Output frequency to write frames and log files in the sampling stage. Default: 5000") do |str|
+  parser.on("-f N", "--frequency=N", "Output frequency to write frames and log files in the sampling stage. Default: 500") do |str|
     output_frequency = str.to_i32
     unless 1 <= n_confs <= 100000
       STDERR.puts "Error: invalid frequency value: #{str}"
