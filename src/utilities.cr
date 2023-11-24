@@ -15,20 +15,22 @@ module Utilities
     min_lastframe
   end
 
-  def babel_random_mol_to_mol(input_mol : String, output_mol_name : String)
+  def babel_random_mol_to_mol(input_mol : String)
+    tempfile = File.tempfile(".mol")
     obabel = "obabel"
-    args1 = ["-i", "mol", input_mol, "-O", output_mol_name, "-e", "--gen3D", "--medium"]
+    args1 = ["-i", "mol", input_mol, "-O", tempfile.path, "-e", "--gen3D", "--medium"]
     run_cmd_silent(cmd = obabel, args = args1, output_file = Nil)
     min_lastframe = Chem::Structure.from_mol(input_mol)
-    variant = Chem::Structure.from_mol(output_mol_name)
+    variant = Chem::Structure.from_mol(tempfile.path)
     index = 0
     min_lastframe['A'][1].each_atom { |atom|
       atom.coords = variant.atoms[index].coords
       atom.temperature_factor = 1.0
       index += 1
     }
-    min_lastframe.to_pdb(output_mol_name, bonds: :none)
     min_lastframe
+  ensure
+    tempfile.try { |file| file.delete }
   end
 
   def babel_random_mol_to_pdb(input_mol : String, output_pdb_name : String)
