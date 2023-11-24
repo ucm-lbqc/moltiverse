@@ -1,8 +1,17 @@
-record Colvar,
-  component : Colvar::Component,
-  bounds : Range(Float64, Float64),
-  force_constant : Float64,
-  width : Float64 do
+class Colvar
+  property component : Colvar::Component
+  property bounds : Range(Float64, Float64)
+  property force_constant : Float64
+  property width : Float64
+
+  def initialize(
+    @component : Colvar::Component,
+    @bounds : Range(Float64, Float64),
+    @force_constant : Float64,
+    @width : Float64
+  )
+  end
+
   def lower_bound : Float64
     @bounds.begin
   end
@@ -22,11 +31,19 @@ struct Colvar::RMSD < Colvar::Component; end
 
 struct Colvar::RadiusOfGyration < Colvar::Component; end
 
-record Colvar::Windowed,
-  colvar : Colvar,
-  simulation_time : Float64 = 1.0,
-  windows : Int32 = 10 do
-  forward_missing_to @colvar
+class Colvar::Windowed < Colvar
+  property simulation_time : Float64 = 1.0
+  property windows : Int32 = 10
+
+  def initialize(
+    @component : Colvar::Component,
+    @bounds : Range(Float64, Float64),
+    @force_constant : Float64,
+    @windows : Int32 = 10,
+    @simulation_time : Float64 = 1.0
+  )
+    @width = (@bounds.end - @bounds.begin) / @windows
+  end
 
   def total_time : Float64
     @simulation_time * @windows

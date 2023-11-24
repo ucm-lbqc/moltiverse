@@ -80,18 +80,22 @@ module Protocols
       @fullsamples : Int32,
       @bin_width : Float64
     )
-      rmsd = Colvar.new(
+      rmsd = Colvar::Windowed.new(
         Colvar::RMSD.new,
         bounds: bounds_colvars.x1..bounds_colvars.x2,
         force_constant: bounds_colvars.xf,
-        width: (bounds_colvars.x2 - bounds_colvars.x1) / bounds_colvars.xw)
-      @colvars << Colvar::Windowed.new(rmsd, bounds_colvars.xt, bounds_colvars.xw)
-      rdgyr = Colvar.new(
+        windows: bounds_colvars.xw,
+        simulation_time: bounds_colvars.xt
+      )
+      @colvars << rmsd
+      rdgyr = Colvar::Windowed.new(
         Colvar::RadiusOfGyration.new,
         bounds: bounds_colvars.y1..bounds_colvars.y2,
         force_constant: bounds_colvars.yf,
-        width: (bounds_colvars.y2 - bounds_colvars.y1) / bounds_colvars.yw)
-      @colvars << Colvar::Windowed.new(rdgyr, bounds_colvars.yt, bounds_colvars.yw)
+        windows: bounds_colvars.yw,
+        simulation_time: bounds_colvars.yt
+      )
+      @colvars << rdgyr
     end
 
     def n_variants
