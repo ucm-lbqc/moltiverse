@@ -40,8 +40,8 @@ module Prepare
       @explicit_water = explicit_water
       @extend_molecule = extend_molecule
       @sampling_protocol = sampling_protocol
-      @time_rmsd = sampling_protocol.time_rmsd
-      @time_rdgyr = sampling_protocol.time_rdgyr
+      @time_rmsd = sampling_protocol.colvars[0].simulation_time
+      @time_rdgyr = sampling_protocol.colvars[1].simulation_time
     end
 
     @time_rmsd : Float32

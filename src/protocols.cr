@@ -60,19 +60,8 @@ module Protocols
   end
 
   class SamplingProtocol
-    @lw_rmsd : Float32
-    @up_rmsd : Float32
-    @windows_rmsd : Int32
-    @time_rmsd : Float32
-    @wallconstant_force_rmsd : Float32
-    @width_rmsd : Float32
+    getter colvars = [] of Colvar::Sampling
 
-    @lw_rdgyr : Float32
-    @up_rdgyr : Float32
-    @windows_rdgyr : Int32
-    @time_rdgyr : Float32
-    @wallconstant_force_rdgyr : Float32
-    @width_rdgyr : Float32
     @metadynamics : Bool
     @dimension : Int32
 
@@ -91,68 +80,18 @@ module Protocols
       @fullsamples : Int32,
       @bin_width : Float64
     )
-      @lw_rmsd = bounds_colvars.x1
-      @up_rmsd = bounds_colvars.x2
-      @windows_rmsd = bounds_colvars.xw
-      @wallconstant_force_rmsd = bounds_colvars.xf
-      @time_rmsd = bounds_colvars.xt
-
-      @lw_rdgyr = bounds_colvars.y1
-      @up_rdgyr = bounds_colvars.y2
-      @windows_rdgyr = bounds_colvars.yw
-      @wallconstant_force_rdgyr = bounds_colvars.yf
-      @time_rdgyr = bounds_colvars.yt
-
-      @width_rmsd = (@up_rmsd - @lw_rmsd) / @windows_rmsd
-      @width_rdgyr = (@up_rdgyr - @lw_rdgyr) / @windows_rdgyr
-    end
-
-    def lw_rmsd
-      @lw_rmsd
-    end
-
-    def up_rmsd
-      @up_rmsd
-    end
-
-    def windows_rmsd
-      @windows_rmsd
-    end
-
-    def lw_rdgyr
-      @lw_rdgyr
-    end
-
-    def up_rdgyr
-      @up_rdgyr
-    end
-
-    def windows_rdgyr
-      @windows_rdgyr
-    end
-
-    def width_rmsd
-      @width_rmsd
-    end
-
-    def width_rdgyr
-      @width_rdgyr
-    end
-
-    def wallconstant_force_rmsd
-      @wallconstant_force_rmsd
-    end
-
-    def wallconstant_force_rdgyr
-      @wallconstant_force_rdgyr
-    end
-
-    def time_rmsd
-      @time_rmsd
-    end
-
-    def time_rdgyr
-      @time_rdgyr
+      rmsd = Colvar.new(
+        Colvar::RMSD.new,
+        bounds: bounds_colvars.x1..bounds_colvars.x2,
+        force_constant: bounds_colvars.xf,
+        width: (bounds_colvars.x2 - bounds_colvars.x1) / bounds_colvars.xw)
+      @colvars << Colvar::Sampling.new(rmsd, bounds_colvars.xt, bounds_colvars.xw)
+      rdgyr = Colvar.new(
+        Colvar::RadiusOfGyration.new,
+        bounds: bounds_colvars.y1..bounds_colvars.y2,
+        force_constant: bounds_colvars.yf,
+        width: (bounds_colvars.y2 - bounds_colvars.y1) / bounds_colvars.yw)
+      @colvars << Colvar::Sampling.new(rdgyr, bounds_colvars.yt, bounds_colvars.yw)
     end
 
     def n_variants
@@ -183,78 +122,31 @@ module Protocols
       @dimension
     end
 
-    def rmsd_ranges
-      (0..@windows_rmsd).map { |i| i * @width_rmsd }
-    end
-
-    def rdgyr_ranges
-      (0..@windows_rdgyr).map { |i| i * @width_rdgyr }
-    end
-
     def describe
       if @dimension == 1
-        if @time_rmsd != 0 && @time_rdgyr != 0
+        if @colvars.all? { |cv| cv.simulation_time > 0 }
           puts "SAMPLING PROTOCOL using two 1D collective variables".colorize(GREEN)
         else
           puts "SAMPLING PROTOCOL using a 1D collective variable".colorize(GREEN)
         end
-
-        puts "Range of RMSD values:               [ #{@lw_rmsd} --> #{@up_rmsd} ]" unless @lw_rmsd == 0.0 && @up_rmsd == 0.0
-        puts "Number of windows:                  [ #{@windows_rmsd} ]" unless @windows_rmsd == 0
-        puts "Number of variants:                 [ #{@n_variants} ]" unless @windows_rmsd == 0
-        puts "RMSD width per window:              [ #{@width_rmsd} ]" unless @width_rmsd.nan?
-        puts "Wallconstant for RMSD colvars:      [ #{@wallconstant_force_rmsd} ]" unless @wallconstant_force_rmsd == 0.0
-        puts "Simulation time per window:         [ #{@time_rmsd} ns ]" unless @time_rmsd == 0
-        puts "Simulation time per variant:        [ #{@time_rmsd/@n_variants} ]" unless @windows_rmsd == 0
-        puts "Simulation time for RMSD colvars:   [ #{@time_rmsd * @windows_rmsd} ns ]" unless @time_rmsd == 0
-        puts ""
-        puts "Range of RDGYR values:              [ #{@lw_rdgyr} --> #{@up_rdgyr} ]" unless @lw_rdgyr == 0 && @up_rdgyr == 0.0
-        puts "Number of windows:                  [ #{@windows_rdgyr} ]" unless @windows_rdgyr == 0
-        puts "Number of variants:                 [ #{@n_variants} ]" unless @windows_rdgyr == 0
-        puts "RDGYR width per window:             [ #{@width_rdgyr} ]" unless @width_rdgyr.nan?
-        puts "Wallconstant for RDGYR colvars:     [ #{@wallconstant_force_rdgyr} ]" unless @wallconstant_force_rdgyr == 0.0
-        puts "Simulation time per window:         [ #{@time_rdgyr} ns ]" unless @time_rdgyr == 0
-        puts "Simulation time per variant:        [ #{@time_rdgyr/@n_variants} ]" unless @windows_rdgyr == 0
-        puts "Simulation time for RDGYR colvars:  [ #{@time_rdgyr * @windows_rdgyr} ns ]" unless @time_rdgyr == 0
-        puts ""
-        puts "Total simulation time:              [ #{(@time_rdgyr * @windows_rdgyr) + (@time_rmsd * @windows_rmsd)} ns ]" unless @time_rmsd == 0 || time_rdgyr == 0
-        if @metadynamics
-          puts "Sampling methods:                   [ M-eABF ]"
-        else
-          puts "Sampling methods:                   [ eABF ]"
-        end
-      end
-      if @dimension == 2
+      else
         puts "SAMPLING PROTOCOL using a 2D collective variable".colorize(GREEN)
-
-        puts "Range of RMSD values:               [ #{@lw_rmsd} --> #{@up_rmsd} ]" unless @lw_rmsd == 0.0 && @up_rmsd == 0.0
-        puts "Number of windows:                  [ #{@windows_rmsd} ]" unless @windows_rmsd == 0
-        puts "Number of variants:                 [ #{@n_variants} ]" unless @windows_rmsd == 0
-        puts "RMSD width per window:              [ #{@width_rmsd} ]" unless @width_rmsd.nan?
-        puts "Wallconstant for RMSD colvars:      [ #{@wallconstant_force_rmsd} ]" unless @wallconstant_force_rmsd.nan?
-        puts "Simulation time per window:         [ #{@time_rmsd} ns ]" unless @time_rmsd == 0
-        puts "Simulation time per variant:        [ #{@time_rmsd/@n_variants} ]" unless @windows_rmsd == 0
-        puts ""
-        puts "Range of RDGYR values:              [ #{@lw_rdgyr} --> #{@up_rdgyr} ]" unless @lw_rdgyr == 0.0 && @up_rdgyr == 0.0
-        puts "Number of windows:                  [ #{@windows_rdgyr} ]" unless @windows_rdgyr == 0
-        puts "RDGYR width per window:             [ #{@width_rdgyr} ]" unless @width_rdgyr.nan?
-        puts "Simulation time per variant:        [ #{@time_rdgyr/@n_variants} ]" unless @windows_rdgyr == 0
-        puts "Wallconstant for RDGYR colvars:     [ #{@wallconstant_force_rdgyr} ]" unless @wallconstant_force_rdgyr.nan?
-        puts "Total simulation time:              [ #{(@windows_rmsd * @windows_rdgyr) * (@time_rmsd)} ns ]" unless @time_rmsd == 0 || time_rdgyr == 0
-        if @metadynamics
-          puts "Sampling methods:                   [ M-eABF ]"
-        else
-          puts "Sampling methods:                   [ eABF ]"
-        end
       end
-    end
 
-    def rmsd_pairs
-      (0..rmsd_ranges.size - 2).map { |i| rmsd_ranges[i...i + 2] }
-    end
-
-    def rdgyr_pairs
-      (0..rdgyr_ranges.size - 2).map { |i| rdgyr_ranges[i...i + 2] }
+      @colvars.each do |cv|
+        puts "#{cv.component.name}:"
+        puts "Range of values:                    [ #{cv.bounds} ]"
+        puts "Number of windows:                  [ #{cv.windows} ]"
+        puts "Number of variants:                 [ #{@n_variants} ]"
+        puts "Width per window:                   [ #{cv.width} ]"
+        puts "Wall force constant:                [ #{cv.force_constant} ]"
+        puts "Simulation time per window:         [ #{cv.simulation_time} ns ]"
+        puts "Simulation time per variant:        [ #{cv.simulation_time / @n_variants} ns ]"
+        puts "Simulation time:                    [ #{cv.total_time} ns ]"
+      end
+      puts
+      puts "Total simulation time:                [ #{@colvars.sum { |cv| cv.total_time }} ns ]"
+      puts "Sampling method:                      [ #{@metadynamics ? "M-eABF" : "eABF"} ]"
     end
 
     def create_variants(n_variants : Int32, threshold_rmsd_variants : Float64, mol_ref : String)
@@ -344,15 +236,16 @@ module Protocols
       # #    end
       # #  end
       # #end
-      if @time_rdgyr != 0 && @dimension == 1
+      if @colvars[1].simulation_time != 0 && @dimension == 1
         puts "Sampling protocol using RDGYR".colorize(GREEN)
-        type = "rdgyr"
+        cv = @colvars[1]
+        type = cv.component.name
         count = -1
         # Variants generation
         # This block code add the variants strategy to start every window with
         # a different random coordinate of the ligand using openbabel.
         min_lastframe = Chem::Structure.from_pdb("min.lastframe.pdb")
-        time_per_variant = @time_rdgyr / @n_variants
+        time_per_variant = cv.simulation_time / @n_variants
 
         if @n_variants >= 2
           puts "Creating variants: ".colorize(GREEN)
@@ -369,12 +262,12 @@ module Protocols
         #  variant = "v#{index += 1}"
         #  minimize_variant(lig.explicit_water, "#{variant}.pdb", lig.topology_file)
         # end
-        combinations = rdgyr_pairs.cartesian_product(variants)
+        combinations = @colvars[1].window_bounds.cartesian_product(variants)
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
-        combinations.each.with_index.concurrent_each(workers) do |(pair, variant_path), i|
+        combinations.each.with_index.concurrent_each(workers) do |(bounds, variant_path), i|
           window = "w#{i // variants.size + 1}"
-          lw_rdgyr = pair[0]
-          up_rdgyr = pair[1]
+          lw_rdgyr = bounds.begin
+          up_rdgyr = bounds.end
           index = variants.index! variant_path
           variant = "v#{index + 1}"
           # Writting namd configuration
@@ -390,7 +283,7 @@ module Protocols
             up_rdgyr,
             false,
             true,
-            @wallconstant_force_rdgyr,
+            cv.force_constant,
             variant_path,
             variant_center.x,
             variant_center.y,
@@ -419,7 +312,7 @@ module Protocols
           end
         end
       end
-      if @time_rmsd != 0 && @time_rdgyr != 0 && @dimension == 2
+      if @colvars.all? { |cv| cv.simulation_time != 0 } && @dimension == 2
         count = -1
         type = "rmsd_rdgyr"
         puts "Sampling protocol using RMSD".colorize(GREEN)
@@ -430,7 +323,7 @@ module Protocols
         # with openbabel.
         # 10 initial variants will be generated, which will be the input for each window.
         min_lastframe = Chem::Structure.from_pdb("min.lastframe.pdb")
-        time_per_variant = @time_rmsd / @n_variants
+        time_per_variant = @colvars[0].simulation_time / @n_variants
 
         if @n_variants >= 2
           puts "Creating variants: ".colorize(GREEN)
@@ -445,14 +338,14 @@ module Protocols
         #  variant = "v#{index += 1}"
         #  minimize_variant(lig.explicit_water, "#{variant}.pdb", lig.topology_file)
         # end
-        combinations = rmsd_pairs.cartesian_product(rdgyr_pairs, variants)
+        combinations = @colvars[0].window_bounds.cartesian_product(@colvars[1].window_bounds, variants)
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
-        combinations.each.with_index.concurrent_each(workers) do |(pair_rmsd, pair_rdgyr, variant_path), i|
+        combinations.each.with_index.concurrent_each(workers) do |(rmsd_bounds, rdgyr_bounds, variant_path), i|
           window = "w#{i // variants.size + 1}"
-          lw_rmsd = pair_rmsd[0]
-          up_rmsd = pair_rmsd[1]
-          lw_rdgyr = pair_rdgyr[0]
-          up_rdgyr = pair_rdgyr[1]
+          lw_rmsd = rmsd_bounds.begin
+          up_rmsd = rmsd_bounds.end
+          lw_rdgyr = rdgyr_bounds.begin
+          up_rdgyr = rdgyr_bounds.end
           index = variants.index! variant_path
           variant = "v#{index + 1}"
           # Writting namd configuration
@@ -469,7 +362,7 @@ module Protocols
             up_rdgyr,
             true,
             true,
-            @wallconstant_force_rmsd,
+            @colvars[0].force_constant,
             variant_path,
             variant_center.x,
             variant_center.y,
