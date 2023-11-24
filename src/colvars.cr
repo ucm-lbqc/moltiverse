@@ -22,7 +22,7 @@ struct Colvar::RMSD < Colvar::Component; end
 
 struct Colvar::RadiusOfGyration < Colvar::Component; end
 
-record Colvar::Sampling,
+record Colvar::Windowed,
   colvar : Colvar,
   simulation_time : Float64 = 1.0,
   windows : Int32 = 10 do

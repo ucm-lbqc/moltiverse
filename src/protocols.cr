@@ -60,7 +60,7 @@ module Protocols
   end
 
   class SamplingProtocol
-    getter colvars = [] of Colvar::Sampling
+    getter colvars = [] of Colvar::Windowed
 
     @metadynamics : Bool
     @dimension : Int32
@@ -85,13 +85,13 @@ module Protocols
         bounds: bounds_colvars.x1..bounds_colvars.x2,
         force_constant: bounds_colvars.xf,
         width: (bounds_colvars.x2 - bounds_colvars.x1) / bounds_colvars.xw)
-      @colvars << Colvar::Sampling.new(rmsd, bounds_colvars.xt, bounds_colvars.xw)
+      @colvars << Colvar::Windowed.new(rmsd, bounds_colvars.xt, bounds_colvars.xw)
       rdgyr = Colvar.new(
         Colvar::RadiusOfGyration.new,
         bounds: bounds_colvars.y1..bounds_colvars.y2,
         force_constant: bounds_colvars.yf,
         width: (bounds_colvars.y2 - bounds_colvars.y1) / bounds_colvars.yw)
-      @colvars << Colvar::Sampling.new(rdgyr, bounds_colvars.yt, bounds_colvars.yw)
+      @colvars << Colvar::Windowed.new(rdgyr, bounds_colvars.yt, bounds_colvars.yw)
     end
 
     def n_variants
