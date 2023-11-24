@@ -230,7 +230,7 @@ module Prepare
         iterations = 1000
         tempfile = File.tempfile(".mol")
         variant_1 = babel_random_mol_to_mol(@file, tempfile.path)
-        tempfile.delete if File.exists?(tempfile.path)
+        tempfile.delete rescue nil
         max_rdgyr = variant_1.coords.rdgyr
         puts "Spreading the molecule structure".colorize(GREEN)
         puts "Initial RDGYR: #{max_rdgyr}"
@@ -239,7 +239,7 @@ module Prepare
         (0...iterations).concurrent_each(System.cpu_count) do |iteration|
           tempfile = File.tempfile(".mol")
           variant_decoy = babel_random_mol_to_mol(@file, tempfile.path)
-          tempfile.delete if File.exists?(tempfile.path)
+          tempfile.delete rescue nil
           actual_rdgyr = variant_decoy.coords.rdgyr
           if actual_rdgyr > max_rdgyr && actual_rdgyr < 15.0
             variant_1 = variant_decoy
