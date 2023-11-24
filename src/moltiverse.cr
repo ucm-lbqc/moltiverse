@@ -10,6 +10,7 @@ end
 require "chem"
 require "option_parser"
 require "./core_ext.cr"
+require "./colvars.cr"
 require "./prepare.cr"
 require "./protocols.cr"
 require "colorize"
