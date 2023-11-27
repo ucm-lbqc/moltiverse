@@ -35,11 +35,11 @@ colvars = [
   Colvar::Windowed.new(
     Colvar::RadiusOfGyration.new,
     bounds: 0.0..10.0,
-    force_constant: 80.0,
     windows: 40,
-    simulation_time: 1.0,
+    force_constant: 80.0,
   ),
 ]
+simulation_time = 1.0
 metadynamics = true
 n_confs = 250
 output_frequency = 500
@@ -96,13 +96,13 @@ OptionParser.parse do |parser|
       exit
     end
   end
-  parser.on("-b FLOAT", "--bounds_colvars=FLOAT", "Lower and upper limits for colvars [Å], the number of windows, the wall constant (f) and the time for every window: 'x1,x2,wx,fx,tx,y1,y2,wy,fy,ty' where x,y are the RMSD and RDGYR collective variables limits, 'w', and 't' is the number of windows and time for each collective variable. e.g. '0.0,8.0,16,50,2,0,0,0,0,0'") do |str|
+  parser.on("-b FLOAT", "--bounds_colvars=FLOAT", "Lower and upper limits for colvars [Å], the number of windows, the wall constant (f) and the time for every window: 'x1,x2,wx,fx,y1,y2,wy,fy' where x,y are the RMSD and RDGYR collective variables limits, 'w', and 'w' is the number of windows. e.g. '0.0,8.0,16,50,0,0,0,0'") do |str|
     colvars.clear
-    str.split(',').each_slice(5).with_index do |(x1, x2, windows, force, simtime), i|
+    str.split(',').each_slice(4).with_index do |(x1, x2, windows, force), i|
       comp = i == 0 ? Colvar::RMSD.new : Colvar::RadiusOfGyration.new
       bounds = x1.to_f..x2.to_f
-      cv = Colvar::Windowed.new(comp, bounds, force.to_f, windows.to_i, simtime.to_f)
-      colvars << cv unless cv.simulation_time == 0
+      cv = Colvar::Windowed.new(comp, bounds, windows.to_i, force.to_f)
+      colvars << cv unless cv.windows == 0
     end
   end
   parser.on("-m BOOL", "--metadynamics=BOOL", "Add metadynamics to eABF sampling?. Default: true") do |str|
@@ -144,6 +144,11 @@ OptionParser.parse do |parser|
   parser.on("-g N", "--spacing_rdgyr_variants=N", "Spacing to reduce RDGYR between variants when it reaches the upper limit. Default: 0.05") do |str|
     spacing_rdgyr_variants = str.to_f64
   end
+  parser.on(
+    "-t FLOAT", "--time FLOAT",
+    "Simulation time (in ns) per window. Default: 1 ns") do |str|
+    simulation_time = str.to_f
+  end
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
@@ -170,12 +175,6 @@ end
 
 # Options verification
 ph_target = 7.0 unless ph_target
-if colvars.uniq(&.simulation_time).size > 1
-  puts "Error: Using a 2D sampling requires the same simulation time for RMSD and RDGYR colvars.".colorize(RED)
-  puts "Check --bounds_colvars option".colorize(RED)
-  exit(1)
-end
-
 extension = "#{File.extname("#{ligand}")}"
 if output_name == "empty"
   extension = "#{File.extname("#{ligand}")}"
@@ -194,7 +193,7 @@ if extension == ".smi"
       new_output_name = "#{output_name}_#{name}"
       puts "SMILE:"
       puts smile_code.colorize(AQUA)
-      protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
+      protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
       lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
       t_start = Time.monotonic
       success, proccess_time = lig.proccess_input
@@ -218,7 +217,7 @@ if extension == ".smi"
     end
   end
 else
-  protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
+  protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
   lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
   lig.add_h
   lig.extend_structure

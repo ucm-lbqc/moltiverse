@@ -32,21 +32,15 @@ struct Colvar::RMSD < Colvar::Component; end
 struct Colvar::RadiusOfGyration < Colvar::Component; end
 
 class Colvar::Windowed < Colvar
-  property simulation_time : Float64 = 1.0
   property windows : Int32 = 10
 
   def initialize(
     @component : Colvar::Component,
     @bounds : Range(Float64, Float64),
-    @force_constant : Float64,
     @windows : Int32 = 10,
-    @simulation_time : Float64 = 1.0
+    @force_constant : Float64 = 20
   )
     @width = (@bounds.end - @bounds.begin) / @windows
-  end
-
-  def total_time : Float64
-    @simulation_time * @windows
   end
 
   def window_bounds : Array(Range(Float64, Float64))

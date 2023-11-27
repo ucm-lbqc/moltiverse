@@ -8,7 +8,7 @@ module Protocols
     getter colvars : Array(Colvar::Windowed)
 
     @metadynamics : Bool
-
+    @simulation_time = 1.0
     @n_variants : Int32
     @threshold_rmsd_variants : Float64
     @spacing_rdgyr_variants : Float64
@@ -17,6 +17,7 @@ module Protocols
     def initialize(
       @colvars : Array(Colvar::Windowed),
       @metadynamics : Bool,
+      @simulation_time : Float64,
       @n_variants : Int32,
       @threshold_rmsd_variants : Float64,
       @spacing_rdgyr_variants : Float64,
@@ -53,6 +54,9 @@ module Protocols
     end
 
     def describe
+      time_per_variant = @simulation_time / @n_variants
+      total_time = @simulation_time * @colvars.product(&.windows)
+
       puts "SAMPLING PROTOCOL using a #{@colvars.size}D collective variable".colorize(GREEN)
 
       @colvars.each do |cv|
@@ -62,12 +66,12 @@ module Protocols
         puts "Number of variants:                 [ #{@n_variants} ]"
         puts "Width per window:                   [ #{cv.width} ]"
         puts "Wall force constant:                [ #{cv.force_constant} ]"
-        puts "Simulation time per window:         [ #{cv.simulation_time} ns ]"
-        puts "Simulation time per variant:        [ #{cv.simulation_time / @n_variants} ns ]"
-        puts "Simulation time:                    [ #{cv.total_time} ns ]"
+        puts "Simulation time:                    [ #{@simulation_time * cv.windows} ns ]"
       end
       puts
-      puts "Total simulation time:              [ #{@colvars.sum { |cv| cv.total_time }} ns ]"
+      puts "Simulation time per window:         [ #{@simulation_time} ns ]"
+      puts "Simulation time per variant:        [ #{time_per_variant} ns ]"
+      puts "Total simulation time:              [ #{total_time} ns ]"
       puts "Sampling method:                    [ #{@metadynamics ? "M-eABF" : "eABF"} ]"
     end
 
@@ -168,7 +172,7 @@ module Protocols
         # This block code add the variants strategy to start every window with
         # a different random coordinate of the ligand using openbabel.
         min_lastframe = Chem::Structure.from_pdb("min.lastframe.pdb")
-        time_per_variant = cv.simulation_time / @n_variants
+        time_per_variant = @simulation_time / @n_variants
 
         if @n_variants >= 2
           puts "Creating variants: ".colorize(GREEN)
@@ -245,7 +249,7 @@ module Protocols
         # with openbabel.
         # 10 initial variants will be generated, which will be the input for each window.
         min_lastframe = Chem::Structure.from_pdb("min.lastframe.pdb")
-        time_per_variant = @colvars[0].simulation_time / @n_variants
+        time_per_variant = @simulation_time / @n_variants
 
         if @n_variants >= 2
           puts "Creating variants: ".colorize(GREEN)
