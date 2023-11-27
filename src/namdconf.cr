@@ -20,7 +20,10 @@ module Namdconf
     File.write output_file, content
   end
 
-  def colvars(wtm : Bool, colvars : Array(Colvar), pdb_reference : String, lig_center_x : Float64, lig_center_y : Float64, lig_center_z : Float64, output_file : String, fullsamples : Int32, bin_width : Float64)
+  def colvars(wtm : Bool, colvars : Array(Colvar), ref_structure : Chem::Structure, output_file : String, fullsamples : Int32, bin_width : Float64)
+    unless ref_structure.source_file
+      raise ArgumentError.new("#{ref_structure} do not have a path to file")
+    end
     content = ECR.render "./src/templates/colvars.ecr"
     File.write output_file, content
   end

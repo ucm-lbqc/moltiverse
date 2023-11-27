@@ -199,14 +199,9 @@ module Protocols
           # enhanced_sampling(lig.explicit_water, "min.#{variant}", lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
           enhanced_sampling(lig.explicit_water, "#{lig.basename}", lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
           # Writting colvars configuration
-          st_variant = Chem::Structure.from_pdb(variant_path)
-          variant_center = st_variant.coords.center
           colvars(@metadynamics,
             [cv],
-            variant_path,
-            variant_center.x,
-            variant_center.y,
-            variant_center.z,
+            Chem::Structure.from_pdb(variant_path),
             "#{type}.#{window}.#{variant}.colvars",
             @fullsamples, @bin_width).to_s
           namd_exec = "namd2"
@@ -266,15 +261,10 @@ module Protocols
           # enhanced_sampling(lig.explicit_water, "min.#{variant}", lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
           enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
           # Writting colvars configuration
-          st_variant = Chem::Structure.from_pdb(variant_path)
-          variant_center = st_variant.coords.center
           # wallconstant_force for 2D must be fixed in the following function.
           colvars(@metadynamics,
             [cv1, cv2],
-            variant_path,
-            variant_center.x,
-            variant_center.y,
-            variant_center.z,
+            Chem::Structure.from_pdb(variant_path),
             "#{type}.#{window}.#{variant}.colvars",
             @fullsamples, @bin_width).to_s
           namd_exec = "namd2"
