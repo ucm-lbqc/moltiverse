@@ -33,7 +33,7 @@ abf {
   writeCZARwindowFile
 }
 
-<%- if wtm -%>
+<%- if use_metadynamics -%>
 metadynamics {
   colvars            <%= colvars.join(" ", &.component.name.underscore) %>
   hillWeight         0.5
@@ -65,7 +65,7 @@ harmonic {
   forceConstant 100.0 
 } 
 
-<%- if wtm && colvars.size > 1 -%>
+<%- if use_metadynamics && colvars.size > 1 -%>
 ## To keep orientation
 colvar { 
   name orientation 

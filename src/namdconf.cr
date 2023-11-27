@@ -20,7 +20,14 @@ module Namdconf
     File.write output_file, content
   end
 
-  def colvars(wtm : Bool, colvars : Array(Colvar), ref_structure : Chem::Structure, output_file : String, fullsamples : Int32, bin_width : Float64)
+  def colvars(
+    output_file : String,
+    colvars : Array(Colvar),
+    ref_structure : Chem::Structure,
+    use_metadynamics : Bool,
+    fullsamples : Int32,
+    bin_width : Float64
+  )
     unless ref_structure.source_file
       raise ArgumentError.new("#{ref_structure} do not have a path to file")
     end

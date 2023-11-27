@@ -199,11 +199,13 @@ module Protocols
           # enhanced_sampling(lig.explicit_water, "min.#{variant}", lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
           enhanced_sampling(lig.explicit_water, "#{lig.basename}", lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
           # Writting colvars configuration
-          colvars(@metadynamics,
+          colvars(
+            "#{type}.#{window}.#{variant}.colvars",
             [cv],
             Chem::Structure.from_pdb(variant_path),
-            "#{type}.#{window}.#{variant}.colvars",
-            @fullsamples, @bin_width).to_s
+            @metadynamics,
+            @fullsamples,
+            @bin_width)
           namd_exec = "namd2"
           # Arguments for GPU and CPU
           if lig.explicit_water
@@ -262,11 +264,13 @@ module Protocols
           enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{type}.#{window}.#{variant}.namd", time_per_variant, window, variant, type, lig.output_frequency).to_s
           # Writting colvars configuration
           # wallconstant_force for 2D must be fixed in the following function.
-          colvars(@metadynamics,
+          colvars(
+            "#{type}.#{window}.#{variant}.colvars",
             [cv1, cv2],
             Chem::Structure.from_pdb(variant_path),
-            "#{type}.#{window}.#{variant}.colvars",
-            @fullsamples, @bin_width).to_s
+            @metadynamics,
+            @fullsamples,
+            @bin_width)
           namd_exec = "namd2"
           # Arguments for GPU and CPU
           if lig.explicit_water
