@@ -33,13 +33,6 @@ explicit_water = false
 output_name = "empty"
 colvars = [
   Colvar::Windowed.new(
-    Colvar::RMSD.new,
-    bounds: 0.0..0.0,
-    force_constant: 80.0,
-    windows: 0,
-    simulation_time: 0,
-  ),
-  Colvar::Windowed.new(
     Colvar::RadiusOfGyration.new,
     bounds: 0.0..10.0,
     force_constant: 80.0,
@@ -110,7 +103,7 @@ OptionParser.parse do |parser|
       comp = i == 0 ? Colvar::RMSD.new : Colvar::RadiusOfGyration.new
       bounds = x1.to_f..x2.to_f
       cv = Colvar::Windowed.new(comp, bounds, force.to_f, windows.to_i, simtime.to_f)
-      colvars << cv
+      colvars << cv unless cv.simulation_time == 0
     end
   end
   parser.on("-d INT", "--dimension=INT", "Colvars dimension.

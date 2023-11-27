@@ -57,7 +57,7 @@ module Protocols
 
     def describe
       if @dimension == 1
-        if @colvars.all? { |cv| cv.simulation_time > 0 }
+        if @colvars.size > 1
           puts "SAMPLING PROTOCOL using two 1D collective variables".colorize(GREEN)
         else
           puts "SAMPLING PROTOCOL using a 1D collective variable".colorize(GREEN)
@@ -169,9 +169,10 @@ module Protocols
       # #    end
       # #  end
       # #end
-      if @colvars[1].simulation_time != 0 && @dimension == 1
+      case @dimension
+      when 1
         puts "Sampling protocol using RDGYR".colorize(GREEN)
-        cv = @colvars[1]
+        cv = @colvars.first
         type = cv.component.name
         count = -1
         # Variants generation
@@ -195,7 +196,7 @@ module Protocols
         #  variant = "v#{index += 1}"
         #  minimize_variant(lig.explicit_water, "#{variant}.pdb", lig.topology_file)
         # end
-        combinations = @colvars[1].window_bounds.cartesian_product(variants)
+        combinations = cv.window_bounds.cartesian_product(variants)
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
         combinations.each.with_index.concurrent_each(workers) do |(bounds, variant_path), i|
           window = "w#{i // variants.size + 1}"
@@ -244,8 +245,7 @@ module Protocols
             puts "No frames were generated in window #{window}"
           end
         end
-      end
-      if @colvars.all? { |cv| cv.simulation_time != 0 } && @dimension == 2
+      when 2
         count = -1
         type = "rmsd_rdgyr"
         puts "Sampling protocol using RMSD".colorize(GREEN)
