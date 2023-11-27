@@ -1,10 +1,8 @@
 set sys <%= system %>
-set type <%= type %>
-set window <%= window %>
-set variant <%= variant %>
+set stem <%= stem %>
 set temperature 300
 set prevBaseName ${sys}
-set outputName outeabf.${type}.${window}.${variant}
+set outputName outeabf.$stem
 set time <%= time %>
 set dt 2.0
 
@@ -68,7 +66,7 @@ wrapAll                         no # deactivated in free energy calculations.
 
 # colvars
 colvars                         on
-colvarsConfig                   ${type}.${window}.${variant}.colvars
+colvarsConfig                   ${stem}.colvars
 
 # Execution 
 minimize                        100

@@ -1,9 +1,8 @@
 set sys <%= system %>
-set type <%= type %>
-set window <%= window %>
+set stem <%= stem %>
 set temperature 300
 set prevBaseName ${sys}
-set outputName outeabf.${type}.${window}.${sys}
+set outputName outeabf.$stem
 set time <%= time %>
 set dt 2.0
 
@@ -78,4 +77,4 @@ wrapAll                         no # deactivated in free energy calculations.
 
 # colvars
 colvars                         on
-colvarsConfig                   ${type}.${window}.colvars
+colvarsConfig                   ${stem}.colvars

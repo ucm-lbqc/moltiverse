@@ -11,7 +11,8 @@ module Namdconf
     File.write output_file, content
   end
 
-  def enhanced_sampling(explicit_water : Bool, system : String, topology_file : String, coordinates_file : String, output_file : String, time : Float64, window : String, variant : String, type : String, output_frequency : Int32)
+  def enhanced_sampling(explicit_water : Bool, system : String, topology_file : String, coordinates_file : String, output_file : String, time : Float64, output_frequency : Int32)
+    stem = Path[output_file].stem
     if explicit_water
       content = ECR.render "./src/templates/eabf_rmsd_rdgyr_water.ecr"
     else
