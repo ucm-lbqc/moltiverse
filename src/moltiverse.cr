@@ -138,7 +138,7 @@ OptionParser.parse do |parser|
     n_variants = str.to_i32
     # TO:DO fix to check if the input is integer.
   end
-  parser.on("-t N", "--threshold_rmsd_variants=N", "Upper threshold for RMSD between variants. Default: 5") do |str|
+  parser.on("-R N", "--threshold_rmsd_variants=N", "Upper threshold for RMSD between variants. Default: 5") do |str|
     threshold_rmsd_variants = str.to_f64
   end
   parser.on("-g N", "--spacing_rdgyr_variants=N", "Spacing to reduce RDGYR between variants when it reaches the upper limit. Default: 0.05") do |str|
