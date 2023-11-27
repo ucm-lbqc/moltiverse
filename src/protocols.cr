@@ -8,7 +8,6 @@ module Protocols
     getter colvars : Array(Colvar::Windowed)
 
     @metadynamics : Bool
-    @dimension : Int32
 
     @n_variants : Int32
     @threshold_rmsd_variants : Float64
@@ -18,13 +17,15 @@ module Protocols
     def initialize(
       @colvars : Array(Colvar::Windowed),
       @metadynamics : Bool,
-      @dimension : Int32,
       @n_variants : Int32,
       @threshold_rmsd_variants : Float64,
       @spacing_rdgyr_variants : Float64,
       @fullsamples : Int32,
       @bin_width : Float64
     )
+      unless @colvars.size.in?(1..2)
+        raise ArgumentError.new("Invalid number of collective variables")
+      end
     end
 
     def n_variants
@@ -51,20 +52,8 @@ module Protocols
       @metadynamics
     end
 
-    def dimension
-      @dimension
-    end
-
     def describe
-      if @dimension == 1
-        if @colvars.size > 1
-          puts "SAMPLING PROTOCOL using two 1D collective variables".colorize(GREEN)
-        else
-          puts "SAMPLING PROTOCOL using a 1D collective variable".colorize(GREEN)
-        end
-      else
-        puts "SAMPLING PROTOCOL using a 2D collective variable".colorize(GREEN)
-      end
+      puts "SAMPLING PROTOCOL using a #{@colvars.size}D collective variable".colorize(GREEN)
 
       @colvars.each do |cv|
         puts "#{cv.component.name}:"
@@ -78,8 +67,8 @@ module Protocols
         puts "Simulation time:                    [ #{cv.total_time} ns ]"
       end
       puts
-      puts "Total simulation time:                [ #{@colvars.sum { |cv| cv.total_time }} ns ]"
-      puts "Sampling method:                      [ #{@metadynamics ? "M-eABF" : "eABF"} ]"
+      puts "Total simulation time:              [ #{@colvars.sum { |cv| cv.total_time }} ns ]"
+      puts "Sampling method:                    [ #{@metadynamics ? "M-eABF" : "eABF"} ]"
     end
 
     def create_variants(n_variants : Int32, threshold_rmsd_variants : Float64, mol_ref : String)
@@ -169,7 +158,7 @@ module Protocols
       # #    end
       # #  end
       # #end
-      case @dimension
+      case @colvars.size
       when 1
         puts "Sampling protocol using RDGYR".colorize(GREEN)
         cv = @colvars.first

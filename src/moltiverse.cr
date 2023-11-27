@@ -40,7 +40,6 @@ colvars = [
     simulation_time: 1.0,
   ),
 ]
-dimension = 1
 metadynamics = true
 n_confs = 250
 output_frequency = 500
@@ -104,15 +103,6 @@ OptionParser.parse do |parser|
       bounds = x1.to_f..x2.to_f
       cv = Colvar::Windowed.new(comp, bounds, force.to_f, windows.to_i, simtime.to_f)
       colvars << cv unless cv.simulation_time == 0
-    end
-  end
-  parser.on("-d INT", "--dimension=INT", "Colvars dimension.
-    If dimension = 1 and --bounds_colvars are defined for both collective variables,
-    will be executed 2 one dimensional protocols. If dimension = 2,
-    will be executed a two dimensional protocol. Defaults : '1'") do |str|
-    case str
-    when "1" then dimension = 1
-    when "2" then dimension = 2
     end
   end
   parser.on("-m BOOL", "--metadynamics=BOOL", "Add metadynamics to eABF sampling?. Default: true") do |str|
@@ -180,8 +170,8 @@ end
 
 # Options verification
 ph_target = 7.0 unless ph_target
-if dimension == 2 && colvars[0].simulation_time != colvars[1].simulation_time
-  puts "Error: Using a 2D colvars requiere the same simulation time for RMSD and RDGYR colvars.".colorize(RED)
+if colvars.uniq(&.simulation_time).size > 1
+  puts "Error: Using a 2D sampling requires the same simulation time for RMSD and RDGYR colvars.".colorize(RED)
   puts "Check --bounds_colvars option".colorize(RED)
   exit(1)
 end
@@ -204,7 +194,7 @@ if extension == ".smi"
       new_output_name = "#{output_name}_#{name}"
       puts "SMILE:"
       puts smile_code.colorize(AQUA)
-      protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
+      protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
       lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
       t_start = Time.monotonic
       success, proccess_time = lig.proccess_input
@@ -228,7 +218,7 @@ if extension == ".smi"
     end
   end
 else
-  protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
+  protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
   lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
   lig.add_h
   lig.extend_structure
