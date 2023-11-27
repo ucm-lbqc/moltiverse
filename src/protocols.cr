@@ -164,9 +164,9 @@ module Protocols
       # #end
       case @colvars.size
       when 1
-        puts "Sampling protocol using RDGYR".colorize(GREEN)
         cv = @colvars.first
         type = cv.component.name
+        puts "Sampling protocol using #{type.underscore.gsub('_', ' ')}".colorize(GREEN)
         count = -1
         # Variants generation
         # This block code add the variants strategy to start every window with
