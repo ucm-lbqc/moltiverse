@@ -191,6 +191,7 @@ module Protocols
         # end
         combinations = cv.window_bounds.cartesian_product(variants)
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
+        puts "Running #{combinations.size} MD runs in #{workers} parallel jobs with #{procs} cores each...".colorize(:blue)
         combinations.each.with_index.concurrent_each(workers) do |(bounds, variant_path), i|
           window = "w#{i // variants.size + 1}"
           lw_rdgyr = bounds.begin
