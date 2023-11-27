@@ -4,61 +4,6 @@ include Utilities
 
 # Define colvar bounds, windows and time for the collective variables.
 module Protocols
-  class BoundsColvars
-    def initialize(x1 : Float64,
-                   x2 : Float64,
-                   xw : Int32,
-                   xf : Float64,
-                   xt : Float64,
-                   y1 : Float64,
-                   y2 : Float64,
-                   yw : Int32,
-                   yf : Float64,
-                   yt : Float64)
-      @x1, @x2, @xw, @xf, @xt, @y1, @y2, @yw, @yf, @yt = x1, x2, xw, xf, xt, y1, y2, yw, yf, yt
-    end
-
-    def x1
-      @x1
-    end
-
-    def x2
-      @x2
-    end
-
-    def xw
-      @xw
-    end
-
-    def xf
-      @xf
-    end
-
-    def xt
-      @xt
-    end
-
-    def y1
-      @y1
-    end
-
-    def y2
-      @y2
-    end
-
-    def yw
-      @yw
-    end
-
-    def yf
-      @yf
-    end
-
-    def yt
-      @yt
-    end
-  end
-
   class SamplingProtocol
     getter colvars : Array(Colvar::Windowed)
 
