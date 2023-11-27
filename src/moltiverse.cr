@@ -35,7 +35,7 @@ colvars = [
   Colvar::Windowed.new(
     Colvar::RadiusOfGyration.new,
     bounds: 0.0..10.0,
-    width: 0.05,
+    bin_width: 0.05,
     windows: 40,
     force_constant: 80.0,
   ),

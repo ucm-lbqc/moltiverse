@@ -2,12 +2,12 @@ class Colvar
   property component : Colvar::Component
   property bounds : Range(Float64, Float64)
   property force_constant : Float64
-  property width : Float64
+  property bin_width : Float64
 
   def initialize(
     @component : Colvar::Component,
     @bounds : Range(Float64, Float64),
-    @width : Float64,
+    @bin_width : Float64,
     @force_constant : Float64
   )
   end
@@ -45,7 +45,7 @@ class Colvar::Windowed < Colvar
   def initialize(
     @component : Colvar::Component,
     @bounds : Range(Float64, Float64),
-    @width : Float64,
+    @bin_width : Float64,
     @windows : Int32 = 10,
     @force_constant : Float64 = 20
   )
@@ -55,7 +55,7 @@ class Colvar::Windowed < Colvar
     step = (upper_bound - lower_bound) / @windows
     (0...@windows).map do |i|
       bounds = (lower_bound + i * step)..(lower_bound + (i + 1) * step)
-      Colvar.new @component, @bounds, @width, @force_constant
+      Colvar.new @component, @bounds, @bin_width, @force_constant
     end
   end
 

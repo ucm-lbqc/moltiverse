@@ -1,7 +1,7 @@
 <%- colvars.each do |cv| -%>
 colvar {
   name <%= cv.component.name.underscore %>
-  width <%= cv.width %> 
+  width <%= cv.bin_width %> 
   lowerWall <%= cv.lower_bound %>
   lowerboundary <%= cv.lower_bound %>
   upperWall <%= cv.upper_bound %>
@@ -11,7 +11,7 @@ colvar {
   upperwallconstant <%= cv.force_constant %>
 
   extendedLagrangian on
-  extendedFluctuation <%= cv.width %> 
+  extendedFluctuation <%= cv.bin_width %> 
 
   <%= cv.component.keyword %> {
     atoms {
