@@ -40,12 +40,7 @@ module Prepare
       @explicit_water = explicit_water
       @extend_molecule = extend_molecule
       @sampling_protocol = sampling_protocol
-      @time_rmsd = sampling_protocol.colvars[0].simulation_time
-      @time_rdgyr = sampling_protocol.colvars[1].simulation_time
     end
-
-    @time_rmsd : Float64
-    @time_rdgyr : Float64
 
     def file
       @file
@@ -117,10 +112,6 @@ module Prepare
 
     def sampling_protocol
       @sampling_protocol
-    end
-
-    def time_rmsd
-      @sampling_protocol.time_rmsd
     end
 
     def lig_center
