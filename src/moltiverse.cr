@@ -31,7 +31,22 @@ keep_hydrogens = true
 extend_molecule = true
 explicit_water = false
 output_name = "empty"
-bounds_colvars = BoundsColvars.new(0, 0, 0, 0, 0, 0, 10.0, 40, 80.0, 1.0)
+colvars = [
+  Colvar::Windowed.new(
+    Colvar::RMSD.new,
+    bounds: 0.0..0.0,
+    force_constant: 80.0,
+    windows: 0,
+    simulation_time: 0,
+  ),
+  Colvar::Windowed.new(
+    Colvar::RadiusOfGyration.new,
+    bounds: 0.0..10.0,
+    force_constant: 80.0,
+    windows: 40,
+    simulation_time: 1.0,
+  ),
+]
 dimension = 1
 metadynamics = true
 n_confs = 250
@@ -90,15 +105,13 @@ OptionParser.parse do |parser|
     end
   end
   parser.on("-b FLOAT", "--bounds_colvars=FLOAT", "Lower and upper limits for colvars [Å], the number of windows, the wall constant (f) and the time for every window: 'x1,x2,wx,fx,tx,y1,y2,wy,fy,ty' where x,y are the RMSD and RDGYR collective variables limits, 'w', and 't' is the number of windows and time for each collective variable. e.g. '0.0,8.0,16,50,2,0,0,0,0,0'") do |str|
-    dict_opts = str.split(",")
-    abort "Error: The 'bounds_colvars' option must be 10 values separated by ','. #{dict_opts.size} values were given.".colorize(RED) unless dict_opts.size == 10
-    dict_opts.map do |str|
-      if str.empty?
-        abort "Error: The 'bounds_colvars' option must be 10 values separated by ','. The following values: #{dict_opts} were given.".colorize(RED)
-      end
+    colvars.clear
+    str.split(',').each_slice(5).with_index do |(x1, x2, windows, force, simtime), i|
+      comp = i == 0 ? Colvar::RMSD.new : Colvar::RadiusOfGyration.new
+      bounds = x1.to_f..x2.to_f
+      cv = Colvar::Windowed.new(comp, bounds, force.to_f, windows.to_i, simtime.to_f)
+      colvars << cv
     end
-    dict = str.split(",")[0..9].map &.to_f32
-    bounds_colvars = BoundsColvars.new(dict[0], dict[1], dict[2].to_i32, dict[3], dict[4], dict[5], dict[6], dict[7].to_i32, dict[8], dict[9])
   end
   parser.on("-d INT", "--dimension=INT", "Colvars dimension.
     If dimension = 1 and --bounds_colvars are defined for both collective variables,
@@ -174,7 +187,7 @@ end
 
 # Options verification
 ph_target = 7.0 unless ph_target
-if dimension == 2 && bounds_colvars.xt != bounds_colvars.yt
+if dimension == 2 && colvars[0].simulation_time != colvars[1].simulation_time
   puts "Error: Using a 2D colvars requiere the same simulation time for RMSD and RDGYR colvars.".colorize(RED)
   puts "Check --bounds_colvars option".colorize(RED)
   exit(1)
@@ -198,7 +211,7 @@ if extension == ".smi"
       new_output_name = "#{output_name}_#{name}"
       puts "SMILE:"
       puts smile_code.colorize(AQUA)
-      protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
+      protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
       lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
       t_start = Time.monotonic
       success, proccess_time = lig.proccess_input
@@ -222,7 +235,7 @@ if extension == ".smi"
     end
   end
 else
-  protocol_eabf1 = SamplingProtocol.new(bounds_colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
+  protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, dimension, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
   lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
   lig.add_h
   lig.extend_structure

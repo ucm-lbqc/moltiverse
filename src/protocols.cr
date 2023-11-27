@@ -60,7 +60,7 @@ module Protocols
   end
 
   class SamplingProtocol
-    getter colvars = [] of Colvar::Windowed
+    getter colvars : Array(Colvar::Windowed)
 
     @metadynamics : Bool
     @dimension : Int32
@@ -71,7 +71,7 @@ module Protocols
     @fullsamples : Int32
 
     def initialize(
-      @bounds_colvars : BoundsColvars,
+      @colvars : Array(Colvar::Windowed),
       @metadynamics : Bool,
       @dimension : Int32,
       @n_variants : Int32,
@@ -80,22 +80,6 @@ module Protocols
       @fullsamples : Int32,
       @bin_width : Float64
     )
-      rmsd = Colvar::Windowed.new(
-        Colvar::RMSD.new,
-        bounds: bounds_colvars.x1..bounds_colvars.x2,
-        force_constant: bounds_colvars.xf,
-        windows: bounds_colvars.xw,
-        simulation_time: bounds_colvars.xt
-      )
-      @colvars << rmsd
-      rdgyr = Colvar::Windowed.new(
-        Colvar::RadiusOfGyration.new,
-        bounds: bounds_colvars.y1..bounds_colvars.y2,
-        force_constant: bounds_colvars.yf,
-        windows: bounds_colvars.yw,
-        simulation_time: bounds_colvars.yt
-      )
-      @colvars << rdgyr
     end
 
     def n_variants
