@@ -21,8 +21,7 @@ module Protocols
       @n_variants : Int32,
       @threshold_rmsd_variants : Float64,
       @spacing_rdgyr_variants : Float64,
-      @fullsamples : Int32,
-      @bin_width : Float64
+      @fullsamples : Int32
     )
       unless @colvars.size.in?(1..2)
         raise ArgumentError.new("Invalid number of collective variables")
@@ -45,10 +44,6 @@ module Protocols
       @fullsamples
     end
 
-    def bin_width
-      @bin_width
-    end
-
     def metadynamics
       @metadynamics
     end
@@ -64,7 +59,7 @@ module Protocols
         puts "Range of values:                    [ #{cv.bounds} ]"
         puts "Number of windows:                  [ #{cv.windows} ]"
         puts "Number of variants:                 [ #{@n_variants} ]"
-        puts "Width per window:                   [ #{cv.width} ]"
+        puts "Width per window:                   [ #{cv.window_width} ]"
         puts "Wall force constant:                [ #{cv.force_constant} ]"
         puts "Simulation time:                    [ #{@simulation_time * cv.windows} ns ]"
       end
@@ -204,8 +199,7 @@ module Protocols
             [cv],
             Chem::Structure.from_pdb(variant_path),
             @metadynamics,
-            @fullsamples,
-            @bin_width)
+            @fullsamples)
           namd_exec = "namd2"
           # Arguments for GPU and CPU
           if lig.explicit_water
@@ -269,8 +263,7 @@ module Protocols
             [cv1, cv2],
             Chem::Structure.from_pdb(variant_path),
             @metadynamics,
-            @fullsamples,
-            @bin_width)
+            @fullsamples)
           namd_exec = "namd2"
           # Arguments for GPU and CPU
           if lig.explicit_water

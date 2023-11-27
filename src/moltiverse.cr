@@ -35,6 +35,7 @@ colvars = [
   Colvar::Windowed.new(
     Colvar::RadiusOfGyration.new,
     bounds: 0.0..10.0,
+    width: 0.05,
     windows: 40,
     force_constant: 80.0,
   ),
@@ -101,7 +102,7 @@ OptionParser.parse do |parser|
     str.split(',').each_slice(4).with_index do |(x1, x2, windows, force), i|
       comp = i == 0 ? Colvar::RMSD.new : Colvar::RadiusOfGyration.new
       bounds = x1.to_f..x2.to_f
-      cv = Colvar::Windowed.new(comp, bounds, windows.to_i, force.to_f)
+      cv = Colvar::Windowed.new(comp, bounds, bin_width, windows.to_i, force.to_f)
       colvars << cv unless cv.windows == 0
     end
   end
@@ -193,7 +194,7 @@ if extension == ".smi"
       new_output_name = "#{output_name}_#{name}"
       puts "SMILE:"
       puts smile_code.colorize(AQUA)
-      protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
+      protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples)
       lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
       t_start = Time.monotonic
       success, proccess_time = lig.proccess_input
@@ -217,7 +218,7 @@ if extension == ".smi"
     end
   end
 else
-  protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples, bin_width)
+  protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, threshold_rmsd_variants, spacing_rdgyr_variants, fullsamples)
   lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
   lig.add_h
   lig.extend_structure

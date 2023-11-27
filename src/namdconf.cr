@@ -25,8 +25,7 @@ module Namdconf
     colvars : Array(Colvar),
     ref_structure : Chem::Structure,
     use_metadynamics : Bool,
-    fullsamples : Int32,
-    bin_width : Float64
+    fullsamples : Int32
   )
     unless ref_structure.source_file
       raise ArgumentError.new("#{ref_structure} do not have a path to file")
