@@ -43,10 +43,11 @@ class Colvar::Windowed < Colvar
     @width = (@bounds.end - @bounds.begin) / @windows
   end
 
-  def window_bounds : Array(Range(Float64, Float64))
+  def window_colvars : Array(Colvar)
     step = (upper_bound - lower_bound) / @windows
     (0...@windows).map do |i|
-      (lower_bound + i * step)..(lower_bound + (i + 1) * step)
+      bounds = (lower_bound + i * step)..(lower_bound + (i + 1) * step)
+      Colvar.new @component, @bounds, @force_constant, @width
     end
   end
 end

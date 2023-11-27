@@ -164,8 +164,7 @@ module Protocols
       # #end
       case @colvars.size
       when 1
-        cv = @colvars.first
-        type = cv.component.name
+        type = @colvars[0].component.name
         puts "Sampling protocol using #{type.underscore.gsub('_', ' ')}".colorize(GREEN)
         count = -1
         # Variants generation
@@ -189,13 +188,13 @@ module Protocols
         #  variant = "v#{index += 1}"
         #  minimize_variant(lig.explicit_water, "#{variant}.pdb", lig.topology_file)
         # end
-        combinations = cv.window_bounds.cartesian_product(variants)
+        combinations = @colvars[0].window_colvars.cartesian_product(variants)
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
         puts "Running #{combinations.size} MD runs in #{workers} parallel jobs with #{procs} cores each...".colorize(:blue)
-        combinations.each.with_index.concurrent_each(workers) do |(bounds, variant_path), i|
+        combinations.each.with_index.concurrent_each(workers) do |(cv, variant_path), i|
           window = "w#{i // variants.size + 1}"
-          lw_rdgyr = bounds.begin
-          up_rdgyr = bounds.end
+          lw_rdgyr = cv.lower_bound
+          up_rdgyr = cv.upper_bound
           index = variants.index! variant_path
           variant = "v#{index + 1}"
           # Writting namd configuration
@@ -265,14 +264,14 @@ module Protocols
         #  variant = "v#{index += 1}"
         #  minimize_variant(lig.explicit_water, "#{variant}.pdb", lig.topology_file)
         # end
-        combinations = @colvars[0].window_bounds.cartesian_product(@colvars[1].window_bounds, variants)
+        combinations = @colvars[0].window_colvars.cartesian_product(@colvars[1].window_colvars, variants)
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
-        combinations.each.with_index.concurrent_each(workers) do |(rmsd_bounds, rdgyr_bounds, variant_path), i|
+        combinations.each.with_index.concurrent_each(workers) do |(cv1, cv2, variant_path), i|
           window = "w#{i // variants.size + 1}"
-          lw_rmsd = rmsd_bounds.begin
-          up_rmsd = rmsd_bounds.end
-          lw_rdgyr = rdgyr_bounds.begin
-          up_rdgyr = rdgyr_bounds.end
+          lw_rmsd = cv1.lower_bound
+          up_rmsd = cv1.upper_bound
+          lw_rdgyr = cv2.lower_bound
+          up_rdgyr = cv2.upper_bound
           index = variants.index! variant_path
           variant = "v#{index + 1}"
           # Writting namd configuration
@@ -289,7 +288,7 @@ module Protocols
             up_rdgyr,
             true,
             true,
-            @colvars[0].force_constant,
+            cv1.force_constant,
             variant_path,
             variant_center.x,
             variant_center.y,
