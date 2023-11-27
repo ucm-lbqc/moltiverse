@@ -193,8 +193,6 @@ module Protocols
         puts "Running #{combinations.size} MD runs in #{workers} parallel jobs with #{procs} cores each...".colorize(:blue)
         combinations.each.with_index.concurrent_each(workers) do |(cv, variant_path), i|
           window = "w#{i // variants.size + 1}"
-          lw_rdgyr = cv.lower_bound
-          up_rdgyr = cv.upper_bound
           index = variants.index! variant_path
           variant = "v#{index + 1}"
           # Writting namd configuration
@@ -204,13 +202,7 @@ module Protocols
           st_variant = Chem::Structure.from_pdb(variant_path)
           variant_center = st_variant.coords.center
           colvars(@metadynamics,
-            false,
-            false,
-            lw_rdgyr,
-            up_rdgyr,
-            false,
-            true,
-            cv.force_constant,
+            [cv],
             variant_path,
             variant_center.x,
             variant_center.y,
@@ -226,7 +218,7 @@ module Protocols
             arguments = ["#{type}.#{window}.#{variant}.namd", "+p", procs.to_s]
             # arguments = ["#{type}.#{window}.namd"]
           end
-          puts "Runnning ABF on window '#{window}', variant '#{variant}' with RDGYR ranges from #{lw_rdgyr} to #{up_rdgyr}"
+          puts "Runnning ABF on window '#{window}', variant '#{variant}' with #{cv.component.name} ranges #{cv.bounds}"
           # Namd execution
           run_namd(cmd = namd_exec, args = arguments, output_file = "#{type}.#{window}.#{variant}.out", stage = "abf", window = "#{window}")
           # Checking number of frames in every calculation.
@@ -268,10 +260,6 @@ module Protocols
         workers ||= Math.min(combinations.size, System.cpu_count) // procs
         combinations.each.with_index.concurrent_each(workers) do |(cv1, cv2, variant_path), i|
           window = "w#{i // variants.size + 1}"
-          lw_rmsd = cv1.lower_bound
-          up_rmsd = cv1.upper_bound
-          lw_rdgyr = cv2.lower_bound
-          up_rdgyr = cv2.upper_bound
           index = variants.index! variant_path
           variant = "v#{index + 1}"
           # Writting namd configuration
@@ -282,13 +270,7 @@ module Protocols
           variant_center = st_variant.coords.center
           # wallconstant_force for 2D must be fixed in the following function.
           colvars(@metadynamics,
-            lw_rmsd,
-            up_rmsd,
-            lw_rdgyr,
-            up_rdgyr,
-            true,
-            true,
-            cv1.force_constant,
+            [cv1, cv2],
             variant_path,
             variant_center.x,
             variant_center.y,
@@ -304,7 +286,11 @@ module Protocols
             arguments = ["#{type}.#{window}.#{variant}.namd", "+p", procs.to_s]
             # arguments = ["#{type}.#{window}.namd"]
           end
-          puts "Runnning ABF on window '#{window}', variant '#{variant}'. RMSD ranges: #{lw_rmsd} to #{up_rmsd}. RDGYR ranges: #{lw_rdgyr} to #{up_rdgyr}"
+          print "Runnning ABF on window '#{window}', variant '#{variant}'."
+          {cv1, cv2}.each do |cv|
+            print " #{cv.component.name} ranges: #{cv.bounds}."
+          end
+          puts
           # Namd execution
           run_namd(cmd = namd_exec, args = arguments, output_file = "#{type}.#{window}.out", stage = "abf", window = "#{window}")
           # Checking number of frames in every calculation.

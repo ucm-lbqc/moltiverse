@@ -1,87 +1,41 @@
-<%- if rmsd_active -%>
+<%- colvars.each do |cv| -%>
 colvar {
-  name RMSD
+  name <%= cv.component.name.underscore %>
   width <%= bin_width %> 
-  lowerWall <%= lw_rmsd %>
-  lowerboundary <%= lw_rmsd %>
-  upperWall <%= up_rmsd %>
-  upperboundary <%= up_rmsd %>
-                         
-  lowerwallconstant <%= wallconstant %>
-  upperwallconstant <%= wallconstant %>
-  
+  lowerWall <%= cv.lower_bound %>
+  lowerboundary <%= cv.lower_bound %>
+  upperWall <%= cv.upper_bound %>
+  upperboundary <%= cv.upper_bound %>
+
+  lowerwallconstant <%= cv.force_constant %>
+  upperwallconstant <%= cv.force_constant %>
+
   extendedLagrangian on
   extendedFluctuation <%= bin_width %> 
-  
-  rmsd {
+
+  <%= cv.component.keyword %> {
     atoms {
       atomsFile <%= pdb_reference %>
-	    atomsCol B
-	    atomsColValue 1.0
+      atomsCol B
+      atomsColValue 1.0
     }
-    refpositionsfile  <%= pdb_reference %>
+    <%- if cv.is_a? Colvar::RMSD -%>
+      refpositionsfile  <%= pdb_reference %>
+    <%- end -%>
   }
 }
-
 <%- end -%>
 
-<%- if rdgyr_active -%>
-colvar {
-  name GYR
-  width <%= bin_width %> 
-  lowerWall <%= lw_rdgyr %>
-  lowerboundary <%= lw_rdgyr %>
-  upperWall <%= up_rdgyr %>
-  upperboundary <%= up_rdgyr %>
-                       
-  lowerwallconstant <%= wallconstant %>
-  upperwallconstant <%= wallconstant %>
-  
-  extendedLagrangian on
-  extendedFluctuation <%= bin_width %> 
-  
-  gyration {
-    atoms {
-      atomsFile <%= pdb_reference %>
-	    atomsCol B
-	    atomsColValue 1.0
-    }
-  }
-}
-
-<%- end -%>
-<%- if rmsd_active && !rdgyr_active -%>
 abf {
-  colvars              RMSD
+  colvars              <%= colvars.join(" ", &.component.name.underscore) %>
   FullSamples          <%= fullsamples %>
   historyfreq          20000
   writeCZARwindowFile
 }
-<%- end -%>
 
-<%- if rmsd_active && rdgyr_active -%>
-abf {
-  colvars              RMSD GYR
-  FullSamples          <%= fullsamples %>
-  historyfreq          20000
-  writeCZARwindowFile
-}
-<%- end -%>
-
-
-<%- if rdgyr_active && !rmsd_active -%>
-abf {
-  colvars              GYR
-  FullSamples          <%= fullsamples %>
-  historyfreq          20000
-  writeCZARwindowFile
-}
-<%- end -%>
-
-
-<%- if wtm && rmsd_active && !rdgyr_active -%>
+<%- if wtm -%>
 metadynamics {
-  colvars            RMSD
+  colvars            <%= colvars.join(" ", &.component.name.underscore) %>
   hillWeight         0.5
   hillWidth          1.0
   #wellTempered       on
@@ -89,29 +43,6 @@ metadynamics {
   #biasTemperature    1490
 }
 <%- end -%>
-
-<%- if wtm && rdgyr_active && !rmsd_active -%>
-metadynamics {
-  colvars            GYR
-  hillWeight         0.5
-  hillWidth          1.0
-  #wellTempered       on
-  newHillFrequency   100
-  #biasTemperature    1000
-}
-<%- end -%>
-
-<%- if wtm && rdgyr_active && rmsd_active -%>
-metadynamics {
-  colvars            RMSD GYR
-  hillWeight         0.5
-  hillWidth          1.0
-  #wellTempered       on
-  newHillFrequency   100
-  #biasTemperature    1490
-}
-<%- end -%>
-
 
 # To avoid ligand translation
 colvar { 
@@ -133,7 +64,7 @@ harmonic {
   forceConstant 100.0 
 } 
 
-<%- if wtm && rdgyr_active && rmsd_active -%>
+<%- if wtm && colvars.size > 1 -%>
 ## To keep orientation
 colvar { 
   name orientation 
@@ -150,5 +81,5 @@ harmonic {
   colvars orientation 
   centers (1.0, 0.0, 0.0, 0.0)
   forceConstant 100.0 
-} 
+}
 <%- end -%>
