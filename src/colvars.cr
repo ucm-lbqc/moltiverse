@@ -22,6 +22,10 @@ class Colvar
 end
 
 abstract struct Colvar::Component
+  def keyword : String
+    name.camelcase(lower: true)
+  end
+
   def name : String
     self.class.name.rpartition("::").last
   end
@@ -29,7 +33,11 @@ end
 
 struct Colvar::RMSD < Colvar::Component; end
 
-struct Colvar::RadiusOfGyration < Colvar::Component; end
+struct Colvar::RadiusOfGyration < Colvar::Component
+  def keyword : String
+    "gyration"
+  end
+end
 
 class Colvar::Windowed < Colvar
   property windows : Int32 = 10
