@@ -124,7 +124,6 @@ module Protocols
         File.copy("min.lastframe.pdb", "v1.pdb")
         variants << Path.new("v1.pdb").expand.to_s
       end
-      time_per_variant = @simulation_time / @n_variants
 
       combinations = Indexable
         .cartesian_product(@colvars.map(&.window_colvars))
@@ -138,7 +137,7 @@ module Protocols
 
         structure = Chem::Structure.from_pdb(path)
 
-        enhanced_sampling(lig.explicit_water, lig.basename, lig.topology_file, lig.coordinates_file, "#{stem}.namd", time_per_variant, lig.output_frequency)
+        enhanced_sampling("#{stem}.namd", lig, @simulation_time / @n_variants)
         colvars("#{stem}.colvars", colvars, structure, @metadynamics, @fullsamples)
 
         print "Runnning ABF on window '#{window}', variant '#{variant}'."
