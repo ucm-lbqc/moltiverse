@@ -19,34 +19,8 @@ dependencies:
 targets:
   moltiverse:
     main: src/moltiverse.cr
-  test_charge:
-    main: src/test_charge.cr
-  sdf_reader:
-    main: src/sdf_reader.cr
-  rmsd_moltiverse:
-    main: src/rmsd_moltiverse.cr
-  test:
-    main: src/test.cr
-  test_rmsd:
-    main: src/test_rmsd.cr
-  test_clustering:
-    main: src/test_clustering.cr
-  rmsd_sdf:
-    main: src/rmsd_sdf.cr
-  rmsd_moltiverse_pdbs:
-    main: src/rmsd_moltiverse_pdbs.cr
-  clustering_rdgyr:
-    main: src/clustering_rdgyr.cr
-  rdgyr:
-    main: src/rdgyr.cr
-  clustering_rmsd:
-    main: src/clustering_rmsd.cr
-  clustering_rmsd_crystals:
-    main: src/clustering_rmsd_crystals.cr
   extract_ligand:
     main: src/extract_ligand.cr
-  rmsd_matrix_for_crystals:
-    main: src/rmsd_matrix_for_crystals.cr
   clustering_rmsd_per_dcd:
     main: src/clustering_rmsd_per_dcd.cr
   clustering_rmsd_rdgyr_per_dcd:
