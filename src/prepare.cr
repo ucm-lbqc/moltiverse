@@ -7,7 +7,6 @@ require "./colors.cr"
 require "hclust"
 
 include Chem
-include Protocols
 
 module Prepare
   class Ligand
