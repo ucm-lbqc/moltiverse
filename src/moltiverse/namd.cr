@@ -2,9 +2,9 @@ module NAMD::Input
   def self.minimization(output_file : String, lig : Ligand)
     if lig.explicit_water
       cell = Chem::Structure.from_pdb(lig.pdb_system).cell
-      content = ECR.render "./src/templates/min_water.ecr"
+      content = ECR.render "./src/moltiverse/templates/min_water.ecr"
     else
-      content = ECR.render "./src/templates/min_vacuum.ecr"
+      content = ECR.render "./src/moltiverse/templates/min_vacuum.ecr"
     end
     File.write output_file, content
   end
@@ -12,9 +12,9 @@ module NAMD::Input
   def self.enhanced_sampling(output_file : String, lig : Ligand, time : Float64)
     stem = Path[output_file].stem
     if lig.explicit_water
-      content = ECR.render "./src/templates/eabf_rmsd_rdgyr_water.ecr"
+      content = ECR.render "./src/moltiverse/templates/eabf_rmsd_rdgyr_water.ecr"
     else
-      content = ECR.render "./src/templates/eabf_rmsd_rdgyr_vacuum.ecr"
+      content = ECR.render "./src/moltiverse/templates/eabf_rmsd_rdgyr_vacuum.ecr"
     end
     File.write output_file, content
   end
@@ -29,7 +29,7 @@ module NAMD::Input
     unless ref_structure.source_file
       raise ArgumentError.new("#{ref_structure} do not have a path to file")
     end
-    content = ECR.render "./src/templates/colvars.ecr"
+    content = ECR.render "./src/moltiverse/templates/colvars.ecr"
     File.write output_file, content
   end
 end

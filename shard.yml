@@ -20,11 +20,11 @@ targets:
   moltiverse:
     main: src/moltiverse.cr
   extract_ligand:
-    main: src/extract_ligand.cr
+    main: src/utilities/extract_ligand.cr
   clustering_rmsd_per_dcd:
-    main: src/clustering_rmsd_per_dcd.cr
+    main: src/utilities/clustering_rmsd_per_dcd.cr
   clustering_rmsd_rdgyr_per_dcd:
-    main: src/clustering_rmsd_rdgyr_per_dcd.cr
+    main: src/utilities/clustering_rmsd_rdgyr_per_dcd.cr
 
 crystal: 1.10.1
 
