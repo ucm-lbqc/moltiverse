@@ -14,7 +14,6 @@ require "option_parser"
 require "./**"
 
 include Chem
-include Prepare
 include Chem::Spatial
 
 # Define defaults values for parser variables.
