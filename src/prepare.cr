@@ -15,7 +15,7 @@ class Ligand
     @pdb_system = "empty"
     @dcd = "empty"
     @extended_mol = "empty"
-    @lig_center = Spatial::Vec3.new(0, 0, 0)
+    @lig_center = Chem::Spatial::Vec3.new(0, 0, 0)
     @pdb_reference = "empty"
     @explicit_water = explicit_water
     @extend_molecule = extend_molecule

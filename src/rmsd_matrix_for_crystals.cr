@@ -1,7 +1,6 @@
 require "chem"
 require "hclust"
 require "option_parser"
-include Chem
 
 # module Chem::Spatial
 #  struct CoordinatesProxy

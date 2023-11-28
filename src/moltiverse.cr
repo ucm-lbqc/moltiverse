@@ -12,9 +12,6 @@ require "colorize"
 require "ecr"
 require "hclust"
 require "option_parser"
-
-include Chem
-include Chem::Spatial
 require "./colors"
 require "./colvars"
 require "./core_ext"

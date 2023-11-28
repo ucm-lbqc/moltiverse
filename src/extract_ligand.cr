@@ -1,6 +1,5 @@
 require "chem"
 require "option_parser"
-include Chem
 
 input = ""
 ch : Char = 'A'
