@@ -10,11 +10,18 @@ end
 require "chem"
 require "colorize"
 require "ecr"
+require "hclust"
 require "option_parser"
-require "./**"
 
 include Chem
 include Chem::Spatial
+require "./colors"
+require "./colvars"
+require "./core_ext"
+require "./helpers"
+require "./namd"
+require "./prepare"
+require "./protocols"
 
 # Define defaults values for parser variables.
 ligand = ""
