@@ -69,9 +69,10 @@ class SamplingProtocol
     variants_array : Array(String) = [] of String
     iterations = 100
     # Create first variant and store it in variants_array
-    variant_1 = babel_random_mol_to_pdb(mol_ref, "v1.pdb")
+    variant_1 = rand_conf(mol_ref)
+    variant_1.to_pdb "v1.pdb", bonds: :none
     variants_array.push(Path.new("v1.pdb").expand.to_s)
-    variant_decoy = babel_random_mol_to_pdb(mol_ref, "decoy.pdb")
+    variant_decoy = rand_conf(mol_ref)
     # Define the initial RMSD between variants
     # This value will generate variants with at least that RMSD.
     # But the value is iteratively reduced and adjusted if neccessary.
@@ -86,7 +87,7 @@ class SamplingProtocol
           iteration = 0
           puts "Reducing RMSD threshold to #{threshold_rmsd_variants.round(4)}...".colorize(YELLOW)
         end
-        variant_decoy = babel_random_mol_to_pdb(mol_ref, "decoy.pdb")
+        variant_decoy = rand_conf(mol_ref)
         index = 0
         rmsd_list : Array(Float64) = [] of Float64
         variants_array.each do |live_variant|
