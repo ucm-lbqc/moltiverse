@@ -341,7 +341,7 @@ module Prepare
       cx = pdb.coords.center.x
       cy = pdb.coords.center.y
       cz = pdb.coords.center.z
-      minimization(@explicit_water, @basename, @topology_file, @coordinates_file, "min.namd", a, b, c, cx, cy, cz)
+      minimization("min.namd", self)
       namd_exec = "namd2"
       arguments = ["min.namd", "+p", "4", "+setcpuaffinity"]
       puts "Runnning minimization..."

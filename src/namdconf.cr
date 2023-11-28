@@ -2,8 +2,9 @@ require "ecr"
 require "./protocols.cr"
 
 module Namdconf
-  def minimization(explicit_water : Bool, system : String, topology_file : String, coordinates_file : String, output_file : String, a : Float64 | Int32, b : Float64 | Int32, c : Float64 | Int32, cx : Float64, cy : Float64, cz : Float64)
-    if explicit_water
+  def minimization(output_file : String, lig : Ligand)
+    if lig.explicit_water
+      cell = Chem::Structure.from_pdb(lig.pdb_system).cell
       content = ECR.render "./src/templates/min_water.ecr"
     else
       content = ECR.render "./src/templates/min_vacuum.ecr"

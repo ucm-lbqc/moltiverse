@@ -1,11 +1,11 @@
-set sys <%= system %>
+set sys <%= lig.basename %>
 set temperature 300
 set outputName min.${sys}
 
 # global configuration
-parmfile                        <%= topology_file %>
-ambercoor                       <%= coordinates_file %>
-#coordinates                     <%= coordinates_file %>
+parmfile                        <%= lig.topology_file %>
+ambercoor                       <%= lig.coordinates_file %>
+#coordinates                     <%= lig.coordinates_file %>
 temperature                     $temperature
 outputName                      $outputName
 
