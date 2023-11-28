@@ -9,7 +9,6 @@ require "./colors.cr"
 require "./execution.cr"
 require "hclust"
 
-include Namdconf
 include Chem
 include Protocols
 include Analysis
@@ -341,7 +340,7 @@ module Prepare
       cx = pdb.coords.center.x
       cy = pdb.coords.center.y
       cz = pdb.coords.center.z
-      minimization("min.namd", self)
+      Namdconf.minimization("min.namd", self)
       namd_exec = "namd2"
       arguments = ["min.namd", "+p", "4", "+setcpuaffinity"]
       puts "Runnning minimization..."

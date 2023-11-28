@@ -137,8 +137,8 @@ module Protocols
 
         structure = Chem::Structure.from_pdb(path)
 
-        enhanced_sampling("#{stem}.namd", lig, @simulation_time / @n_variants)
-        colvars("#{stem}.colvars", colvars, structure, @metadynamics, @fullsamples)
+        Namdconf.enhanced_sampling("#{stem}.namd", lig, @simulation_time / @n_variants)
+        Namdconf.colvars("#{stem}.colvars", colvars, structure, @metadynamics, @fullsamples)
 
         print "Runnning ABF on window '#{window}', variant '#{variant}'."
         colvars.each do |cv|
