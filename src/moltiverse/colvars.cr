@@ -55,7 +55,7 @@ class Colvar::Windowed < Colvar
     step = (upper_bound - lower_bound) / @windows
     (0...@windows).map do |i|
       bounds = (lower_bound + i * step)..(lower_bound + (i + 1) * step)
-      Colvar.new @component, @bounds, @bin_width, @force_constant
+      Colvar.new @component, bounds, @bin_width, @force_constant
     end
   end
 
