@@ -173,8 +173,8 @@ if output_name == "empty"
   output_name = "#{File.basename("#{ligand}", "#{extension}")}"
 end
 
-# Check dependencies
-dependencies()
+check_dependencies
+
 main_dir = Dir.current
 if extension == ".smi"
   puts "Output folders will have the format: 'output_name'_'smi_ligand_name'".colorize(YELLOW)

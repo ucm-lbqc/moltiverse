@@ -48,7 +48,7 @@ def babel_random_mol_to_pdb(input_mol : String, output_pdb_name : String)
   min_lastframe
 end
 
-def dependencies
+def check_dependencies
   dependencies = {
     "obabel"      => true,
     "namd2"       => true,
