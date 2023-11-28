@@ -2,19 +2,12 @@ require "./namd.cr"
 require "ecr"
 require "chem"
 require "./protocols.cr"
-require "./analysis.cr"
-require "./utilities.cr"
 require "colorize"
 require "./colors.cr"
-require "./execution.cr"
 require "hclust"
 
 include Chem
 include Protocols
-include Analysis
-include Utilities
-include Coloring
-include Execution
 
 module Prepare
   class Ligand

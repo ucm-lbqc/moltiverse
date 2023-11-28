@@ -1,6 +1,4 @@
 require "./namd.cr"
-require "./utilities.cr"
-include Utilities
 
 # Define colvar bounds, windows and time for the collective variables.
 module Protocols

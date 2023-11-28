@@ -15,13 +15,11 @@ require "./prepare.cr"
 require "./protocols.cr"
 require "colorize"
 require "./colors.cr"
-require "./dependencies.cr"
+require "./helpers"
 
 include Chem
 include Prepare
 include Chem::Spatial
-include Coloring
-include Dependencies
 
 # Define defaults values for parser variables.
 ligand = ""
