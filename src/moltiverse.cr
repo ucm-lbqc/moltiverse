@@ -8,14 +8,10 @@ module Moltiverse
 end
 
 require "chem"
-require "option_parser"
-require "./core_ext.cr"
-require "./colvars.cr"
-require "./prepare.cr"
-require "./protocols.cr"
 require "colorize"
-require "./colors.cr"
-require "./helpers"
+require "ecr"
+require "option_parser"
+require "./**"
 
 include Chem
 include Prepare

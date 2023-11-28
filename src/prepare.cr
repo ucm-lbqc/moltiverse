@@ -1,13 +1,3 @@
-require "./namd.cr"
-require "ecr"
-require "chem"
-require "./protocols.cr"
-require "colorize"
-require "./colors.cr"
-require "hclust"
-
-include Chem
-
 module Prepare
   class Ligand
     def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float64 | Float64, output_name : String, extend_molecule : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)

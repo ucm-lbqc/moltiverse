@@ -1,5 +1,3 @@
-require "ecr"
-
 module NAMD::Input
   def self.minimization(output_file : String, lig : Ligand)
     if lig.explicit_water

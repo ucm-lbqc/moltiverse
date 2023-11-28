@@ -1,7 +1,4 @@
-require "./namd.cr"
-
 # Define colvar bounds, windows and time for the collective variables.
-
 class SamplingProtocol
   getter colvars : Array(Colvar::Windowed)
 
