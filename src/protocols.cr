@@ -1,4 +1,4 @@
-require "./namdconf.cr"
+require "./namd.cr"
 require "./utilities.cr"
 include Utilities
 
@@ -137,8 +137,8 @@ module Protocols
 
         structure = Chem::Structure.from_pdb(path)
 
-        Namdconf.enhanced_sampling("#{stem}.namd", lig, @simulation_time / @n_variants)
-        Namdconf.colvars("#{stem}.colvars", colvars, structure, @metadynamics, @fullsamples)
+        NAMD::Input.enhanced_sampling("#{stem}.namd", lig, @simulation_time / @n_variants)
+        NAMD::Input.colvars("#{stem}.colvars", colvars, structure, @metadynamics, @fullsamples)
 
         print "Runnning ABF on window '#{window}', variant '#{variant}'."
         colvars.each do |cv|

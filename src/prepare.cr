@@ -1,4 +1,4 @@
-require "./namdconf.cr"
+require "./namd.cr"
 require "ecr"
 require "chem"
 require "./protocols.cr"
@@ -340,7 +340,7 @@ module Prepare
       cx = pdb.coords.center.x
       cy = pdb.coords.center.y
       cz = pdb.coords.center.z
-      Namdconf.minimization("min.namd", self)
+      NAMD::Input.minimization("min.namd", self)
       namd_exec = "namd2"
       arguments = ["min.namd", "+p", "4", "+setcpuaffinity"]
       puts "Runnning minimization..."

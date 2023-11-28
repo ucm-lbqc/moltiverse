@@ -1,6 +1,6 @@
 require "ecr"
 
-module Namdconf
+module NAMD::Input
   def self.minimization(output_file : String, lig : Ligand)
     if lig.explicit_water
       cell = Chem::Structure.from_pdb(lig.pdb_system).cell
