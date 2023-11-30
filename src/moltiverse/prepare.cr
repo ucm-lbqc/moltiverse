@@ -362,6 +362,7 @@ class Ligand
     frames = Dir["#{@working_dir}/out*.dcd"].flat_map do |path|
       Array(Chem::Structure).from_dcd path, structure
     end
+    abort "Empty trayectories at #{@working_dir}".colorize(:red) if frames.empty?
     puts "Analyzing #{frames.size} total structures generated in the sampling stage..."
 
     puts "Calculating RMSD..."
