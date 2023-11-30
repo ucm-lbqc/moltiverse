@@ -322,10 +322,9 @@ class Ligand
     cy = pdb.coords.center.y
     cz = pdb.coords.center.z
     NAMD::Input.minimization("min.namd", self)
-    namd_exec = "namd2"
-    arguments = ["min.namd", "+p", "4", "+setcpuaffinity"]
-    puts "Runnning minimization..."
-    run_cmd(cmd = namd_exec, args = arguments, output_file = "min.out", stage = "Minimization done ✔".colorize(GREEN), verbose = false)
+    print "Runnning minimization..."
+    NAMD.run("min.namd", :setcpuaffinity, cores: 4)
+    puts " done"
     @basename = "min.#{@basename}"
     new_dcd = "#{@basename}.dcd"
     @dcd = Path.new(new_dcd).expand.to_s

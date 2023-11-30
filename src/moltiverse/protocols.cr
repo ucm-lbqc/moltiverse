@@ -141,9 +141,7 @@ class SamplingProtocol
         print " #{cv.component.name} ranges: #{cv.bounds}."
       end
       puts ".."
-      args = ["#{stem}.namd", "+p", procs.to_s]
-      args << "+devices" << "0" if lig.explicit_water
-      run_namd("namd2", args, "#{stem}.out", stage: "abf", window: window)
+      NAMD.run "#{stem}.namd", cores: procs, retries: 5, use_gpu: lig.explicit_water
 
       path = Path["outeabf.#{stem}.dcd"].expand
       if File.exists?(path)

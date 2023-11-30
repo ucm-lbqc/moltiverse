@@ -33,3 +33,25 @@ module NAMD::Input
     File.write output_file, content
   end
 end
+
+def NAMD.run(
+  cfg : Path | String,
+  *args,
+  cores : Int = System.cpu_count,
+  use_gpu : Bool = false,
+  retries : Int = 1,
+  **options
+) : Bool
+  cli_args = [cfg, "+p", cores]
+  cli_args << "+devices" << 0 if use_gpu
+  args.each do |value|
+    cli_args << "+#{value}"
+  end
+  options.each do |key, value|
+    next if value == false
+    cli_args << "+#{key}"
+    cli_args << value unless value.is_a?(Bool)
+  end
+  output = "#{Path[cfg].stem}.out"
+  ::run "namd2", cli_args, output, retries
+end
