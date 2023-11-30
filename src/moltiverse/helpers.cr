@@ -141,3 +141,38 @@ def run_cmd_silent(cmd : String, args : Array(String), output_file : Nil.class |
   stdout.close
   stderr.close
 end
+
+def run(
+  cmd : String,
+  args : Array,
+  output path : Path | String | Nil = nil,
+  retries : Int = 1
+) : Bool
+  output_file = path.try { |x| File.new(x, mode: "w") } || IO::Memory.new
+  status = nil
+  cmdline = "#{cmd} #{args.join(' ')}"
+  retries.times do |i|
+    STDERR.puts "Retrying `#{cmdline}` (#{i})...".colorize(:blue) if i > 0
+    process = Process.new(cmd, args, output: output_file, error: :pipe)
+    stderr = process.error.gets_to_end
+    status = process.wait
+    break if status.success?
+    STDERR.puts "Process `#{cmdline}` failed due to:".colorize(:yellow)
+    STDERR.puts stderr.gsub(/^/m, "> ").chomp.colorize(:light_gray)
+  end
+
+  case status
+  when .nil?
+    abort "Something went wrong executing `#{cmdline}`".colorize(:red)
+  when .success?
+    true
+  else
+    if retries > 1
+      message = "Maximum number of retries was reached for `#{cmdline}`"
+      STDERR.puts message.colorize(:red)
+    end
+    false
+  end
+ensure
+  output_file.try &.close
+end
