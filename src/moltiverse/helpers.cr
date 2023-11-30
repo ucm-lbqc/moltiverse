@@ -153,7 +153,7 @@ def run(
   cmdline = "#{cmd} #{args.join(' ')}"
   retries.times do |i|
     STDERR.puts "Retrying `#{cmdline}` (#{i})...".colorize(:blue) if i > 0
-    process = Process.new(cmd, args, output: output_file, error: :pipe)
+    process = Process.new(cmd, args.map(&.to_s), output: output_file, error: :pipe)
     stderr = process.error.gets_to_end
     status = process.wait
     break if status.success?
