@@ -1,10 +1,6 @@
 def rand_conf(input_mol : String) : Chem::Structure
-  tempfile = File.tempfile(".mol")
-  obabel = "obabel"
-  args1 = ["-i", "mol", input_mol, "-O", tempfile.path, "-e", "--gen3D", "--medium"]
-  run_cmd_silent(cmd = obabel, args = args1, output_file = Nil)
   min_lastframe = Chem::Structure.from_mol(input_mol)
-  variant = Chem::Structure.from_mol(tempfile.path)
+  variant = OpenBabel.gen_coords(input_mol)
   index = 0
   min_lastframe['A'][1].each_atom { |atom|
     atom.coords = variant.atoms[index].coords
@@ -12,8 +8,6 @@ def rand_conf(input_mol : String) : Chem::Structure
     index += 1
   }
   min_lastframe
-ensure
-  tempfile.try { |file| file.delete }
 end
 
 def check_dependencies
@@ -153,6 +147,7 @@ def run(
   cmdline = "#{cmd} #{args.join(' ')}"
   retries.times do |i|
     STDERR.puts "Retrying `#{cmdline}` (#{i})...".colorize(:blue) if i > 0
+    # puts "Running `#{cmdline}`..."
     process = Process.new(cmd, args.map(&.to_s), output: output_file, error: :pipe)
     stderr = process.error.gets_to_end
     status = process.wait

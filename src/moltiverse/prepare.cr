@@ -134,19 +134,18 @@ class Ligand
     end
     if @smile
       @basename = "#{@output_name}"
-      obabel = "obabel"
-      args1 = ["-:#{@smile}", "-h", "--gen3D", "-O", "#{@basename}.mol"]
       puts "Running openbabel convertion..."
-      run_cmd(cmd = obabel, args = args1, output_file = Nil, stage = "SMILE code converted to .mol format ✔".colorize(GREEN), verbose = false)
       @format = "mol"
       @extension = ".mol"
       @file = Path.new("#{@basename}#{@extension}").expand.to_s
       begin
-        @charge = Chem::Structure.read(@file).formal_charge
+        structure = OpenBabel.convert_smiles(@smile.as(String))
+        structure.to_mol @file
+        @charge = structure.formal_charge
         puts "Molecule charge: #{@charge}"
         success = true
-      rescue exception
-        puts "Could not read the file: #{@basename}.mol".colorize(RED)
+      rescue ex
+        puts "SMILES conversion failed due to #{ex}".colorize(RED)
         puts "Please check the input SMILE code:"
         puts @smile.colorize(AQUA)
         # exit(1)
@@ -171,19 +170,18 @@ class Ligand
     # tleap parameterization.
     if @keep_hydrogens
       File.copy("#{@file}", "original_keep_hydrogens#{extension}")
-      obabel = "obabel"
-      args1 = ["-i", "#{@format}", "#{@file}", "-O", "#{@basename}.mol"]
       puts "Running openbabel convertion..."
-      run_cmd(cmd = obabel, args = args1, output_file = Nil, stage = "File converted to .mol format ✔".colorize(GREEN), verbose = false)
+      OpenBabel.convert(@file, "#{@basename}.mol")
+      puts "File converted to .mol format ✔".colorize(GREEN)
       @basename = "#{@basename}"
       @format = "mol"
       @extension = ".mol"
     else
       File.copy("#{@file}", "original_no-keep_hydrogens#{extension}")
-      obabel = "obabel"
-      args1 = ["-i", "#{@format}", "#{@file}", "-O", "#{@basename}_h.mol", "-p", "#{@ph}"]
       puts "Running openbabel convertion..."
-      run_cmd(cmd = obabel, args = args1, output_file = Nil, stage = "Hydrogen addition ✔".colorize(GREEN), verbose = false)
+      structure = OpenBabel.add_hydrogens @file, @ph
+      structure.to_mol "#{@basename}_h.mol"
+      puts "Hydrogen addition ✔".colorize(GREEN)
       @basename = "#{@basename}_h"
       @format = "mol"
       @extension = ".mol"
