@@ -5,8 +5,6 @@ class SamplingProtocol
   @metadynamics : Bool
   @simulation_time = 1.0
   @n_variants : Int32
-  @threshold_rmsd_variants : Float64
-  @spacing_rdgyr_variants : Float64
   @fullsamples : Int32
 
   def initialize(
@@ -14,8 +12,6 @@ class SamplingProtocol
     @metadynamics : Bool,
     @simulation_time : Float64,
     @n_variants : Int32,
-    @threshold_rmsd_variants : Float64,
-    @spacing_rdgyr_variants : Float64,
     @fullsamples : Int32
   )
     unless @colvars.size.in?(1..2)
@@ -25,14 +21,6 @@ class SamplingProtocol
 
   def n_variants
     @n_variants
-  end
-
-  def threshold_rmsd_variants
-    @threshold_rmsd_variants
-  end
-
-  def spacing_rdgyr_variants
-    @spacing_rdgyr_variants
   end
 
   def fullsamples
@@ -65,45 +53,19 @@ class SamplingProtocol
     puts "Sampling method:                    [ #{@metadynamics ? "M-eABF" : "eABF"} ]"
   end
 
-  def create_variants(n_variants : Int32, threshold_rmsd_variants : Float64, mol_ref : String)
-    variants_array : Array(String) = [] of String
-    iterations = 100
-    # Create first variant and store it in variants_array
-    variant_1 = rand_conf(mol_ref)
-    variant_1.to_pdb "v1.pdb", bonds: :none
-    variants_array.push(Path.new("v1.pdb").expand.to_s)
-    variant_decoy = rand_conf(mol_ref)
-    # Define the initial RMSD between variants
-    # This value will generate variants with at least that RMSD.
-    # But the value is iteratively reduced and adjusted if neccessary.
-    # Start creation of the second ... and the following variants checking condition of RMSD spanning.
-    (2..n_variants).each do |v|
-      min_rmsd = 0.0
-      iteration = 0
-      while min_rmsd <= threshold_rmsd_variants
-        iteration += 1
-        if iteration > iterations
-          threshold_rmsd_variants -= 0.1
-          iteration = 0
-          puts "Reducing RMSD threshold to #{threshold_rmsd_variants.round(4)}...".colorize(YELLOW)
-        end
-        variant_decoy = rand_conf(mol_ref)
-        index = 0
-        rmsd_list : Array(Float64) = [] of Float64
-        variants_array.each do |live_variant|
-          live_variant_st = Chem::Structure.from_pdb(live_variant)
-          rmsd = live_variant_st.coords.rmsd(variant_decoy.coords, minimize: true)
-          # puts "RMSD: #{rmsd}"
-          rmsd_list.push(rmsd)
-        end
-        min_rmsd = rmsd_list.min
-      end
-      puts "MAX RSMD: #{threshold_rmsd_variants.round(4)}. VARIANT #{v}. ITERATION #{iteration}"
-      variant_decoy.to_pdb("v#{v}.pdb", bonds: :none)
-      variants_array.push(Path.new("v#{v}.pdb").expand.to_s)
+  def create_variants(mol_ref : String, samples : Int = 500) : Array(Chem::Structure)
+    variants = [] of Chem::Structure
+    (0...samples).concurrent_each(workers: System.cpu_count) do
+      variants << rand_conf(mol_ref)
     end
-    puts "Final RMSD threshold: #{threshold_rmsd_variants.round(4)}"
-    variants_array
+
+    dism = HClust::DistanceMatrix.new(variants.size) do |i, j|
+      variants[i].coords.rmsd variants[j].coords, minimize: true
+    end
+    dendrogram = HClust.linkage(dism, :single)
+    dendrogram.flatten(count: @n_variants).map do |idxs|
+      variants[idxs[dism[idxs].centroid]]
+    end
   end
 
   def execute(lig : Ligand, parallel workers : Int? = nil, procs : Int = 4)
@@ -113,9 +75,13 @@ class SamplingProtocol
 
     variants = [] of String
     if @n_variants >= 2
-      puts "Creating variants: ".colorize(GREEN)
+      puts "Creating #{@n_variants} variants: ".colorize(GREEN)
       puts "Reference mol: #{lig.extended_mol}"
-      variants = create_variants(@n_variants, @threshold_rmsd_variants, lig.extended_mol)
+      create_variants(lig.extended_mol).each_with_index(offset: 1) do |variant, i|
+        path = Path["v#{i}.pdb"].expand
+        variant.to_pdb path, bonds: :none
+        variants << path.to_s
+      end
     else
       File.copy("min.lastframe.pdb", "v1.pdb")
       variants << Path.new("v1.pdb").expand.to_s
