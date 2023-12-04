@@ -124,7 +124,7 @@ OptionParser.parse do |parser|
   parser.on("-u N", "--bin_width=N", "Bin width setting for ABF calculations. Default: 0.05") do |str|
     bin_width = str.to_f64
   end
-  parser.on("-v N", "--variants=N", "Number of initial conformations of the ligand to use as input in every window. Default: 10") do |str|
+  parser.on("-v N", "--variants=N", "Number of initial conformations of the ligand to use as input in every window. Default: 1") do |str|
     n_variants = str.to_i32
     # TO:DO fix to check if the input is integer.
   end
