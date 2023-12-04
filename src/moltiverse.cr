@@ -104,7 +104,7 @@ OptionParser.parse do |parser|
       exit
     end
   end
-  parser.on("-n N", "--number_of_conformers=N", "Desired number of conformers to generate. Default: 50") do |str|
+  parser.on("-n N", "--number_of_conformers=N", "Desired number of conformers to generate. Default: 250") do |str|
     n_confs = str.to_i32
     unless 1 <= n_confs <= 4000
       STDERR.puts "Error: invalid n value: #{str}"
