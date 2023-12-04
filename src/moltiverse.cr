@@ -86,7 +86,7 @@ OptionParser.parse do |parser|
       exit
     end
   end
-  parser.on("-b FLOAT", "--bounds_colvars=FLOAT", "Lower and upper limits for colvars [Å], the number of windows, the wall constant (f) and the time for every window: 'x1,x2,wx,fx,y1,y2,wy,fy' where x,y are the RMSD and RDGYR collective variables limits, 'w', and 'w' is the number of windows. e.g. '0.0,8.0,16,50,0,0,0,0'") do |str|
+  parser.on("-b FLOAT", "--bounds_colvars=FLOAT", "Lower and upper limits for colvars [Å], the number of windows, the wall constant (f) and the time for every window: 'x1,x2,wx,fx,tx,y1,y2,wy,fy,ty' where x,y are the RMSD and RDGYR collective variables limits, and 'w' is the number of windows. e.g. '0.0,8.0,16,50,0,0,0,0'") do |str|
     colvars.clear
     str.split(',').each_slice(4).with_index do |(x1, x2, windows, force), i|
       comp = i == 0 ? Colvar::RMSD.new : Colvar::RadiusOfGyration.new
