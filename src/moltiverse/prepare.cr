@@ -354,6 +354,7 @@ class Ligand
   end
 
   def clustering
+    t1 = Time.monotonic
     puts "Performing structure clustering".colorize(GREEN)
 
     structure = Chem::Structure.from_pdb(@pdb_system)
@@ -385,5 +386,7 @@ class Ligand
     puts "Output file: #{@output_name}.sdf".colorize(TURQUOISE)
     puts "_____________________________________________________".colorize(YELLOW)
     centroids.to_sdf "#{@output_name}"
+    t2 = Time.monotonic
+    t2 - t1
   end
 end
