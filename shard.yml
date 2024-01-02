@@ -25,6 +25,12 @@ targets:
     main: src/utilities/clustering_rmsd_per_dcd.cr
   clustering_rmsd_rdgyr_per_dcd:
     main: src/utilities/clustering_rmsd_rdgyr_per_dcd.cr
+  convert_sdf_to_pdbs:
+    main: src/utilities/convert_sdf_to_pdbs.cr
+  rmsd_sdf:
+    main: src/utilities/rmsd_sdf.cr
+  check_covalent:
+    main: src/utilities/check_covalent.cr
 
 crystal: 1.10.1
 
