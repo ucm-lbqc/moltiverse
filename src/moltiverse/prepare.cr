@@ -386,6 +386,7 @@ class Ligand
     puts "Output file: #{@output_name}.sdf".colorize(TURQUOISE)
     puts "_____________________________________________________".colorize(YELLOW)
     centroids.to_sdf "#{@output_name}.sdf"
+    centroids.to_pdb "#{@output_name}.pdb", bonds: :all
     t2 = Time.monotonic
     t2 - t1
   end
