@@ -131,6 +131,15 @@ OptionParser.parse do |parser|
   parser.on("-s N", "--fullsamples=N", "FullSamples setting for ABF calculations. Default: 500") do |str|
     fullsamples = str.to_i32
   end
+  parser.on("-i N", "--hillweight=N", "HillWeight setting for Metadynamics calculation. Default: 0.5") do |str|
+    hillweight = str.to_f64
+  end
+  parser.on("-d N", "--hillwidth=N", "HillWidth setting for Metadynamics calculation. Default: 1.0") do |str|
+    hillwidth = str.to_f64
+  end
+  parser.on("-r N", "--newhillfrequency=N", "NewHillFrequency setting for Metadynamics calculation. Default: 100") do |str|
+    newhillfrequency = str.to_i32
+  end
   parser.on("-u N", "--bin_width=N", "Bin width setting for ABF calculations. Default: 0.05") do |str|
     bin_width = str.to_f64
   end
@@ -187,7 +196,7 @@ if extension == ".smi"
       new_output_name = "#{output_name}_#{name}"
       puts "SMILE:"
       puts smile_code.colorize(AQUA)
-      protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, fullsamples)
+      protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, fullsamples, hillweight, hillwidth, newhillfrequency)
       lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
       t_start = Time.monotonic
       success, proccess_time = lig.proccess_input
@@ -211,7 +220,7 @@ if extension == ".smi"
     end
   end
 else
-  protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, fullsamples)
+  protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, fullsamples, hillweight, hillwidth, newhillfrequency)
   lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
   lig.add_h
   lig.extend_structure
