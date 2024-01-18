@@ -24,7 +24,10 @@ module NAMD::Input
     colvars : Array(Colvar),
     ref_structure : Chem::Structure,
     use_metadynamics : Bool,
-    fullsamples : Int32
+    fullsamples : Int32,
+    hillweight : Float64,
+    hillwidth : Float64,
+    newhillfrequency : Int32
   )
     unless ref_structure.source_file
       raise ArgumentError.new("#{ref_structure} do not have a path to file")

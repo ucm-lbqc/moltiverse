@@ -36,10 +36,10 @@ abf {
 <%- if use_metadynamics -%>
 metadynamics {
   colvars            <%= colvars.join(" ", &.component.name.underscore) %>
-  hillWeight         0.5
-  hillWidth          1.0
+  hillWeight         <%= hillweight %>
+  hillWidth          <%= hillwidth %>
   #wellTempered       on
-  newHillFrequency   100
+  newHillFrequency   <%= newhillfrequency %>
   #biasTemperature    1490
 }
 <%- end -%>
