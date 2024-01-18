@@ -15,6 +15,7 @@ require "option_parser"
 require "./moltiverse/**"
 
 # Define defaults values for parser variables.
+#Global settings
 ligand = ""
 extension = ""
 ph_target = 7.0
@@ -22,24 +23,33 @@ keep_hydrogens = true
 extend_molecule = true
 explicit_water = false
 output_name = "empty"
+simulation_time = 1.0
+n_confs = 250
+output_frequency = 500
+n_variants = 1
+parallel_runs = nil
+cores_per_run = 4
+
+#Colvars settings
 colvars = [
   Colvar::Windowed.new(
     Colvar::RadiusOfGyration.new,
     bounds: 0.0..10.0,
     bin_width: 0.05,
-    windows: 40,
-    force_constant: 80.0,
+    windows: 10,
+    force_constant: 10.0,
   ),
 ]
-simulation_time = 1.0
-metadynamics = true
-n_confs = 250
-output_frequency = 500
-fullsamples = 500
 bin_width = 0.05
-n_variants = 1
-parallel_runs = nil
-cores_per_run = 4
+
+#ABF settings
+fullsamples = 500
+
+#Metadynamics settings
+metadynamics = true
+hillweight = 0.5
+hillwidth = 1.0
+newhillfrequency = 100
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
   parser.on("-l FILE", "--ligand=FILE", "Input ligand file [SMI, PDB, MOL, MOL2]") do |str|

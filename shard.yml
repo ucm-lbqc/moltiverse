@@ -31,6 +31,10 @@ targets:
     main: src/utilities/rmsd_sdf.cr
   check_covalent:
     main: src/utilities/check_covalent.cr
+  rdgyr:
+    main: src/utilities/rdgyr.cr
+  rmsd_matrix_for_sdf:
+    main: src/utilities/rmsd_matrix_for_sdf.cr
 
 crystal: 1.10.1
 
