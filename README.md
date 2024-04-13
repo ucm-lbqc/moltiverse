@@ -1,6 +1,12 @@
 # Moltiverse
 
-Moltiverse is a command-line application for generating molecular conformers using enhanced sampling methods.
+[<img align="left" src="./assets/moltiverse_logo_color_hex_transparent.png" width="250" />](./assets/moltiverse_logo_color_hex_transparent.png) Moltiverse is a molecular conformer generator available as an open-source command line application written in the modern Crystal language. 
+
+Moltiverse uses the robust ecosystem of open-source applications to process the molecules and perform conformational sampling. 
+
+The conformer generation protocol consists of seven main steps: (i) molecular pre-processing which includes conversion of the SMILES code into three-dimensional coordinates using Open Babel software, (ii) structure spreading, (iii) parameterization of the molecule with the GAFF2 force field using Amber Tools, (iv) energetic minimization, (v) sampling of the molecule with the M-eABF method in vacuum using the NAMD molecular dynamics engine, (vi) structure clustering, and (vii) conformer ensemble refinement using electronic structure optimization calculations with XTB software. 
+
+
 
 ## Installation
 
