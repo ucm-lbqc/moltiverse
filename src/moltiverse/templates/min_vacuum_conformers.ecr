@@ -1,0 +1,47 @@
+set sys <%= lig.basename %>
+set temperature 300
+set outputName min.${sys}
+
+# global configuration
+parmfile                        <%= lig.topology_file %>
+#ambercoor                       <%= lig.coordinates_file %>
+coordinates                     <%= lig.coordinates_file %>
+temperature                     $temperature
+outputName                      $outputName
+
+# minimization
+minimization                    on
+numSteps                        <%= lig.min_steps %>
+amber                           on          # AMBER IN NAMD
+exclude                         scaled1-4   # AMBER IN NAMD
+1-4scaling                      0.833333    # AMBER IN NAMD
+switching                       off         # AMBER IN NAMD
+cutoff                          50          # AMBER IN NAMD
+pairListDist                    52          # AMBER IN NAMD
+#LJcorrection                   on          # AMBER IN NAMD Take care, in alchemical simulations should be on.
+scnb                            2.0         # AMBER IN NAMD
+readexclusions                  yes         # AMBER IN NAMD
+ZeroMomentum                    on          # AMBER IN NAMD
+
+# avoid "periodic cell too small for patch grid" errors
+margin                          5
+
+# integration
+rigidBonds                      none         # AMBER IN NAMD (water or all)
+rigidTolerance                  1.0e-8        # AMBER IN NAMD  
+useSettle                       on            # AMBER IN NAMD
+timestep                        1.0
+firstTimestep                   0
+fullElectFrequency              1             # AMBER IN NAMD
+nonBondedFreq                   1             # AMBER IN NAMD
+stepsPerCycle                   10            # AMBER IN NAMD
+
+# output
+binaryOutput                    yes
+binaryRestart                   yes
+outputEnergies                  100
+outputPressure                  100
+outputTiming                    100
+xstFreq                         100
+dcdFreq                         100
+restartFreq                     100
