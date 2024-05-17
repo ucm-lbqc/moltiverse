@@ -19,7 +19,7 @@ colvar {
       atomsCol B
       atomsColValue 1.0
     }
-    <%- if cv.is_a? Colvar::RMSD -%>
+    <%- if cv.component.keyword == "RMSD" -%>
       refpositionsfile  <%= ref_structure.source_file %>
     <%- end -%>
   }
