@@ -23,7 +23,8 @@ end
 
 abstract struct Colvar::Component
   def keyword : String
-    name.camelcase(lower: true)
+    #name.camelcase(lower: true)
+    name.upcase
   end
 
   def name : String
