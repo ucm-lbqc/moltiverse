@@ -220,6 +220,10 @@ if extension == ".smi"
         log.print("#{name},sampling_time,#{sampling_time}\n")
         clustering_time = lig.clustering
         log.print("#{name},clustering_time,#{clustering_time}\n")
+        mm_refinement_time = lig.mm_refinement
+        log.print("#{name},mm_refinement_time,#{mm_refinement_time}\n")
+        qm_refinement_time = lig.qm_refinement
+        log.print("#{name},qm_refinement_time,#{qm_refinement_time}\n")
         t_final = Time.monotonic
         log.print("#{name},total_time,#{t_final - t_start}\n")
       else
