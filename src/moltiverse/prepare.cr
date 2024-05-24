@@ -423,4 +423,93 @@ class Ligand
     t2 = Time.monotonic
     t2 - t1
   end
+
+  def mm_refinement
+    t1 = Time.monotonic
+    puts "Performing MM refinement...".colorize(GREEN)
+    structures : Array(Chem::Structure) = [] of Chem::Structure
+    pdb_names : Array(String) = [] of String
+    mm_refined_structures : Array(Chem::Structure) = [] of Chem::Structure
+    
+    # VARIABLES
+    cores = 1
+    steps = 300
+
+    # Reading previously generated conformers
+    sdf_structures = Array(Chem::Structure).from_sdf("#{@output_name}.sdf")
+    sdf_structures.map_with_index do |_, idx|
+      st = sdf_structures[idx]
+      structures.push(st)
+    end
+
+    # Conformer optimization using MM
+    structures.each_with_index do |st, idx|
+      idx+=1
+      st.to_pdb "#{idx}.pdb"
+      pdb = Conformer.new("#{idx}.pdb", "#{@topology_file}", steps, false)
+      NAMD::Input.minimization("min.#{pdb.basename}.namd", pdb)
+      NAMD.run("min.#{pdb.basename}.namd", :setcpuaffinity, cores: cores)
+      # Extracting last frame of the minimized trajectory
+      Chem::DCD::Reader.open(("min.#{pdb.basename}.dcd"), pdb.structure) do |reader|
+        n_structures = reader.n_entries - 1
+        st = reader.read_entry n_structures
+        mm_refined_structures.push(st)
+        st.to_pdb "#{idx}.min.pdb"
+      end
+      # Delete files
+      File.delete("#{idx}.pdb") if File.exists?("#{idx}.pdb")
+      File.delete("#{idx}.min.pdb") if File.exists?("#{idx}.min.pdb")
+      Dir["./*.#{idx}*"].each do |temporary_file|
+        File.delete(temporary_file) if File.exists?(temporary_file)
+      end
+    end
+    # Export new SDF file with the optimized structures
+    mm_refined_structures.to_sdf "#{@output_name}_mm.sdf"
+    puts "Output file: '#{@output_name}_mm.sdf' file".colorize(TURQUOISE)
+    t2 = Time.monotonic
+    t2 - t1
+  end
+
+  def qm_refinement
+    t1 = Time.monotonic
+    puts "Performing QM refinement...".colorize(GREEN)
+    structures : Array(Chem::Structure) = [] of Chem::Structure
+    pdb_names : Array(String) = [] of String
+    qm_refined_structures : Array(Chem::Structure) = [] of Chem::Structure
+    
+    # VARIABLES
+    xtb_exec = "xtb"
+    optimization_mode = "crude"
+    iter = 1000
+    cores = 1
+    steps = 300
+
+    # Reading previously generated conformers
+    sdf_structures = Array(Chem::Structure).from_sdf("#{@output_name}_mm.sdf")
+    sdf_structures.map_with_index do |_, idx|
+      st = sdf_structures[idx]
+      structures.push(st)
+    end
+
+    # Conformer optimization using MM
+    structures.each_with_index do |st, idx|
+      idx+=1
+      st.to_pdb "#{idx}.pdb"
+      arguments = ["#{idx}.pdb", "--opt", "#{optimization_mode}", "--iterations", "#{iter}"]
+      run_cmd_silent(cmd = xtb_exec, args = arguments, output_file = "#{idx}.log")
+      if File.exists?("xtbopt.pdb")
+        pdb = Chem::Structure.from_pdb("xtbopt.pdb")
+      else
+        pdb = st
+      end
+      qm_refined_structures.push(pdb)
+      File.delete("xtbopt.pdb") if File.exists?("xtbopt.pdb")
+    end
+    # Export new SDF file with the optimized structures
+    qm_refined_structures.to_sdf "#{@output_name}_qm.sdf"
+    puts "Output file: '#{@output_name}_qm.sdf' file".colorize(TURQUOISE)
+    puts "_____________________________________________________".colorize(YELLOW)
+    t2 = Time.monotonic
+    t2 - t1
+  end
 end
