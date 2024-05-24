@@ -1,3 +1,37 @@
+class Conformer
+  def initialize(input_pdb : String, input_topology : String, min_steps : Int32, explicit_water : Bool)
+    @coordinates_file = Path.new(input_pdb).expand.to_s
+    @topology_file = Path.new(input_topology).expand.to_s
+    @explicit_water = explicit_water
+    @min_steps = min_steps
+    @extension = "#{File.extname("#{@coordinates_file}")}"
+    @basename = "#{File.basename("#{@coordinates_file}", "#{@extension}")}"
+    @pdb_system = input_pdb
+    @structure = Chem::Structure.from_pdb(@coordinates_file)
+  end
+  def coordinates_file
+    @coordinates_file
+  end
+  def topology_file
+    @topology_file
+  end
+  def basename
+    @basename
+  end
+  def min_steps
+    @min_steps
+  end
+  def explicit_water
+    @explicit_water
+  end
+  def pdb_system
+    @pdb_system
+  end
+  def structure
+    @structure
+  end
+end
+
 class Ligand
   def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float64 | Float64, output_name : String, extend_molecule : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
     @main_dir = main_dir
