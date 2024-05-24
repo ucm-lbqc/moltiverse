@@ -29,6 +29,8 @@ output_frequency = 500
 n_variants = 1
 parallel_runs = nil
 cores_per_run = 4
+cores_per_run_mm_refinement = 1
+cores_per_run_qm_refinement = 1
 
 #Colvars settings
 colvars = [
@@ -161,6 +163,12 @@ OptionParser.parse do |parser|
   end
   parser.on("--parallel=N", "Number of parallel NAMD runs. Default: CPU cores / cores per run") do |str|
     parallel = str.to_i.clamp 1..System.cpu_count
+  end
+  parser.on("--cores-per-mm-refinement=N", "Number of cores per NAMD run in the refinement using MM . Default: 1") do |str|
+    cores_per_run_mm_refinement = str.to_i
+  end
+  parser.on("--cores-per-qm-refinement=N", "Number of cores per XTB run in the refinement using QM . Default: 1") do |str|
+    cores_per_run_qm_refinement = str.to_i
   end
   parser.invalid_option do |flag|
     STDERR.puts "ERROR: #{flag} is not a valid option."
