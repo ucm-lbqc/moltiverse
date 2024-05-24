@@ -465,7 +465,8 @@ class Ligand
     end
     # Export new SDF file with the optimized structures
     mm_refined_structures.to_sdf "#{@output_name}_mm.sdf"
-    puts "Output file: '#{@output_name}_mm.sdf' file".colorize(TURQUOISE)
+    mm_refined_structures.to_pdb "#{@output_name}_mm.pdb", bonds: :all
+    puts "Output file: '#{@output_name}_mm.[sdf,pdb]'".colorize(TURQUOISE)
     t2 = Time.monotonic
     t2 - t1
   end
@@ -506,7 +507,8 @@ class Ligand
     end
     # Export new SDF file with the optimized structures
     qm_refined_structures.to_sdf "#{@output_name}_qm.sdf"
-    puts "Output file: '#{@output_name}_qm.sdf' file".colorize(TURQUOISE)
+    qm_refined_structures.to_pdb "#{@output_name}_qm.pdb", bonds: :all
+    puts "Output file: '#{@output_name}_qm.[sdf,pdb]'".colorize(TURQUOISE)
     puts "_____________________________________________________".colorize(YELLOW)
     t2 = Time.monotonic
     t2 - t1
