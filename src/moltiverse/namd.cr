@@ -9,6 +9,16 @@ module NAMD::Input
     File.write output_file, content
   end
 
+  def self.minimization(output_file : String, lig : Conformer)
+    if lig.explicit_water
+      cell = Chem::Structure.from_pdb(lig.pdb_system).cell
+      content = ECR.render "./src/moltiverse/templates/min_water_conformers.ecr"
+    else
+      content = ECR.render "./src/moltiverse/templates/min_vacuum_conformers.ecr"
+    end
+    File.write output_file, content
+  end
+
   def self.enhanced_sampling(output_file : String, lig : Ligand, time : Float64)
     stem = Path[output_file].stem
     if lig.explicit_water
