@@ -480,9 +480,8 @@ class Ligand
     # VARIABLES
     xtb_exec = "xtb"
     optimization_mode = "crude"
-    iter = 1000
+    iter = 1500
     cores = 1
-    steps = 300
 
     # Reading previously generated conformers
     sdf_structures = Array(Chem::Structure).from_sdf("#{@output_name}_mm.sdf")
