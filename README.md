@@ -48,4 +48,5 @@ following article:
 
 ## Contributors
 
-- [Mauricio Bedoya](https://github.com/your-github-user) - creator and maintainer
+- [Mauricio Bedoya](https://github.com/maurobedoya) - creator and maintainer
+- [Francisco Adasme](https://github.com/franciscoadasme) - maintainer
