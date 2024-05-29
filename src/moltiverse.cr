@@ -15,7 +15,7 @@ require "option_parser"
 require "./moltiverse/**"
 
 # Define defaults values for parser variables.
-#Global settings
+# Global settings
 ligand = ""
 extension = ""
 ph_target = 7.0
@@ -32,7 +32,7 @@ cores_per_run = 4
 cores_per_run_mm_refinement = 1
 cores_per_run_qm_refinement = 1
 
-#Colvars settings
+# Colvars settings
 colvars = [
   Colvar::Windowed.new(
     Colvar::RadiusOfGyration.new,
@@ -44,10 +44,10 @@ colvars = [
 ]
 bin_width = 0.05
 
-#ABF settings
+# ABF settings
 fullsamples = 500
 
-#Metadynamics settings
+# Metadynamics settings
 metadynamics = true
 hillweight = 0.5
 hillwidth = 1.0

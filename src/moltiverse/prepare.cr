@@ -9,24 +9,31 @@ class Conformer
     @pdb_system = input_pdb
     @structure = Chem::Structure.from_pdb(@coordinates_file)
   end
+
   def coordinates_file
     @coordinates_file
   end
+
   def topology_file
     @topology_file
   end
+
   def basename
     @basename
   end
+
   def min_steps
     @min_steps
   end
+
   def explicit_water
     @explicit_water
   end
+
   def pdb_system
     @pdb_system
   end
+
   def structure
     @structure
   end
@@ -430,7 +437,7 @@ class Ligand
     structures : Array(Chem::Structure) = [] of Chem::Structure
     pdb_names : Array(String) = [] of String
     mm_refined_structures : Array(Chem::Structure) = [] of Chem::Structure
-    
+
     # VARIABLES
     cores = 1
     steps = 300
@@ -444,7 +451,7 @@ class Ligand
 
     # Conformer optimization using MM
     structures.each_with_index do |st, idx|
-      idx+=1
+      idx += 1
       st.to_pdb "#{idx}.pdb"
       pdb = Conformer.new("#{idx}.pdb", "#{@topology_file}", steps, false)
       NAMD::Input.minimization("min.#{pdb.basename}.namd", pdb)
