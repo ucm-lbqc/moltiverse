@@ -15,21 +15,24 @@ module XTB
     level : OptimizationLevel = :normal,
     procs : Int = 1
   ) : Chem::Structure?
-    tempfile = "xtbinput.pdb"
-    structure.to_pdb tempfile
+    cwd = Path[Dir.current]
+    input = "xtbinput.pdb"
+    output = "xtbopt.pdb"
+    structure.to_pdb input
     args = {
       "chrg"   => structure.formal_charge,
       "opt"    => level.to_s.camelcase.downcase,
       "cycles" => cycles,
     }.transform_keys { |k| "--#{k}" }.map(&.to_a).flatten
-    run tempfile, args, procs
-    if File.exists?("xtbopt.pdb")
-      Chem::Structure.from_pdb("xtbopt.pdb")
+    run input, args, procs
+    if File.exists?(cwd / output)
+      Chem::Structure.from_pdb cwd / output
     else
       STDERR.puts "Something went wrong optimizing #{structure}"
     end
   ensure
-    Dir.glob("xtb*") { |path| File.delete path }
+    cwd = cwd.not_nil!
+    Dir.glob(cwd / "xtb*") { |path| File.delete path }
   end
 
   def self.run(
