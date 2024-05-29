@@ -33,6 +33,9 @@ module XTB
   ensure
     cwd = cwd.not_nil!
     Dir.glob(cwd / "xtb*") { |path| File.delete path }
+    File.delete? cwd / "charges"
+    File.delete? cwd / "wbo"
+    File.delete? cwd / ".xtboptok"
   end
 
   def self.run(
