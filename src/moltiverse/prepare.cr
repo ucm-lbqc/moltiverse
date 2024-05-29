@@ -474,38 +474,14 @@ class Ligand
   def qm_refinement
     t1 = Time.monotonic
     puts "Performing QM refinement...".colorize(GREEN)
-    structures : Array(Chem::Structure) = [] of Chem::Structure
-    pdb_names : Array(String) = [] of String
-    qm_refined_structures : Array(Chem::Structure) = [] of Chem::Structure
-    
-    # VARIABLES
-    xtb_exec = "xtb"
-    optimization_mode = "crude"
-    iter = 1500
-    cores = 1
 
-    # Reading previously generated conformers
-    sdf_structures = Array(Chem::Structure).from_sdf("#{@output_name}_mm.sdf")
-    sdf_structures.map_with_index do |_, idx|
-      st = sdf_structures[idx]
-      structures.push(st)
-    end
-
-    # Conformer optimization using MM
-    structures.each_with_index do |st, idx|
-      idx+=1
-      st.to_pdb "#{idx}.pdb"
-      arguments = ["#{idx}.pdb", "--opt", "#{optimization_mode}", "--iterations", "#{iter}"]
-      run_cmd_silent(cmd = xtb_exec, args = arguments, output_file = "#{idx}.log")
-      if File.exists?("xtbopt.pdb")
-        pdb = Chem::Structure.from_pdb("xtbopt.pdb")
-      else
-        pdb = st
+    qm_refined_structures = [] of Chem::Structure
+    Array(Chem::Structure)
+      .from_sdf("#{@output_name}_mm.sdf")
+      .each do |structure|
+        next unless pdb = XTB.optimize(structure, cycles: 1500, level: :crude)
+        qm_refined_structures.push(pdb)
       end
-      qm_refined_structures.push(pdb)
-      File.delete("xtbopt.pdb") if File.exists?("xtbopt.pdb")
-    end
-    # Export new SDF file with the optimized structures
     qm_refined_structures.to_sdf "#{@output_name}_qm.sdf"
     qm_refined_structures.to_pdb "#{@output_name}_qm.pdb", bonds: :all
     puts "Output file: '#{@output_name}_qm.[sdf,pdb]'".colorize(TURQUOISE)
