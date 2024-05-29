@@ -140,7 +140,8 @@ def run(
   cmd : String,
   args : Array,
   output path : Path | String | Nil = nil,
-  retries : Int = 1
+  retries : Int = 1,
+  env : Process::Env = nil
 ) : Bool
   output_file = path.try { |x| File.new(x, mode: "w") } || IO::Memory.new
   status = nil
@@ -148,7 +149,7 @@ def run(
   retries.times do |i|
     STDERR.puts "Retrying `#{cmdline}` (#{i})...".colorize(:blue) if i > 0
     # puts "Running `#{cmdline}`..."
-    process = Process.new(cmd, args.map(&.to_s), output: output_file, error: :pipe)
+    process = Process.new(cmd, args.map(&.to_s), output: output_file, error: :pipe, env: env)
     stderr = process.error.gets_to_end
     status = process.wait
     break if status.success?
