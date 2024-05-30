@@ -35,6 +35,8 @@ cores_per_run_mm_refinement = 1
 cores_per_run_qm_refinement = 1
 
 # Colvars settings
+colvars = v1.colvars
+bin_width = v1.bin_width
 
 # ABF settings
 fullsamples = v1.fullsamples
