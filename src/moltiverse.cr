@@ -36,10 +36,9 @@ OptionParser.parse do |parser|
     STDERR.puts "The --protocol value must be 'v1' or 'test'. 'v1' and 'test' are the only protocols supported by the current version."
     exit 1
   end
-  parser.on("-o NAME", "--output_name=NAME", "Output folder name. Default: Same as input ligand basename") do |str|
     output_name = str
   end
-  parser.on("-n N", "--number_of_conformers=N", "Desired number of conformers to generate. Default: #{n_confs}") do |str|
+  parser.on("-n N", "--conformers=N", "Number of conformers to generate. Default: #{n_confs}") do |str|
     n_confs = str.to_i32
     unless 1 <= n_confs <= 4000
       STDERR.puts "Error: invalid n value: #{str}"
