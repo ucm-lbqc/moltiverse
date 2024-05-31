@@ -11,13 +11,13 @@ class SamplingProtocol
 
   def initialize(
     @colvars : Array(Colvar::Windowed),
-    @metadynamics : Bool,
     @simulation_time : Float64,
-    @n_variants : Int32,
     @fullsamples : Int32,
+    @metadynamics : Bool,
     @hillweight : Float64,
     @hillwidth : Float64,
-    @newhillfrequency : Int32
+    @newhillfrequency : Int32,
+    @n_variants : Int32
   )
     unless @colvars.size.in?(1..2)
       raise ArgumentError.new("Invalid number of collective variables")
@@ -43,13 +43,13 @@ class SamplingProtocol
           force_constant: 10.0,
         ),
       ],
-      metadynamics: true,
       simulation_time: 0.4,
-      n_variants: 1,
       fullsamples: 500,
+      metadynamics: true,
       hillweight: 0.5,
       hillwidth: 1.0,
       newhillfrequency: 100,
+      n_variants: 1,
     )
   end
 
@@ -64,13 +64,13 @@ class SamplingProtocol
           force_constant: 10.0,
         ),
       ],
-      metadynamics: true,
       simulation_time: 2,
-      n_variants: 1,
       fullsamples: 500,
+      metadynamics: true,
       hillweight: 0.5,
       hillwidth: 1.0,
       newhillfrequency: 100,
+      n_variants: 1,
     )
   end
 
