@@ -24,6 +24,48 @@ class SamplingProtocol
     end
   end
 
+  def self.test : self
+    new(
+      colvars: [
+        Colvar::Windowed.new(
+          Colvar::RadiusOfGyration.new,
+          bounds: 0.0..4.0,
+          bin_width: 0.05,
+          windows: 2,
+          force_constant: 10.0,
+        ),
+      ],
+      metadynamics: true,
+      simulation_time: 0.4,
+      n_variants: 1,
+      fullsamples: 500,
+      hillweight: 0.5,
+      hillwidth: 1.0,
+      newhillfrequency: 100,
+    )
+  end
+
+  def self.v1 : self
+    new(
+      colvars: [
+        Colvar::Windowed.new(
+          Colvar::RadiusOfGyration.new,
+          bounds: 3.0..9.0,
+          bin_width: 0.05,
+          windows: 12,
+          force_constant: 10.0,
+        ),
+      ],
+      metadynamics: true,
+      simulation_time: 2,
+      n_variants: 1,
+      fullsamples: 500,
+      hillweight: 0.5,
+      hillwidth: 1.0,
+      newhillfrequency: 100,
+    )
+  end
+
   def describe
     time_per_variant = @simulation_time / @n_variants
     total_time = @simulation_time * @colvars.product(&.windows)
