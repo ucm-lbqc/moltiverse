@@ -62,13 +62,7 @@ if ligand.empty?
   STDERR.puts "Usage: moltiverse [OPTIONS] -l FILE"
   exit
 end
-
-# Options verification
-extension = "#{File.extname("#{ligand}")}"
-unless output_name
-  extension = "#{File.extname("#{ligand}")}"
-  output_name = "#{File.basename("#{ligand}", "#{extension}")}"
-end
+output_name ||= Path[ligand].stem
 
 check_dependencies
 
