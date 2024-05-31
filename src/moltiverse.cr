@@ -17,9 +17,8 @@ require "./moltiverse/**"
 # Define defaults values for parser variables.
 # Global settings
 protocol = SamplingProtocol.v1
-ligand = ""
-extension = ""
-output_name = "empty"
+ligand = nil
+output_name = nil
 n_confs = 250
 cpus = System.cpu_count
 OptionParser.parse do |parser|
@@ -74,7 +73,7 @@ end
 
 # Options verification
 extension = "#{File.extname("#{ligand}")}"
-if output_name == "empty"
+unless output_name
   extension = "#{File.extname("#{ligand}")}"
   output_name = "#{File.basename("#{ligand}", "#{extension}")}"
 end
