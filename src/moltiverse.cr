@@ -62,11 +62,6 @@ OptionParser.parse do |parser|
   end
 end
 
-def read_smi(file_path : String)
-  lines = File.read_lines(file_path).map do |line|
-    line.split(" ", limit: 2)
-  end
-  lines
 if ligand.empty?
   STDERR.puts "Usage: moltiverse [OPTIONS] -l FILE"
   exit
@@ -86,8 +81,8 @@ t_start_full = Time.monotonic
 main_dir = Dir.current
 puts "Output folders will have the format: 'output_name'_'smi_ligand_name'".colorize(YELLOW)
 log = File.open "#{output_name}_time_per_stage.log", "w"
-read_smi(ligand).each do |line|
-  smile_code, name = line
+File.each_line(ligand) do |line|
+  smile_code, name = line.split limit: 2
   new_output_name = "#{output_name}_#{name}"
   puts "SMILE:"
   puts smile_code.colorize(AQUA)
