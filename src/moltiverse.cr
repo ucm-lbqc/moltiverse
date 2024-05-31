@@ -104,11 +104,8 @@ end
 log.close
 puts "Process completed".colorize(GREEN)
 
-extension = "#{File.extname("#{ligand}")}"
-output_proc_time = "#{File.basename("#{ligand}", "#{extension}")}"
-
 t_end_full = Time.monotonic
 Dir.cd(main_dir)
 File.open("#{output_name}_total_proc_time.txt", "w") do |log|
-  log.print("#{output_proc_time}#{extension},#{t_end_full - t_start_full}")
+  log.print("#{File.basename ligand},#{t_end_full - t_start_full}")
 end
