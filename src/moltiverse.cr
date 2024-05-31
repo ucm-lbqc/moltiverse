@@ -60,13 +60,6 @@ OptionParser.parse do |parser|
       exit(1)
     end
   end
-  parser.on("-f N", "--frequency=N", "Output frequency to write frames and log files in the sampling stage. Default: 500") do |str|
-    protocol.output_frequency = str.to_i
-    unless 1 <= n_confs <= 100000
-      STDERR.puts "Error: invalid frequency value: #{str}"
-      exit(1)
-    end
-  end
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
