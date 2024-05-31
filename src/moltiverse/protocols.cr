@@ -154,7 +154,7 @@ class SamplingProtocol
         print " #{cv.component.name} ranges: #{cv.bounds}."
       end
       puts ".."
-      NAMD.run "#{stem}.namd", cores: procs, retries: 5, use_gpu: lig.explicit_water
+      NAMD.run "#{stem}.namd", cores: procs, retries: 5
 
       path = Path["outeabf.#{stem}.dcd"].expand
       if File.exists?(path)

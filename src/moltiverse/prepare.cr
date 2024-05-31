@@ -1,8 +1,7 @@
 class Conformer
-  def initialize(input_pdb : String, input_topology : String, min_steps : Int32, explicit_water : Bool)
+  def initialize(input_pdb : String, input_topology : String, min_steps : Int32)
     @coordinates_file = Path.new(input_pdb).expand.to_s
     @topology_file = Path.new(input_topology).expand.to_s
-    @explicit_water = explicit_water
     @min_steps = min_steps
     @extension = "#{File.extname("#{@coordinates_file}")}"
     @basename = "#{File.basename("#{@coordinates_file}", "#{@extension}")}"
@@ -26,10 +25,6 @@ class Conformer
     @min_steps
   end
 
-  def explicit_water
-    @explicit_water
-  end
-
   def pdb_system
     @pdb_system
   end
@@ -40,7 +35,7 @@ class Conformer
 end
 
 class Ligand
-  def initialize(file : String, smile : Bool | String, output_name : String, explicit_water : Bool, sampling_protocol : SamplingProtocol, main_dir : String)
+  def initialize(file : String, smile : Bool | String, output_name : String, sampling_protocol : SamplingProtocol, main_dir : String)
     @main_dir = main_dir
     @file = Path.new(file).expand.to_s
     @extension = "#{File.extname("#{file}")}"
@@ -54,7 +49,6 @@ class Ligand
     @extended_mol = "empty"
     @lig_center = Chem::Spatial::Vec3.new(0, 0, 0)
     @pdb_reference = "empty"
-    @explicit_water = explicit_water
     @sampling_protocol = sampling_protocol
     @charge = 0
   end
@@ -109,10 +103,6 @@ class Ligand
 
   def pdb_reference
     @pdb_reference
-  end
-
-  def explicit_water
-    @explicit_water
   end
 
   def sampling_protocol
@@ -219,71 +209,40 @@ class Ligand
     arguments = ["-i", "#{basename}_prep.mol2", "-f", "mol2", "-o", "#{basename}_prep.frcmod", "-s", "gaff2"]
     run_cmd(cmd = parmchk2_exec, args = arguments, output_file = Nil, stage = "Parameterization stage 2 ✔".colorize(GREEN), verbose = false)
 
-    if @explicit_water
-      outfile = "tleap.in"
-      File.write outfile, <<-SCRIPT
-        source leaprc.gaff2
-        source leaprc.water.tip3p
-        LIG = loadmol2 "#{basename}_prep.mol2"
-        solvatebox LIG SPCBOX 20 iso
-        loadamberparams "#{basename}_prep.frcmod"
-        saveAmberParm LIG "#{basename}_prep_solv.prmtop" "#{basename}_prep_solv.inpcrd"
-        savePdb LIG "#{basename}_prep_solv.pdb"
-        quit
-        SCRIPT
-      tleap_exec = "tleap"
-      arguments = ["-s", "-f", "#{outfile}", ">", "#{basename}_tleap.out"]
-      run_cmd(cmd = tleap_exec, args = arguments, output_file = Nil, stage = "Parameterization stage 3 ✔".colorize(GREEN), verbose = false)
-      # Verify if topology and coordinates file were generated.
-      top_file = "#{@basename}_prep_solv.prmtop"
-      coord_file = "#{@basename}_prep_solv.inpcrd"
-      if File.exists?(top_file)
-        @topology_file = Path.new(top_file).expand.to_s
-      else
-        puts "Topology file was not generated. Check the *.out log files."
-        exit(1)
-      end
-      if File.exists?(coord_file)
-        @coordinates_file = Path.new(coord_file).expand.to_s
-      else
-        puts "Coordinates file was not generated. Check the *.out log files."
-        exit(1)
-      end
-      @basename = "#{@basename}_prep_solv"
-      @pdb_system = "#{@basename}.pdb"
-      puts "SYSTEM INFO: ".colorize(GREEN), Chem::Structure.from_pdb(@pdb_system)
+    outfile = "tleap.in"
+    File.write outfile, <<-SCRIPT
+      source leaprc.gaff2
+      LIG = loadmol2 "#{basename}_prep.mol2"
+      loadamberparams "#{basename}_prep.frcmod"
+      saveAmberParm LIG "#{basename}_prep.prmtop" "#{basename}_prep.inpcrd"
+      savePdb LIG "#{basename}_prep.pdb"
+      quit
+      SCRIPT
+    tleap_exec = "tleap"
+    arguments = ["-s", "-f", "#{outfile}", ">", "#{basename}_tleap.out"]
+    run_cmd(cmd = tleap_exec, args = arguments, output_file = Nil, stage = "Parameterization stage 3 ✔".colorize(GREEN), verbose = false)
+    # Verify if topology and coordinates file were generated.
+    top_file = "#{@basename}_prep.prmtop"
+    coord_file = "#{@basename}_prep.inpcrd"
+
+    if File.exists?(top_file)
+      @topology_file = Path.new(top_file).expand.to_s
     else
-      outfile = "tleap.in"
-      File.write outfile, <<-SCRIPT
-        source leaprc.gaff2
-        LIG = loadmol2 "#{basename}_prep.mol2"
-        loadamberparams "#{basename}_prep.frcmod"
-        saveAmberParm LIG "#{basename}_prep.prmtop" "#{basename}_prep.inpcrd"
-        savePdb LIG "#{basename}_prep.pdb"
-        quit
-        SCRIPT
-      tleap_exec = "tleap"
-      arguments = ["-s", "-f", "#{outfile}", ">", "#{basename}_tleap.out"]
-      run_cmd(cmd = tleap_exec, args = arguments, output_file = Nil, stage = "Parameterization stage 3 ✔".colorize(GREEN), verbose = false)
-      # Verify if topology and coordinates file were generated.
-      top_file = "#{@basename}_prep.prmtop"
-      coord_file = "#{@basename}_prep.inpcrd"
-      if File.exists?(top_file)
-        @topology_file = Path.new(top_file).expand.to_s
-      else
-        puts "Topology file was not generated. Check the *.out log files."
-        exit(1)
-      end
-      if File.exists?(coord_file)
-        @coordinates_file = Path.new(coord_file).expand.to_s
-      else
-        puts "Coordinates file was not generated. Check the *.out log files."
-        exit(1)
-      end
-      @basename = "#{@basename}_prep"
-      @pdb_system = "#{@basename}.pdb"
-      puts "SYSTEM INFO: ".colorize(GREEN), Chem::Structure.from_pdb(@pdb_system)
+      puts "Topology file was not generated. Check the *.out log files."
+      exit(1)
     end
+
+    if File.exists?(coord_file)
+      @coordinates_file = Path.new(coord_file).expand.to_s
+    else
+      puts "Coordinates file was not generated. Check the *.out log files."
+      exit(1)
+    end
+
+    @basename = "#{@basename}_prep"
+    @pdb_system = "#{@basename}.pdb"
+    puts "SYSTEM INFO: ".colorize(GREEN), Chem::Structure.from_pdb(@pdb_system)
+
     t2 = Time.monotonic
     t2 - t1
   end
@@ -389,7 +348,7 @@ class Ligand
     structures.each_with_index do |st, idx|
       idx += 1
       st.to_pdb "#{idx}.pdb"
-      pdb = Conformer.new("#{idx}.pdb", "#{@topology_file}", steps, false)
+      pdb = Conformer.new("#{idx}.pdb", "#{@topology_file}", steps)
       NAMD::Input.minimization("min.#{pdb.basename}.namd", pdb)
       NAMD.run("min.#{pdb.basename}.namd", :setcpuaffinity, cores: cores)
       # Extracting last frame of the minimized trajectory

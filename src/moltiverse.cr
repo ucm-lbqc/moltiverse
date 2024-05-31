@@ -19,7 +19,6 @@ require "./moltiverse/**"
 protocol = SamplingProtocol.v1
 ligand = ""
 extension = ""
-explicit_water = false
 output_name = "empty"
 n_confs = 250
 parallel_runs = nil
@@ -43,15 +42,6 @@ OptionParser.parse do |parser|
   end
   parser.on("-o NAME", "--output_name=NAME", "Output folder name. Default: Same as input ligand basename") do |str|
     output_name = str
-  end
-  parser.on("-w Bool", "--water=Bool", "Add explicit water to run calculations. Default: false. Options: 'true', 'false'.") do |str|
-    case str
-    when "true"  then explicit_water = true
-    when "false" then explicit_water = false
-    else
-      puts "The --water value must be 'true' or 'false'"
-      exit
-    end
   end
   parser.on("-n N", "--number_of_conformers=N", "Desired number of conformers to generate. Default: 250") do |str|
     n_confs = str.to_i32
@@ -108,7 +98,7 @@ File.open("#{output_name}_time_per_stage.log", "w") do |log|
     new_output_name = "#{output_name}_#{name}"
     puts "SMILE:"
     puts smile_code.colorize(AQUA)
-    lig = Ligand.new(ligand, smile_code, new_output_name, explicit_water, protocol, main_dir)
+    lig = Ligand.new(ligand, smile_code, new_output_name, protocol, main_dir)
     t_start = Time.monotonic
     success, proccess_time = lig.proccess_input
     if success
