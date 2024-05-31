@@ -66,11 +66,11 @@ output_name ||= Path[ligand].stem
 
 check_dependencies
 
-t_start_full = Time.monotonic
-
-main_dir = Dir.current
 puts "Output folders will have the format: 'output_name'_'smi_ligand_name'".colorize(YELLOW)
+
 log = File.open "#{output_name}_time_per_stage.log", "w"
+main_dir = Dir.current
+t_start_full = Time.monotonic
 File.each_line(ligand) do |line|
   smile_code, name = line.split limit: 2
   new_output_name = "#{output_name}_#{name}"
@@ -104,8 +104,8 @@ end
 log.close
 puts "Process completed".colorize(GREEN)
 
-t_end_full = Time.monotonic
+elapsed = Time.monotonic - t_start_full
 Dir.cd(main_dir)
 File.open("#{output_name}_total_proc_time.txt", "w") do |log|
-  log.puts "#{File.basename ligand},#{t_end_full - t_start_full}"
+  log.puts "#{File.basename ligand},#{elapsed}"
 end
