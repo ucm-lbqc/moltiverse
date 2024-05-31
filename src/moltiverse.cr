@@ -116,7 +116,7 @@ File.open("#{output_name}_time_per_stage.log", "w") do |log|
     new_output_name = "#{output_name}_#{name}"
     puts "SMILE:"
     puts smile_code.colorize(AQUA)
-    lig = Ligand.new(ligand, smile_code, new_output_name, explicit_water, protocol, n_confs, main_dir, output_frequency)
+    lig = Ligand.new(ligand, smile_code, new_output_name, explicit_water, protocol, main_dir, output_frequency)
     t_start = Time.monotonic
     success, proccess_time = lig.proccess_input
     if success
@@ -129,7 +129,7 @@ File.open("#{output_name}_time_per_stage.log", "w") do |log|
       log.print("#{name},minimization_time,#{minimization_time}\n")
       sampling_time = lig.sampling parallel_runs, cores_per_run
       log.print("#{name},sampling_time,#{sampling_time}\n")
-      clustering_time = lig.clustering
+      clustering_time = lig.clustering n_confs
       log.print("#{name},clustering_time,#{clustering_time}\n")
       mm_refinement_time = lig.mm_refinement
       log.print("#{name},mm_refinement_time,#{mm_refinement_time}\n")

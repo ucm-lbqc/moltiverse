@@ -40,9 +40,8 @@ class Conformer
 end
 
 class Ligand
-  def initialize(file : String, smile : Bool | String, output_name : String, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
+  def initialize(file : String, smile : Bool | String, output_name : String, explicit_water : Bool, sampling_protocol : SamplingProtocol, main_dir : String, output_frequency : Int32)
     @main_dir = main_dir
-    @n_confs = n_confs
     @output_frequency = output_frequency
     @file = Path.new(file).expand.to_s
     @extension = "#{File.extname("#{file}")}"
@@ -131,10 +130,6 @@ class Ligand
 
   def working_dir
     @working_dir
-  end
-
-  def n_confs
-    @n_confs
   end
 
   def output_frequency
@@ -340,7 +335,7 @@ class Ligand
     t2 - t1
   end
 
-  def clustering
+  def clustering(n_confs : Int)
     t1 = Time.monotonic
     puts "Performing structure clustering".colorize(GREEN)
 
@@ -360,12 +355,12 @@ class Ligand
 
     puts "Clustering..."
     dendrogram = HClust.linkage(dism, :single)
-    clusters = dendrogram.flatten(count: @n_confs)
+    clusters = dendrogram.flatten(count: n_confs)
     centroids = clusters.map do |idxs|
       frames[idxs[dism[idxs].centroid]]
     end
 
-    if centroids.size != @n_confs
+    if centroids.size != n_confs
       puts "Warning: The number of molecule conformers generated is different from the requested ensemble.".colorize(YELLOW)
     end
 
