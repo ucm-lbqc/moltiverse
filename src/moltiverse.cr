@@ -15,7 +15,7 @@ end
 # Define defaults values for parser variables.
 # Global settings
 protocol = SamplingProtocol.v1
-ligand = nil
+ligand = ""
 output_name = nil
 n_confs = 250
 cpus = System.cpu_count
@@ -67,6 +67,9 @@ def read_smi(file_path : String)
     line.split(" ", limit: 2)
   end
   lines
+if ligand.empty?
+  STDERR.puts "Usage: moltiverse [OPTIONS] -l FILE"
+  exit
 end
 
 # Options verification
