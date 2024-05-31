@@ -12,6 +12,11 @@ module Moltiverse
   # TODO: Put your code here
 end
 
+def abort(message : String, status : Int8 = 1) : NoReturn
+  Crystal.ignore_stdio_errors { STDERR.puts "Error: #{message}".colorize(:red) }
+  exit status
+end
+
 # Define defaults values for parser variables.
 # Global settings
 protocol = SamplingProtocol.v1
@@ -22,27 +27,20 @@ cpus = System.cpu_count
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
   parser.on("-l FILE", "--ligand=FILE", "A SMILES file containing one or more molecules.") do |str|
-    unless File.exists?(str)
-      STDERR.puts "Error: ligand file not found: #{str}"
-      exit(1)
-    end
+    abort "Ligand file not found: #{str}" unless File.exists?(str)
     ligand = str
   end
   parser.on("-p NAME", "--protocol=NAME", "Moltiverse protocol. Default: 'v1'") do |str|
     protocol = SamplingProtocol.new str
   rescue ArgumentError
-    STDERR.puts "The --protocol value must be 'v1' or 'test'. 'v1' and 'test' are the only protocols supported by the current version."
-    exit 1
+    abort "The --protocol value must be 'v1' or 'test'. 'v1' and 'test' are the only protocols supported by the current version."
   end
   parser.on("-o NAME", "--output=NAME", "Output folder name. Default: input ligand's basename") do |str|
     output_name = str
   end
   parser.on("-n N", "--conformers=N", "Number of conformers to generate. Default: #{n_confs}") do |str|
     n_confs = str.to_i32
-    unless 1 <= n_confs <= 4000
-      STDERR.puts "Error: invalid n value: #{str}"
-      exit(1)
-    end
+    abort "Invalid conformers: #{str}" unless 1 <= n_confs <= 4000
   end
   parser.on(
     "-P N",
@@ -56,9 +54,7 @@ OptionParser.parse do |parser|
     exit
   end
   parser.invalid_option do |flag|
-    STDERR.puts "ERROR: #{flag} is not a valid option."
-    STDERR.puts parser
-    exit(1)
+    abort "#{flag} is not a valid option.\n#{parser}"
   end
 end
 
