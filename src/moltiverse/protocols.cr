@@ -8,6 +8,7 @@ class SamplingProtocol
   getter hillweight : Float64
   getter hillwidth : Float64
   getter newhillfrequency : Int32
+  property output_frequency : Int32
 
   def initialize(
     @colvars : Array(Colvar::Windowed),
@@ -17,7 +18,8 @@ class SamplingProtocol
     @hillweight : Float64,
     @hillwidth : Float64,
     @newhillfrequency : Int32,
-    @n_variants : Int32
+    @n_variants : Int32,
+    @output_frequency : Int = 500
   )
     unless @colvars.size.in?(1..2)
       raise ArgumentError.new("Invalid number of collective variables")
@@ -50,6 +52,7 @@ class SamplingProtocol
       hillwidth: 1.0,
       newhillfrequency: 100,
       n_variants: 1,
+      output_frequency: 500,
     )
   end
 
@@ -71,6 +74,7 @@ class SamplingProtocol
       hillwidth: 1.0,
       newhillfrequency: 100,
       n_variants: 1,
+      output_frequency: 500,
     )
   end
 
@@ -142,7 +146,7 @@ class SamplingProtocol
 
       structure = Chem::Structure.from_pdb(path)
 
-      NAMD::Input.enhanced_sampling("#{stem}.namd", lig, @simulation_time / @n_variants)
+      NAMD::Input.enhanced_sampling("#{stem}.namd", lig, @simulation_time / @n_variants, @output_frequency)
       NAMD::Input.colvars("#{stem}.colvars", colvars, structure, @metadynamics, @fullsamples, @hillweight, @hillwidth, @newhillfrequency)
 
       print "Runnning ABF on window '#{window}', variant '#{variant}'."

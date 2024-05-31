@@ -19,7 +19,12 @@ module NAMD::Input
     File.write output_file, content
   end
 
-  def self.enhanced_sampling(output_file : String, lig : Ligand, time : Float64)
+  def self.enhanced_sampling(
+    output_file : String,
+    lig : Ligand,
+    time : Float64,
+    output_frequency : Int
+  )
     stem = Path[output_file].stem
     if lig.explicit_water
       content = ECR.render "./src/moltiverse/templates/eabf_rmsd_rdgyr_water.ecr"

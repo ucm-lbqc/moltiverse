@@ -22,7 +22,6 @@ extension = ""
 explicit_water = false
 output_name = "empty"
 n_confs = 250
-output_frequency = 500
 parallel_runs = nil
 cores_per_run = 4
 cores_per_run_mm_refinement = 1
@@ -62,7 +61,7 @@ OptionParser.parse do |parser|
     end
   end
   parser.on("-f N", "--frequency=N", "Output frequency to write frames and log files in the sampling stage. Default: 500") do |str|
-    output_frequency = str.to_i32
+    protocol.output_frequency = str.to_i
     unless 1 <= n_confs <= 100000
       STDERR.puts "Error: invalid frequency value: #{str}"
       exit(1)
@@ -116,7 +115,7 @@ File.open("#{output_name}_time_per_stage.log", "w") do |log|
     new_output_name = "#{output_name}_#{name}"
     puts "SMILE:"
     puts smile_code.colorize(AQUA)
-    lig = Ligand.new(ligand, smile_code, new_output_name, explicit_water, protocol, main_dir, output_frequency)
+    lig = Ligand.new(ligand, smile_code, new_output_name, explicit_water, protocol, main_dir)
     t_start = Time.monotonic
     success, proccess_time = lig.proccess_input
     if success

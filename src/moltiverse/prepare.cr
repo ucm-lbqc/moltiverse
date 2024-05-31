@@ -40,9 +40,8 @@ class Conformer
 end
 
 class Ligand
-  def initialize(file : String, smile : Bool | String, output_name : String, explicit_water : Bool, sampling_protocol : SamplingProtocol, main_dir : String, output_frequency : Int32)
+  def initialize(file : String, smile : Bool | String, output_name : String, explicit_water : Bool, sampling_protocol : SamplingProtocol, main_dir : String)
     @main_dir = main_dir
-    @output_frequency = output_frequency
     @file = Path.new(file).expand.to_s
     @extension = "#{File.extname("#{file}")}"
     @basename = "#{File.basename("#{@file}", "#{@extension}")}"
@@ -130,10 +129,6 @@ class Ligand
 
   def working_dir
     @working_dir
-  end
-
-  def output_frequency
-    @output_frequency
   end
 
   def extended_mol
