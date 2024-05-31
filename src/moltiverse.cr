@@ -40,7 +40,7 @@ OptionParser.parse do |parser|
   parser.on("-o NAME", "--output_name=NAME", "Output folder name. Default: Same as input ligand basename") do |str|
     output_name = str
   end
-  parser.on("-n N", "--number_of_conformers=N", "Desired number of conformers to generate. Default: 250") do |str|
+  parser.on("-n N", "--number_of_conformers=N", "Desired number of conformers to generate. Default: #{n_confs}") do |str|
     n_confs = str.to_i32
     unless 1 <= n_confs <= 4000
       STDERR.puts "Error: invalid n value: #{str}"
