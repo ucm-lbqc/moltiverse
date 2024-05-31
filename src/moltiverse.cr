@@ -1,3 +1,10 @@
+require "chem"
+require "colorize"
+require "ecr"
+require "hclust"
+require "option_parser"
+require "./moltiverse/**"
+
 t_start_full = Time.monotonic
 
 # TODO: Write documentation for `Moltiverse`
@@ -6,13 +13,6 @@ module Moltiverse
 
   # TODO: Put your code here
 end
-
-require "chem"
-require "colorize"
-require "ecr"
-require "hclust"
-require "option_parser"
-require "./moltiverse/**"
 
 # Define defaults values for parser variables.
 # Global settings
