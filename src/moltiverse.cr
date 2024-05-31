@@ -30,12 +30,13 @@ OptionParser.parse do |parser|
     end
     ligand = str
   end
-  parser.on("-p NAME", "--protocol=NAME", "Moltiverse protocol. Default: v1") do |str|
+  parser.on("-p NAME", "--protocol=NAME", "Moltiverse protocol. Default: 'v1'") do |str|
     protocol = SamplingProtocol.new str
   rescue ArgumentError
     STDERR.puts "The --protocol value must be 'v1' or 'test'. 'v1' and 'test' are the only protocols supported by the current version."
     exit 1
   end
+  parser.on("-o NAME", "--output=NAME", "Output folder name. Default: input ligand's basename") do |str|
     output_name = str
   end
   parser.on("-n N", "--conformers=N", "Number of conformers to generate. Default: #{n_confs}") do |str|
@@ -48,7 +49,7 @@ OptionParser.parse do |parser|
   parser.on(
     "-P N",
     "--procs=N",
-    "Total number of CPUs to use. Defaults to the available CPUs."
+    "Total number of CPUs to use. Default: available CPUs."
   ) do |str|
     cpus = str.to_i.clamp 1..System.cpu_count
   end
