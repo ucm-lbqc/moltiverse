@@ -80,25 +80,25 @@ File.each_line(ligand) do |line|
   t_start = Time.monotonic
   success, proccess_time = lig.proccess_input
   if success
-    log.print("#{name},proccess_time,#{proccess_time}\n")
+    log.puts "#{name},proccess_time,#{proccess_time}"
     extend_structure_time = lig.extend_structure cpus
-    log.print("#{name},structure_spreading_time,#{extend_structure_time}\n")
+    log.puts "#{name},structure_spreading_time,#{extend_structure_time}"
     parameterization_time = lig.parameterize cpus
-    log.print("#{name},parameterization_time,#{parameterization_time}\n")
+    log.puts "#{name},parameterization_time,#{parameterization_time}"
     minimization_time = lig.minimize
-    log.print("#{name},minimization_time,#{minimization_time}\n")
+    log.puts "#{name},minimization_time,#{minimization_time}"
     sampling_time = lig.sampling cpus
-    log.print("#{name},sampling_time,#{sampling_time}\n")
+    log.puts "#{name},sampling_time,#{sampling_time}"
     clustering_time = lig.clustering n_confs
-    log.print("#{name},clustering_time,#{clustering_time}\n")
+    log.puts "#{name},clustering_time,#{clustering_time}"
     mm_refinement_time = lig.mm_refinement
-    log.print("#{name},mm_refinement_time,#{mm_refinement_time}\n")
+    log.puts "#{name},mm_refinement_time,#{mm_refinement_time}"
     qm_refinement_time = lig.qm_refinement cpus
-    log.print("#{name},qm_refinement_time,#{qm_refinement_time}\n")
+    log.puts "#{name},qm_refinement_time,#{qm_refinement_time}"
     t_final = Time.monotonic
-    log.print("#{name},total_time,#{t_final - t_start}\n")
+    log.puts "#{name},total_time,#{t_final - t_start}"
   else
-    log.print("#{name},failed\n")
+    log.puts "#{name},failed"
   end
 end
 log.close
@@ -107,5 +107,5 @@ puts "Process completed".colorize(GREEN)
 t_end_full = Time.monotonic
 Dir.cd(main_dir)
 File.open("#{output_name}_total_proc_time.txt", "w") do |log|
-  log.print("#{File.basename ligand},#{t_end_full - t_start_full}")
+  log.puts "#{File.basename ligand},#{t_end_full - t_start_full}"
 end
