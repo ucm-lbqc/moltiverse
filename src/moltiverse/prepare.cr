@@ -40,7 +40,7 @@ class Conformer
 end
 
 class Ligand
-  def initialize(file : String, smile : Bool | String, output_name : String, extend_molecule : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
+  def initialize(file : String, smile : Bool | String, output_name : String, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
     @main_dir = main_dir
     @n_confs = n_confs
     @output_frequency = output_frequency
@@ -57,7 +57,6 @@ class Ligand
     @lig_center = Chem::Spatial::Vec3.new(0, 0, 0)
     @pdb_reference = "empty"
     @explicit_water = explicit_water
-    @extend_molecule = extend_molecule
     @sampling_protocol = sampling_protocol
     @charge = 0
   end
@@ -116,10 +115,6 @@ class Ligand
 
   def explicit_water
     @explicit_water
-  end
-
-  def extend_molecule
-    @extend_molecule
   end
 
   def sampling_protocol
@@ -189,31 +184,29 @@ class Ligand
 
   def extend_structure
     t1 = Time.monotonic
-    if extend_molecule
-      iterations = 1000
-      variant_1 = rand_conf(@file)
-      max_rdgyr = variant_1.coords.rdgyr
-      puts "Spreading the molecule structure".colorize(GREEN)
-      puts "Initial RDGYR: #{max_rdgyr}"
-      # Create first variant in 1000 iterations.
-      # The best one will be saved in the variants_st_array.
-      (0...iterations).concurrent_each(System.cpu_count) do |iteration|
-        variant_decoy = rand_conf(@file)
-        actual_rdgyr = variant_decoy.coords.rdgyr
-        if actual_rdgyr > max_rdgyr && actual_rdgyr < 15.0
-          variant_1 = variant_decoy
-          max_rdgyr = actual_rdgyr
-          puts "MAX RDGYR #{max_rdgyr.round(4)}. ITERATION #{iteration}"
-        end
+    iterations = 1000
+    variant_1 = rand_conf(@file)
+    max_rdgyr = variant_1.coords.rdgyr
+    puts "Spreading the molecule structure".colorize(GREEN)
+    puts "Initial RDGYR: #{max_rdgyr}"
+    # Create first variant in 1000 iterations.
+    # The best one will be saved in the variants_st_array.
+    (0...iterations).concurrent_each(System.cpu_count) do |iteration|
+      variant_decoy = rand_conf(@file)
+      actual_rdgyr = variant_decoy.coords.rdgyr
+      if actual_rdgyr > max_rdgyr && actual_rdgyr < 15.0
+        variant_1 = variant_decoy
+        max_rdgyr = actual_rdgyr
+        puts "MAX RDGYR #{max_rdgyr.round(4)}. ITERATION #{iteration}"
       end
-
-      variant_1.to_mol("#{@basename}_rand.mol")
-      puts "RDGYR of the conformation: #{max_rdgyr}".colorize(GREEN)
-      @extension = ".mol"
-      @basename = "#{@basename}_rand"
-      @format = "mol"
-      @extended_mol = "#{@basename}.mol"
     end
+
+    variant_1.to_mol("#{@basename}_rand.mol")
+    puts "RDGYR of the conformation: #{max_rdgyr}".colorize(GREEN)
+    @extension = ".mol"
+    @basename = "#{@basename}_rand"
+    @format = "mol"
+    @extended_mol = "#{@basename}.mol"
     t2 = Time.monotonic
     t2 - t1
   end

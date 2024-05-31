@@ -19,7 +19,6 @@ require "./moltiverse/**"
 protocol = SamplingProtocol.v1
 ligand = ""
 extension = ""
-extend_molecule = true
 explicit_water = false
 output_name = "empty"
 n_confs = 250
@@ -45,15 +44,6 @@ OptionParser.parse do |parser|
   end
   parser.on("-o NAME", "--output_name=NAME", "Output folder name. Default: Same as input ligand basename") do |str|
     output_name = str
-  end
-  parser.on("-e N", "--extend=N", "Extend the initial ligand structure?. Default: true. Options: 'true' or 'false'.") do |str|
-    case str
-    when "false" then extend_molecule = false
-    when "true"  then extend_molecule = true
-    else
-      puts "The --random option must be 'true' or 'false'"
-      exit
-    end
   end
   parser.on("-w Bool", "--water=Bool", "Add explicit water to run calculations. Default: false. Options: 'true', 'false'.") do |str|
     case str
@@ -126,7 +116,7 @@ File.open("#{output_name}_time_per_stage.log", "w") do |log|
     new_output_name = "#{output_name}_#{name}"
     puts "SMILE:"
     puts smile_code.colorize(AQUA)
-    lig = Ligand.new(ligand, smile_code, new_output_name, extend_molecule, explicit_water, protocol, n_confs, main_dir, output_frequency)
+    lig = Ligand.new(ligand, smile_code, new_output_name, explicit_water, protocol, n_confs, main_dir, output_frequency)
     t_start = Time.monotonic
     success, proccess_time = lig.proccess_input
     if success
