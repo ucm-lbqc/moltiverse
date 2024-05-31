@@ -15,9 +15,8 @@ require "option_parser"
 require "./moltiverse/**"
 
 # Define defaults values for parser variables.
-# Call default protocol
-v1 = SamplingProtocol.v1
 # Global settings
+protocol = SamplingProtocol.v1
 ligand = ""
 extension = ""
 ph_target = 7.0
@@ -25,30 +24,12 @@ keep_hydrogens = true
 extend_molecule = true
 explicit_water = false
 output_name = "empty"
-simulation_time = 1.0
 n_confs = 250
 output_frequency = 500
-n_variants = v1.n_variants
 parallel_runs = nil
 cores_per_run = 4
 cores_per_run_mm_refinement = 1
 cores_per_run_qm_refinement = 1
-
-# Colvars settings
-colvars = v1.colvars
-bin_width = 0.05
-
-# ABF settings
-fullsamples = v1.fullsamples
-
-# Metadynamics settings
-metadynamics = v1.metadynamics
-hillweight = v1.hillweight
-hillwidth = v1.hillwidth
-newhillfrequency = v1.newhillfrequency
-
-protocol = v1
-
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
   parser.on("-l FILE", "--ligand=FILE", "Input ligand file [SMI, PDB, MOL, MOL2]") do |str|
@@ -101,24 +82,6 @@ OptionParser.parse do |parser|
       exit
     end
   end
-  parser.on("-b FLOAT", "--bounds_colvars=FLOAT", "Lower and upper limits for colvars [Å], the number of windows (w), and the wall constant (f) for every window: 'x1,x2,wx,fx,y1,y2,wy,fy' where x,y are the RMSD and RDGYR collective variables limits. e.g. '0.0,8.0,16,50,0,0,0,0' sample the RMSD from 0.0 to 8.0 divided in 16 windows with a wall constant of 50 kcal/mol.") do |str|
-    colvars.clear
-    str.split(',').each_slice(4).with_index do |(x1, x2, windows, force), i|
-      comp = i == 0 ? Colvar::RMSD.new : Colvar::RadiusOfGyration.new
-      bounds = x1.to_f..x2.to_f
-      cv = Colvar::Windowed.new(comp, bounds, bin_width, windows.to_i, force.to_f)
-      colvars << cv unless cv.windows == 0
-    end
-  end
-  parser.on("-m BOOL", "--metadynamics=BOOL", "Add metadynamics to eABF sampling?. Default: true") do |str|
-    case str
-    when "true"  then metadynamics = true
-    when "false" then metadynamics = false
-    else
-      puts "The --metadynamics value must be 'true' or 'false'"
-      exit
-    end
-  end
   parser.on("-n N", "--number_of_conformers=N", "Desired number of conformers to generate. Default: 250") do |str|
     n_confs = str.to_i32
     unless 1 <= n_confs <= 4000
@@ -132,30 +95,6 @@ OptionParser.parse do |parser|
       STDERR.puts "Error: invalid frequency value: #{str}"
       exit(1)
     end
-  end
-  parser.on("-s N", "--fullsamples=N", "FullSamples setting for ABF calculations. Default: 500") do |str|
-    fullsamples = str.to_i32
-  end
-  parser.on("-i N", "--hillweight=N", "HillWeight setting for Metadynamics calculation. Default: 0.5") do |str|
-    hillweight = str.to_f64
-  end
-  parser.on("-d N", "--hillwidth=N", "HillWidth setting for Metadynamics calculation. Default: 1.0") do |str|
-    hillwidth = str.to_f64
-  end
-  parser.on("-r N", "--newhillfrequency=N", "NewHillFrequency setting for Metadynamics calculation. Default: 100") do |str|
-    newhillfrequency = str.to_i32
-  end
-  parser.on("-u N", "--bin_width=N", "Bin width setting for ABF calculations. Default: 0.05") do |str|
-    bin_width = str.to_f64
-  end
-  parser.on("-v N", "--variants=N", "Number of initial conformations of the ligand to use as input in every window. Default: 1") do |str|
-    n_variants = str.to_i32
-    # TO:DO fix to check if the input is integer.
-  end
-  parser.on(
-    "-t FLOAT", "--time FLOAT",
-    "Simulation time (in ns) per window. Default: 1 ns") do |str|
-    simulation_time = str.to_f
   end
   parser.on("-h", "--help", "Show this help") do
     puts parser
@@ -234,8 +173,7 @@ if extension == ".smi"
     end
   end
 else
-  protocol_eabf1 = SamplingProtocol.new(colvars, metadynamics, simulation_time, n_variants, fullsamples, hillweight, hillwidth, newhillfrequency)
-  lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, extend_molecule, explicit_water, protocol_eabf1, n_confs, main_dir, output_frequency)
+  lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, extend_molecule, explicit_water, protocol, n_confs, main_dir, output_frequency)
   lig.add_h
   lig.extend_structure
   lig.parameterize
