@@ -16,7 +16,7 @@ require "./moltiverse/**"
 
 # Define defaults values for parser variables.
 # Call default protocol
-v1 = protocol_moltiverse_builder("v1")
+v1 = SamplingProtocol.v1
 # Global settings
 ligand = ""
 extension = ""
@@ -26,8 +26,8 @@ extend_molecule = true
 explicit_water = false
 output_name = "empty"
 simulation_time = 1.0
-n_confs = v1.n_confs
-output_frequency = v1.output_frequency
+n_confs = 250
+output_frequency = 500
 n_variants = v1.n_variants
 parallel_runs = nil
 cores_per_run = 4
@@ -36,7 +36,7 @@ cores_per_run_qm_refinement = 1
 
 # Colvars settings
 colvars = v1.colvars
-bin_width = v1.bin_width
+bin_width = 0.05
 
 # ABF settings
 fullsamples = v1.fullsamples
@@ -59,13 +59,10 @@ OptionParser.parse do |parser|
     ligand = str
   end
   parser.on("-p NAME", "--protocol=NAME", "Moltiverse protocol. Default: v1") do |str|
-    case str
-    when "v1"  then protocol = protocol_moltiverse_builder("v1")
-    when "test"  then protocol = protocol_moltiverse_builder("test")
-    else
-      puts "The --protocol value must be 'v1' or 'test'. 'v1' and 'test' are the only protocols supported by the current version."
-      exit
-    end
+    protocol = SamplingProtocol.new str
+  rescue ArgumentError
+    STDERR.puts "The --protocol value must be 'v1' or 'test'. 'v1' and 'test' are the only protocols supported by the current version."
+    exit 1
   end
   parser.on("--ph=N", "Desired pH to assign protonation. Default: 7.0") do |str|
     ph_target = str.to_f64
@@ -210,8 +207,7 @@ if extension == ".smi"
       new_output_name = "#{output_name}_#{name}"
       puts "SMILE:"
       puts smile_code.colorize(AQUA)
-      protocol_eabf1 = SamplingProtocol.new(protocol.colvars, protocol.metadynamics, protocol.simulation_time, protocol.n_variants, protocol.fullsamples, protocol.hillweight, protocol.hillwidth, protocol.newhillfrequency)
-      lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, extend_molecule, explicit_water, protocol_eabf1, protocol.n_confs, main_dir, protocol.output_frequency)
+      lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, extend_molecule, explicit_water, protocol, n_confs, main_dir, output_frequency)
       t_start = Time.monotonic
       success, proccess_time = lig.proccess_input
       if success

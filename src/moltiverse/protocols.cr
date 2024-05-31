@@ -2,7 +2,7 @@
 class SamplingProtocol
   getter colvars : Array(Colvar::Windowed)
   getter n_variants : Int32
-  getter metadynamics :  Bool
+  getter metadynamics : Bool
   getter simulation_time : Float64
   getter fullsamples : Int32
   getter hillweight : Float64
@@ -21,6 +21,14 @@ class SamplingProtocol
   )
     unless @colvars.size.in?(1..2)
       raise ArgumentError.new("Invalid number of collective variables")
+    end
+  end
+
+  def self.new(name : String) : self
+    case name
+    when "v1"   then v1
+    when "test" then test
+    else             raise ArgumentError.new("Unknown protocol '#{name}'")
     end
   end
 
@@ -152,157 +160,5 @@ class SamplingProtocol
         puts "No frames were generated in window #{window}".colorize(:yellow)
       end
     end
-  end
-end
-
-
-def protocol_moltiverse_builder(protocol : String) : MoltiverseProtocol
-  # v1 protocol
-  colvars = [
-    Colvar::Windowed.new(
-      Colvar::RadiusOfGyration.new,
-      bounds: 3.0..9.0,
-      bin_width: 0.05,
-      windows: 12,
-      force_constant: 10.0,
-    ),]
-  metadynamics = true
-  simulation_time = 2
-  n_variants = 1
-  fullsamples = 500
-  hillweight = 0.5
-  hillwidth = 1.0
-  newhillfrequency = 100
-  n_confs = 250
-  output_frequency = 500
-  bin_width = 0.05
-  v1 = MoltiverseProtocol.new(colvars, metadynamics, simulation_time, n_variants, fullsamples, hillweight, hillwidth, newhillfrequency, n_confs, output_frequency, bin_width)
-  selected_protocol = v1
-  # test
-  colvars = [
-    Colvar::Windowed.new(
-      Colvar::RadiusOfGyration.new,
-      bounds: 0.0..4.0,
-      bin_width: 0.05,
-      windows: 2,
-      force_constant: 10.0,
-    ),]
-  metadynamics = true
-  simulation_time = 0.4
-  n_variants = 1
-  fullsamples = 500
-  hillweight = 0.5
-  hillwidth = 1.0
-  newhillfrequency = 100
-  n_confs = 10
-  output_frequency = 1000
-  bin_width = 0.05
-  test = MoltiverseProtocol.new(colvars, metadynamics, simulation_time, n_variants, fullsamples, hillweight, hillwidth, newhillfrequency, n_confs, output_frequency, bin_width)
-
-  # v2 protocol
-  case protocol
-  when "v1"
-    selected_protocol = v1
-  when "test"
-    selected_protocol = test
-  else
-    v1
-  end
-  selected_protocol
-end
-
-class MoltiverseProtocol
-  getter colvars : Array(Colvar::Windowed)
-
-  @metadynamics : Bool
-  @simulation_time = 1.0
-  @n_variants : Int32
-  @fullsamples : Int32
-  @hillweight : Float64
-  @hillwidth : Float64
-  @newhillfrequency : Int32
-  @n_confs : Int32
-  @output_frequency : Int32
-  @bin_width : Float64
-  
-
-  def initialize(
-    @colvars : Array(Colvar::Windowed),
-    @metadynamics : Bool,
-    @simulation_time : Float64,
-    @n_variants : Int32,
-    @fullsamples : Int32,
-    @hillweight : Float64,
-    @hillwidth : Float64,
-    @newhillfrequency : Int32,
-    @n_confs : Int32,
-    @output_frequency : Int32,
-    @bin_width : Float64,
-  )
-    unless @colvars.size.in?(1..2)
-      raise ArgumentError.new("Invalid number of collective variables")
-    end
-  end
-
-  def n_variants
-    @n_variants
-  end
-
-  def fullsamples
-    @fullsamples
-  end
-
-  def hillweight
-    @hillweight
-  end
-
-  def hillwidth
-    @hillwidth
-  end
-
-  def newhillfrequency
-    @newhillfrequency
-  end
-
-  def metadynamics
-    @metadynamics
-  end
-
-  def n_confs
-    @n_confs
-  end
-
-  def output_frequency
-    @output_frequency
-  end
-
-  def bin_width
-    @bin_width
-  end
-
-  def simulation_time
-    @simulation_time
-  end
-
-  def describe
-    time_per_variant = @simulation_time / @n_variants
-    total_time = @simulation_time * @colvars.product(&.windows)
-
-    puts "SAMPLING PROTOCOL using a #{@colvars.size}D collective variable".colorize(GREEN)
-
-    @colvars.each do |cv|
-      puts "#{cv.component.name}:"
-      puts "Range of values:                    [ #{cv.bounds} ]"
-      puts "Number of windows:                  [ #{cv.windows} ]"
-      puts "Number of variants:                 [ #{@n_variants} ]"
-      puts "Width per window:                   [ #{cv.window_width} ]"
-      puts "Wall force constant:                [ #{cv.force_constant} ]"
-      puts "Simulation time:                    [ #{@simulation_time * cv.windows} ns ]"
-    end
-    puts
-    puts "Simulation time per window:         [ #{@simulation_time} ns ]"
-    puts "Simulation time per variant:        [ #{time_per_variant} ns ]"
-    puts "Total simulation time:              [ #{total_time} ns ]"
-    puts "Sampling method:                    [ #{@metadynamics ? "M-eABF" : "eABF"} ]"
   end
 end
