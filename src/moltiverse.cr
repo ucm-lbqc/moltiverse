@@ -5,8 +5,6 @@ require "hclust"
 require "option_parser"
 require "./moltiverse/**"
 
-t_start_full = Time.monotonic
-
 # TODO: Write documentation for `Moltiverse`
 module Moltiverse
   VERSION = "0.1.0"
@@ -79,6 +77,8 @@ unless output_name
 end
 
 check_dependencies
+
+t_start_full = Time.monotonic
 
 main_dir = Dir.current
 puts "Output folders will have the format: 'output_name'_'smi_ligand_name'".colorize(YELLOW)
