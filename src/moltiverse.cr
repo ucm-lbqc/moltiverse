@@ -19,8 +19,6 @@ require "./moltiverse/**"
 protocol = SamplingProtocol.v1
 ligand = ""
 extension = ""
-ph_target = 7.0
-keep_hydrogens = true
 extend_molecule = true
 explicit_water = false
 output_name = "empty"
@@ -32,7 +30,7 @@ cores_per_run_mm_refinement = 1
 cores_per_run_qm_refinement = 1
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
-  parser.on("-l FILE", "--ligand=FILE", "Input ligand file [SMI, PDB, MOL, MOL2]") do |str|
+  parser.on("-l FILE", "--ligand=FILE", "A SMILES file containing one or more molecules.") do |str|
     unless File.exists?(str)
       STDERR.puts "Error: ligand file not found: #{str}"
       exit(1)
@@ -44,22 +42,6 @@ OptionParser.parse do |parser|
   rescue ArgumentError
     STDERR.puts "The --protocol value must be 'v1' or 'test'. 'v1' and 'test' are the only protocols supported by the current version."
     exit 1
-  end
-  parser.on("--ph=N", "Desired pH to assign protonation. Default: 7.0") do |str|
-    ph_target = str.to_f64
-    unless 0.0 <= ph_target <= 14.0
-      STDERR.puts "Error: invalid pH value: #{str}"
-      exit(1)
-    end
-  end
-  parser.on("-k BOOL", "--keep_hydrogens=BOOL", "Keep original hydrogens. Default: true") do |str|
-    case str
-    when "true"  then keep_hydrogens = true
-    when "false" then keep_hydrogens = false
-    else
-      puts "The --keep_hydrogens value must be 'true' or 'false'"
-      exit
-    end
   end
   parser.on("-o NAME", "--output_name=NAME", "Output folder name. Default: Same as input ligand basename") do |str|
     output_name = str
@@ -127,7 +109,6 @@ def read_smi(file_path : String)
 end
 
 # Options verification
-ph_target = 7.0 unless ph_target
 extension = "#{File.extname("#{ligand}")}"
 if output_name == "empty"
   extension = "#{File.extname("#{ligand}")}"
@@ -137,49 +118,39 @@ end
 check_dependencies
 
 main_dir = Dir.current
-if extension == ".smi"
-  puts "Output folders will have the format: 'output_name'_'smi_ligand_name'".colorize(YELLOW)
-  smiles = read_smi(ligand)
-  File.open("#{output_name}_time_per_stage.log", "w") do |log|
-    smiles.each do |line|
-      smile_code, name = line
-      new_output_name = "#{output_name}_#{name}"
-      puts "SMILE:"
-      puts smile_code.colorize(AQUA)
-      lig = Ligand.new(ligand, smile_code, keep_hydrogens, ph_target, new_output_name, extend_molecule, explicit_water, protocol, n_confs, main_dir, output_frequency)
-      t_start = Time.monotonic
-      success, proccess_time = lig.proccess_input
-      if success
-        log.print("#{name},proccess_time,#{proccess_time}\n")
-        extend_structure_time = lig.extend_structure
-        log.print("#{name},structure_spreading_time,#{extend_structure_time}\n")
-        parameterization_time = lig.parameterize
-        log.print("#{name},parameterization_time,#{parameterization_time}\n")
-        minimization_time = lig.minimize
-        log.print("#{name},minimization_time,#{minimization_time}\n")
-        sampling_time = lig.sampling parallel_runs, cores_per_run
-        log.print("#{name},sampling_time,#{sampling_time}\n")
-        clustering_time = lig.clustering
-        log.print("#{name},clustering_time,#{clustering_time}\n")
-        mm_refinement_time = lig.mm_refinement
-        log.print("#{name},mm_refinement_time,#{mm_refinement_time}\n")
-        qm_refinement_time = lig.qm_refinement
-        log.print("#{name},qm_refinement_time,#{qm_refinement_time}\n")
-        t_final = Time.monotonic
-        log.print("#{name},total_time,#{t_final - t_start}\n")
-      else
-        log.print("#{name},failed\n")
-      end
+puts "Output folders will have the format: 'output_name'_'smi_ligand_name'".colorize(YELLOW)
+smiles = read_smi(ligand)
+File.open("#{output_name}_time_per_stage.log", "w") do |log|
+  smiles.each do |line|
+    smile_code, name = line
+    new_output_name = "#{output_name}_#{name}"
+    puts "SMILE:"
+    puts smile_code.colorize(AQUA)
+    lig = Ligand.new(ligand, smile_code, new_output_name, extend_molecule, explicit_water, protocol, n_confs, main_dir, output_frequency)
+    t_start = Time.monotonic
+    success, proccess_time = lig.proccess_input
+    if success
+      log.print("#{name},proccess_time,#{proccess_time}\n")
+      extend_structure_time = lig.extend_structure
+      log.print("#{name},structure_spreading_time,#{extend_structure_time}\n")
+      parameterization_time = lig.parameterize
+      log.print("#{name},parameterization_time,#{parameterization_time}\n")
+      minimization_time = lig.minimize
+      log.print("#{name},minimization_time,#{minimization_time}\n")
+      sampling_time = lig.sampling parallel_runs, cores_per_run
+      log.print("#{name},sampling_time,#{sampling_time}\n")
+      clustering_time = lig.clustering
+      log.print("#{name},clustering_time,#{clustering_time}\n")
+      mm_refinement_time = lig.mm_refinement
+      log.print("#{name},mm_refinement_time,#{mm_refinement_time}\n")
+      qm_refinement_time = lig.qm_refinement
+      log.print("#{name},qm_refinement_time,#{qm_refinement_time}\n")
+      t_final = Time.monotonic
+      log.print("#{name},total_time,#{t_final - t_start}\n")
+    else
+      log.print("#{name},failed\n")
     end
   end
-else
-  lig = Ligand.new(ligand, false, keep_hydrogens, ph_target, output_name, extend_molecule, explicit_water, protocol, n_confs, main_dir, output_frequency)
-  lig.add_h
-  lig.extend_structure
-  lig.parameterize
-  lig.minimize
-  lig.sampling parallel_runs, cores_per_run
-  lig.clustering
 end
 puts "Process completed".colorize(GREEN)
 

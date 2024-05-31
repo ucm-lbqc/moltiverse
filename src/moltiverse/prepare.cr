@@ -40,7 +40,7 @@ class Conformer
 end
 
 class Ligand
-  def initialize(file : String, smile : Bool | String, keep_hydrogens : Bool, ph : Float64 | Float64, output_name : String, extend_molecule : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
+  def initialize(file : String, smile : Bool | String, output_name : String, extend_molecule : Bool, explicit_water : Bool, sampling_protocol : SamplingProtocol, n_confs : Int32, main_dir : String, output_frequency : Int32)
     @main_dir = main_dir
     @n_confs = n_confs
     @output_frequency = output_frequency
@@ -48,8 +48,6 @@ class Ligand
     @extension = "#{File.extname("#{file}")}"
     @basename = "#{File.basename("#{@file}", "#{@extension}")}"
     @smile = smile
-    @keep_hydrogens = keep_hydrogens
-    @ph = ph
     @output_name = output_name
     @topology_file = "empty"
     @coordinates_file = "empty"
@@ -61,6 +59,7 @@ class Ligand
     @explicit_water = explicit_water
     @extend_molecule = extend_molecule
     @sampling_protocol = sampling_protocol
+    @charge = 0
   end
 
   def file
@@ -69,10 +68,6 @@ class Ligand
 
   def smile
     @smile
-  end
-
-  def keep_hydrogens
-    @keep_hydrogens
   end
 
   def path
@@ -85,10 +80,6 @@ class Ligand
 
   def format
     @format
-  end
-
-  def ph
-    @ph
   end
 
   def basename
@@ -173,65 +164,27 @@ class Ligand
       Dir.cd(@output_name)
       @working_dir = Dir.current
     end
-    if @smile
-      @basename = "#{@output_name}"
-      puts "Running openbabel convertion..."
-      @format = "mol"
-      @extension = ".mol"
-      @file = Path.new("#{@basename}#{@extension}").expand.to_s
-      begin
-        structure = OpenBabel.convert_smiles(@smile.as(String))
-        structure.to_mol @file
-        @charge = structure.formal_charge
-        puts "Molecule charge: #{@charge}"
-        success = true
-      rescue ex
-        puts "SMILES conversion failed due to #{ex}".colorize(RED)
-        puts "Please check the input SMILE code:"
-        puts @smile.colorize(AQUA)
-        # exit(1)
-      end
-    else
-      @path = Path.new(@file).expand.parent
-      @format = "#{@extension.split(".")[1]}"
-      @basename = "#{File.basename("#{@file}", "#{@extension}")}"
+    @basename = "#{@output_name}"
+    puts "Running openbabel convertion..."
+    @format = "mol"
+    @extension = ".mol"
+    @file = Path.new("#{@basename}#{@extension}").expand.to_s
+    begin
+      structure = OpenBabel.convert_smiles(@smile.as(String))
+      structure.to_mol @file
+      @charge = structure.formal_charge
+      puts "Molecule charge: #{@charge}"
+      success = true
+    rescue ex
+      puts "SMILES conversion failed due to #{ex}".colorize(RED)
+      puts "Please check the input SMILE code:"
+      puts @smile.colorize(AQUA)
+      # exit(1)
     end
+
     t2 = Time.monotonic
     time = t2 - t1
     return success, time
-  end
-
-  def add_h
-    # 1. This stage cheks if hydrogens must be preserved, if so, only convert the file to .pdb using openbabel.
-    # This must be done because RDKit does not read the formal charge  correctly when, possibly, connectivities and
-    # charge in the last column of atoms do not specify the atom partial charges.
-    # TO:DO 1. Proper conversion to read adecuately the formal charge. Extremely important for tleap parameterization.
-    # TO:DO 2. Test antechamber to use as input the mol2 file. Require a formal charge especification?
-    # TO:DO 3. If keep_hydrogens == yes and input file is a PDB, ask the user to specify the formal charge, and use it for
-    # tleap parameterization.
-    if @keep_hydrogens
-      File.copy("#{@file}", "original_keep_hydrogens#{extension}")
-      puts "Running openbabel convertion..."
-      OpenBabel.convert(@file, "#{@basename}.mol")
-      puts "File converted to .mol format ✔".colorize(GREEN)
-      @basename = "#{@basename}"
-      @format = "mol"
-      @extension = ".mol"
-    else
-      File.copy("#{@file}", "original_no-keep_hydrogens#{extension}")
-      puts "Running openbabel convertion..."
-      structure = OpenBabel.add_hydrogens @file, @ph
-      structure.to_mol "#{@basename}_h.mol"
-      puts "Hydrogen addition ✔".colorize(GREEN)
-      @basename = "#{@basename}_h"
-      @format = "mol"
-      @extension = ".mol"
-    end
-    new_file = "#{@basename}#{@extension}"
-    @file = Path.new(new_file).expand.to_s
-    @path = Path.new(new_file).expand.parent
-    @charge = Chem::Structure.read(@file).formal_charge
-    puts "Molecule charge: #{@charge}"
   end
 
   def extend_structure
