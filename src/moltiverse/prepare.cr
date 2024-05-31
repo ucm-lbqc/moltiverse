@@ -162,7 +162,7 @@ class Ligand
     return success, time
   end
 
-  def extend_structure
+  def extend_structure(cpus : Int = System.cpu_count)
     t1 = Time.monotonic
     iterations = 1000
     variant_1 = rand_conf(@file)
@@ -171,7 +171,7 @@ class Ligand
     puts "Initial RDGYR: #{max_rdgyr}"
     # Create first variant in 1000 iterations.
     # The best one will be saved in the variants_st_array.
-    (0...iterations).concurrent_each(System.cpu_count) do |iteration|
+    (0...iterations).concurrent_each(cpus) do |iteration|
       variant_decoy = rand_conf(@file)
       actual_rdgyr = variant_decoy.coords.rdgyr
       if actual_rdgyr > max_rdgyr && actual_rdgyr < 15.0
@@ -191,7 +191,7 @@ class Ligand
     t2 - t1
   end
 
-  def parameterize
+  def parameterize(cpus : Int = System.cpu_count)
     t1 = Time.monotonic
     # Convert to PDB after add_h and structure randomization and write PDB without connectivities
     new_pdb = Chem::Structure.read("#{@basename}#{@extension}")
@@ -204,7 +204,8 @@ class Ligand
     antechamber_exec = "antechamber"
     arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "bcc", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2"]
     puts "Parameterizing ligand with tleap ..."
-    run_cmd(cmd = antechamber_exec, args = arguments, output_file = Nil, stage = "Parameterization stage 1 ✔".colorize(GREEN), verbose = false)
+    run("antechamber", arguments, env: {"OMP_NUM_THREADS" => "#{cpus},1"})
+    puts "Parameterization stage 1 ✔".colorize(GREEN)
     parmchk2_exec = "parmchk2"
     arguments = ["-i", "#{basename}_prep.mol2", "-f", "mol2", "-o", "#{basename}_prep.frcmod", "-s", "gaff2"]
     run_cmd(cmd = parmchk2_exec, args = arguments, output_file = Nil, stage = "Parameterization stage 2 ✔".colorize(GREEN), verbose = false)
@@ -257,7 +258,7 @@ class Ligand
     cz = pdb.coords.center.z
     NAMD::Input.minimization("min.namd", self)
     print "Runnning minimization..."
-    NAMD.run("min.namd", :setcpuaffinity, cores: 4)
+    NAMD.run("min.namd", :setcpuaffinity, cores: 1)
     puts " done"
     @basename = "min.#{@basename}"
     new_dcd = "#{@basename}.dcd"
@@ -279,12 +280,12 @@ class Ligand
     t2 - t1
   end
 
-  def sampling(parallel workers : Int? = nil, procs : Int = 4)
+  def sampling(cpus : Int = System.cpu_count)
     t1 = Time.monotonic
     # Print protocol description
     puts sampling_protocol.describe
     # Generate variants, and perform sampling
-    sampling_protocol.execute(self, workers, procs)
+    sampling_protocol.execute(self, cpus)
     t2 = Time.monotonic
     t2 - t1
   end
@@ -334,7 +335,6 @@ class Ligand
     mm_refined_structures : Array(Chem::Structure) = [] of Chem::Structure
 
     # VARIABLES
-    cores = 1
     steps = 300
 
     # Reading previously generated conformers
@@ -350,7 +350,7 @@ class Ligand
       st.to_pdb "#{idx}.pdb"
       pdb = Conformer.new("#{idx}.pdb", "#{@topology_file}", steps)
       NAMD::Input.minimization("min.#{pdb.basename}.namd", pdb)
-      NAMD.run("min.#{pdb.basename}.namd", :setcpuaffinity, cores: cores)
+      NAMD.run("min.#{pdb.basename}.namd", :setcpuaffinity, cores: 1)
       # Extracting last frame of the minimized trajectory
       Chem::DCD::Reader.open(("min.#{pdb.basename}.dcd"), pdb.structure) do |reader|
         n_structures = reader.n_entries - 1
@@ -373,7 +373,7 @@ class Ligand
     t2 - t1
   end
 
-  def qm_refinement(parallel workers : Int = System.cpu_count)
+  def qm_refinement(cpus : Int = System.cpu_count)
     t1 = Time.monotonic
     puts "Performing QM refinement...".colorize(GREEN)
 
@@ -382,7 +382,7 @@ class Ligand
     qm_refined_structures = [] of Chem::Structure
     Array(Chem::Structure)
       .from_sdf("#{@output_name}_mm.sdf")
-      .concurrent_each(workers) do |structure|
+      .concurrent_each(cpus) do |structure|
         i += 1
         workdir = cwd / ("%05d" % i)
         Dir.mkdir_p workdir

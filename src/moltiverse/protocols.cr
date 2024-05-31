@@ -115,7 +115,7 @@ class SamplingProtocol
     end
   end
 
-  def execute(lig : Ligand, parallel workers : Int? = nil, procs : Int = 4)
+  def execute(lig : Ligand, cpus : Int = System.cpu_count)
     desc = @colvars.join(" & ") { |cv| cv.component.name.underscore.gsub('_', ' ') }
     type = @colvars.join('_') { |cv| cv.component.keyword.underscore }
     puts "Sampling protocol using #{desc}".colorize(GREEN)
@@ -137,8 +137,9 @@ class SamplingProtocol
     combinations = Indexable
       .cartesian_product(@colvars.map(&.window_colvars))
       .cartesian_product(variants)
-    workers ||= Math.min(combinations.size, System.cpu_count) // procs
-    puts "Running #{combinations.size} MD runs in #{workers} parallel jobs with #{procs} cores each...".colorize(:blue)
+    cpus_per_run = 4
+    workers = Math.min(combinations.size, cpus) // cpus_per_run
+    puts "Running #{combinations.size} MD runs in #{workers} parallel jobs with #{cpus_per_run} cores each...".colorize(:blue)
     combinations.each.with_index.concurrent_each(workers) do |(colvars, path), i|
       window = "w#{i // variants.size + 1}"
       variant = "v#{variants.index!(path) + 1}"
@@ -154,7 +155,7 @@ class SamplingProtocol
         print " #{cv.component.name} ranges: #{cv.bounds}."
       end
       puts ".."
-      NAMD.run "#{stem}.namd", cores: procs, retries: 5
+      NAMD.run "#{stem}.namd", cores: cpus_per_run, retries: 5
 
       path = Path["outeabf.#{stem}.dcd"].expand
       if File.exists?(path)

@@ -21,10 +21,7 @@ ligand = ""
 extension = ""
 output_name = "empty"
 n_confs = 250
-parallel_runs = nil
-cores_per_run = 4
-cores_per_run_mm_refinement = 1
-cores_per_run_qm_refinement = 1
+cpus = System.cpu_count
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
   parser.on("-l FILE", "--ligand=FILE", "A SMILES file containing one or more molecules.") do |str|
@@ -50,21 +47,16 @@ OptionParser.parse do |parser|
       exit(1)
     end
   end
+  parser.on(
+    "-P N",
+    "--procs=N",
+    "Total number of CPUs to use. Defaults to the available CPUs."
+  ) do |str|
+    cpus = str.to_i.clamp 1..System.cpu_count
+  end
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
-  end
-  parser.on("--cores-per-run=N", "Number of cores per NAMD run. Default: 4") do |str|
-    cores_per_run = str.to_i.clamp 1..System.cpu_count
-  end
-  parser.on("--parallel=N", "Number of parallel NAMD runs. Default: CPU cores / cores per run") do |str|
-    parallel = str.to_i.clamp 1..System.cpu_count
-  end
-  parser.on("--cores-per-mm-refinement=N", "Number of cores per NAMD run in the refinement using MM . Default: 1") do |str|
-    cores_per_run_mm_refinement = str.to_i
-  end
-  parser.on("--cores-per-qm-refinement=N", "Number of cores per XTB run in the refinement using QM . Default: 1") do |str|
-    cores_per_run_qm_refinement = str.to_i
   end
   parser.invalid_option do |flag|
     STDERR.puts "ERROR: #{flag} is not a valid option."
@@ -103,19 +95,19 @@ File.open("#{output_name}_time_per_stage.log", "w") do |log|
     success, proccess_time = lig.proccess_input
     if success
       log.print("#{name},proccess_time,#{proccess_time}\n")
-      extend_structure_time = lig.extend_structure
+      extend_structure_time = lig.extend_structure cpus
       log.print("#{name},structure_spreading_time,#{extend_structure_time}\n")
-      parameterization_time = lig.parameterize
+      parameterization_time = lig.parameterize cpus
       log.print("#{name},parameterization_time,#{parameterization_time}\n")
       minimization_time = lig.minimize
       log.print("#{name},minimization_time,#{minimization_time}\n")
-      sampling_time = lig.sampling parallel_runs, cores_per_run
+      sampling_time = lig.sampling cpus
       log.print("#{name},sampling_time,#{sampling_time}\n")
       clustering_time = lig.clustering n_confs
       log.print("#{name},clustering_time,#{clustering_time}\n")
       mm_refinement_time = lig.mm_refinement
       log.print("#{name},mm_refinement_time,#{mm_refinement_time}\n")
-      qm_refinement_time = lig.qm_refinement
+      qm_refinement_time = lig.qm_refinement cpus
       log.print("#{name},qm_refinement_time,#{qm_refinement_time}\n")
       t_final = Time.monotonic
       log.print("#{name},total_time,#{t_final - t_start}\n")
