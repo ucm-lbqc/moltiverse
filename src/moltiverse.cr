@@ -82,39 +82,38 @@ t_start_full = Time.monotonic
 
 main_dir = Dir.current
 puts "Output folders will have the format: 'output_name'_'smi_ligand_name'".colorize(YELLOW)
-smiles = read_smi(ligand)
-File.open("#{output_name}_time_per_stage.log", "w") do |log|
-  smiles.each do |line|
-    smile_code, name = line
-    new_output_name = "#{output_name}_#{name}"
-    puts "SMILE:"
-    puts smile_code.colorize(AQUA)
-    lig = Ligand.new(ligand, smile_code, new_output_name, protocol, main_dir)
-    t_start = Time.monotonic
-    success, proccess_time = lig.proccess_input
-    if success
-      log.print("#{name},proccess_time,#{proccess_time}\n")
-      extend_structure_time = lig.extend_structure cpus
-      log.print("#{name},structure_spreading_time,#{extend_structure_time}\n")
-      parameterization_time = lig.parameterize cpus
-      log.print("#{name},parameterization_time,#{parameterization_time}\n")
-      minimization_time = lig.minimize
-      log.print("#{name},minimization_time,#{minimization_time}\n")
-      sampling_time = lig.sampling cpus
-      log.print("#{name},sampling_time,#{sampling_time}\n")
-      clustering_time = lig.clustering n_confs
-      log.print("#{name},clustering_time,#{clustering_time}\n")
-      mm_refinement_time = lig.mm_refinement
-      log.print("#{name},mm_refinement_time,#{mm_refinement_time}\n")
-      qm_refinement_time = lig.qm_refinement cpus
-      log.print("#{name},qm_refinement_time,#{qm_refinement_time}\n")
-      t_final = Time.monotonic
-      log.print("#{name},total_time,#{t_final - t_start}\n")
-    else
-      log.print("#{name},failed\n")
-    end
+log = File.open "#{output_name}_time_per_stage.log", "w"
+read_smi(ligand).each do |line|
+  smile_code, name = line
+  new_output_name = "#{output_name}_#{name}"
+  puts "SMILE:"
+  puts smile_code.colorize(AQUA)
+  lig = Ligand.new(ligand, smile_code, new_output_name, protocol, main_dir)
+  t_start = Time.monotonic
+  success, proccess_time = lig.proccess_input
+  if success
+    log.print("#{name},proccess_time,#{proccess_time}\n")
+    extend_structure_time = lig.extend_structure cpus
+    log.print("#{name},structure_spreading_time,#{extend_structure_time}\n")
+    parameterization_time = lig.parameterize cpus
+    log.print("#{name},parameterization_time,#{parameterization_time}\n")
+    minimization_time = lig.minimize
+    log.print("#{name},minimization_time,#{minimization_time}\n")
+    sampling_time = lig.sampling cpus
+    log.print("#{name},sampling_time,#{sampling_time}\n")
+    clustering_time = lig.clustering n_confs
+    log.print("#{name},clustering_time,#{clustering_time}\n")
+    mm_refinement_time = lig.mm_refinement
+    log.print("#{name},mm_refinement_time,#{mm_refinement_time}\n")
+    qm_refinement_time = lig.qm_refinement cpus
+    log.print("#{name},qm_refinement_time,#{qm_refinement_time}\n")
+    t_final = Time.monotonic
+    log.print("#{name},total_time,#{t_final - t_start}\n")
+  else
+    log.print("#{name},failed\n")
   end
 end
+log.close
 puts "Process completed".colorize(GREEN)
 
 extension = "#{File.extname("#{ligand}")}"
