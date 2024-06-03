@@ -15,19 +15,20 @@ module Enumerable(T)
     end
   end
 
-  def concurrent_each(workers : Int, &block : T ->) : Nil
+  def concurrent_each(workers : Int, &block : T, Int32 ->) : Nil
     raise ArgumentError.new("Negative or zero workers: #{workers}") unless workers > 0
-    ch_in = Array.new(workers) { Channel(T | Iterator::Stop).new }
+    ch_in = Array.new(workers) { Channel({T | Iterator::Stop, Int32}).new }
     ch_out = Channel(Nil).new
 
     workers.times do |i|
       spawn do
         loop do
-          case ele = ch_in[i].receive
+          ele, j = ch_in[i].receive
+          case ele
           when Iterator::Stop
             break
           else
-            block.call ele
+            block.call ele, j
           end
         end
         ch_out.send nil
@@ -36,10 +37,10 @@ module Enumerable(T)
 
     spawn do
       each_with_index do |ele, i|
-        ch_in[i % workers].send(ele)
+        ch_in[i % workers].send({ele, i})
       end
       workers.times do |i|
-        ch_in[i].send(Iterator.stop)
+        ch_in[i].send({Iterator.stop, i.to_i})
       end
     end
 

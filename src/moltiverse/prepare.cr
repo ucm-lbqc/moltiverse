@@ -377,14 +377,12 @@ class Ligand
     t1 = Time.monotonic
     puts "Performing QM refinement...".colorize(GREEN)
 
-    i = 0
     cwd = Path[Dir.current]
     qm_refined_structures = [] of Chem::Structure
     Array(Chem::Structure)
       .from_sdf("#{@output_name}_mm.sdf")
-      .concurrent_each(cpus) do |structure|
-        i += 1
-        workdir = cwd / ("%05d" % i)
+      .concurrent_each(cpus) do |structure, i|
+        workdir = cwd / ("%05d" % (i + 1))
         Dir.mkdir_p workdir
         Dir.cd workdir
         if pdb = XTB.optimize(structure, cycles: 1500, level: :crude)
