@@ -68,13 +68,13 @@ class SamplingProtocol
         ),
       ],
       simulation_time: 2,
-      fullsamples: 500,
+      fullsamples: 250,
       metadynamics: true,
-      hillweight: 0.5,
-      hillwidth: 1.0,
-      newhillfrequency: 100,
+      hillweight: 3.0,
+      hillwidth: 3.0,
+      newhillfrequency: 50,
       n_variants: 1,
-      output_frequency: 500,
+      output_frequency: 400,
     )
   end
 
@@ -137,7 +137,7 @@ class SamplingProtocol
     combinations = Indexable
       .cartesian_product(@colvars.map(&.window_colvars))
       .cartesian_product(variants)
-    cpus_per_run = 4
+    cpus_per_run = 2
     workers = Math.min(combinations.size, cpus // cpus_per_run)
     puts "Running #{combinations.size} MD runs in #{workers} parallel jobs with #{cpus_per_run} cores each...".colorize(:blue)
     combinations.concurrent_each(workers) do |(colvars, path), i|
