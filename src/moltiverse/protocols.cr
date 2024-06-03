@@ -138,7 +138,7 @@ class SamplingProtocol
       .cartesian_product(@colvars.map(&.window_colvars))
       .cartesian_product(variants)
     cpus_per_run = 4
-    workers = Math.min(combinations.size, cpus) // cpus_per_run
+    workers = Math.min(combinations.size, cpus // cpus_per_run)
     puts "Running #{combinations.size} MD runs in #{workers} parallel jobs with #{cpus_per_run} cores each...".colorize(:blue)
     combinations.each.with_index.concurrent_each(workers) do |(colvars, path), i|
       window = "w#{i // variants.size + 1}"
