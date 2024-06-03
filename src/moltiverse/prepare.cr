@@ -378,7 +378,7 @@ class Ligand
     puts "Performing QM refinement...".colorize(GREEN)
 
     cwd = Path[Dir.current]
-    qm_refined_structures = [] of Chem::Structure
+    results = [] of {Int32, Chem::Structure}
     Array(Chem::Structure)
       .from_sdf("#{@output_name}_mm.sdf")
       .concurrent_each(cpus) do |structure, i|
@@ -386,12 +386,14 @@ class Ligand
         Dir.mkdir_p workdir
         Dir.cd workdir
         if pdb = XTB.optimize(structure, cycles: 1500, level: :crude)
-          qm_refined_structures.push(pdb)
+          results.push({i, pdb})
         end
         Dir.cd cwd
         Dir.delete workdir
       end
+
     Dir.cd cwd
+    qm_refined_structures = results.sort_by! { |i, _| i }.map { |_, st| st }
     qm_refined_structures.to_sdf "#{@output_name}_qm.sdf"
     qm_refined_structures.to_pdb "#{@output_name}_qm.pdb", bonds: :all
     puts "Output file: '#{@output_name}_qm.[sdf,pdb]'".colorize(TURQUOISE)
