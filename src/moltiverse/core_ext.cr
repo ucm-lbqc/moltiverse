@@ -16,6 +16,7 @@ module Enumerable(T)
   end
 
   def concurrent_each(workers : Int, &block : T ->) : Nil
+    raise ArgumentError.new("Negative or zero workers: #{workers}") unless workers > 0
     ch_in = Array.new(workers) { Channel(T | Iterator::Stop).new }
     ch_out = Channel(Nil).new
 
