@@ -294,7 +294,7 @@ class Ligand
     t1 = Time.monotonic
     puts "Performing structure clustering".colorize(GREEN)
 
-    structure = Chem::Structure.from_pdb(@pdb_system)
+    structure = Chem::Structure.read(@extended_mol)
     frames = Dir["#{@working_dir}/out*.dcd"].flat_map do |path|
       Array(Chem::Structure).from_dcd path, structure
     end
@@ -385,8 +385,10 @@ class Ligand
         workdir = cwd / ("%05d" % (i + 1))
         Dir.mkdir_p workdir
         Dir.cd workdir
-        optimized_structure = XTB.optimize(structure, cycles: 1500, level: :crude)
-        results.push({i, optimized_structure || structure})
+        if optimized_structure = XTB.optimize(structure, cycles: 1500, level: :crude)
+          structure.coords = optimized_structure.coords
+        end
+        results.push({i, structure})
         Dir.cd cwd
         Dir.delete workdir
       end
