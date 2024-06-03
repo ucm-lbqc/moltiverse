@@ -385,9 +385,8 @@ class Ligand
         workdir = cwd / ("%05d" % (i + 1))
         Dir.mkdir_p workdir
         Dir.cd workdir
-        if pdb = XTB.optimize(structure, cycles: 1500, level: :crude)
-          results.push({i, pdb})
-        end
+        optimized_structure = XTB.optimize(structure, cycles: 1500, level: :crude)
+        results.push({i, optimized_structure || structure})
         Dir.cd cwd
         Dir.delete workdir
       end
