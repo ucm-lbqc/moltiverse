@@ -157,8 +157,9 @@ class SamplingProtocol
       puts ".."
       NAMD.run "#{stem}.namd", cores: cpus_per_run, retries: 5
 
-      path = Path["outeabf.#{stem}.dcd"].expand
-      if File.exists?(path)
+      if File.exists?("outeabf.#{stem}.dcd")
+        path = Path["outeabf.#{stem}.dcd"].expand
+      #if File.exists?(path)
         frames = n_frames(lig.pdb_system, path.to_s)
         puts "Done. #{frames} frames generated for window #{window}, variant #{variant}"
       else
