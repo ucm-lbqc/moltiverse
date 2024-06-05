@@ -143,7 +143,7 @@ def run(
   retries : Int = 1,
   env : Process::Env = nil
 ) : Bool
-  output_file = path.try { |x| File.new(x, mode: "w") } || IO::Memory.new
+  output_file = path.try { |x| File.new(x, mode: "w+") } || IO::Memory.new
   status = nil
   cmdline = "#{cmd} #{args.join(' ')}"
   retries.times do |i|
