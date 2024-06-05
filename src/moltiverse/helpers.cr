@@ -154,9 +154,9 @@ def run(
     status = process.wait
     break if status.success?
     stdout = output_file.is_a?(IO) ? output_file.rewind.gets_to_end : File.read(output_file)
-    STDERR.puts "Process `#{cmdline}` failed due to:".colorize(:yellow)
-    STDERR.puts stdout.gsub(/^/m, "> ").chomp.colorize(:dark_gray)
-    STDERR.puts stderr.gsub(/^/m, "> ").chomp.colorize(:dark_gray)
+    stdout = stdout.lines.last(5).join("\n")
+    STDERR.puts "Process #{cmdline} failed due to:".colorize(:yellow)
+    STDERR.puts (stdout + stderr).gsub(/^/m, "> ").chomp.colorize(:dark_gray)
   end
 
   case status
