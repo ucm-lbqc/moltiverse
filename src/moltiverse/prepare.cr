@@ -389,7 +389,7 @@ class Ligand
           structure.coords = optimized_structure.coords
         end
         results.push({i, structure})
-        Dir.cd cwd
+        Dir.glob(workdir / "*") { |path| File.delete path }
         Dir.delete workdir
       end
 
