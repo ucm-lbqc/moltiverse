@@ -28,7 +28,11 @@ module Enumerable(T)
           when Iterator::Stop
             break
           else
-            block.call ele, j
+            begin
+              block.call ele, j
+            rescue ex
+              ex.inspect_with_backtrace STDERR
+            end
           end
         end
         ch_out.send nil
