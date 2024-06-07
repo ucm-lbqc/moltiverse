@@ -389,6 +389,10 @@ class Ligand
           structure.coords = optimized_structure.coords
         end
         results.push({i, structure})
+        # current dir may be another workdir, which may have been
+        # deleted by another fiber, so cd into an existing dir first to
+        # avoid exception on glob
+        Dir.cd cwd
         Dir.glob(workdir / "*") { |path| File.delete path }
         Dir.delete workdir
       end
