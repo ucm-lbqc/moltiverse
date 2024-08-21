@@ -94,7 +94,6 @@ sdf_first = sdf_structures[ref_index]
 sdf_first.to_pdb("ref.pdb", bonds: :none)
 order_ref = Chem::Structure.from_pdb("ref.pdb")
 
-
 File.open("#{output_name}", "w") do |log|
   Dir["#{pdbs_path}/*.pdb"].each do |pdb|
     file = Path.new(pdb).expand.to_s
@@ -107,20 +106,20 @@ File.open("#{output_name}", "w") do |log|
     idxs = run_cmd(cmd, args)
     idxs = idxs.split("\n")
     # puts idxs.size
-    ordered_atoms = idxs[0..st_pdb.n_atoms - 1]
+    ordered_atoms = idxs[0..st_pdb.atoms.size - 1]
     atom_order_map = Hash(String, Int32).new
     ordered_atoms.each_with_index do |name, idx|
       atom_order_map[name] = idx
     end
     # puts "Number of common atoms: #{ordered_atoms.size}"
-    if st_pdb.atoms.select(&.heavy?).n_atoms == order_ref.atoms.select(&.heavy?).n_atoms && atom_order_map.size == order_ref.atoms.select(&.heavy?).n_atoms
+    if st_pdb.atoms.count(&.heavy?) == order_ref.atoms.count(&.heavy?) && atom_order_map.size == order_ref.atoms.count(&.heavy?)
       begin
         sorted_atoms = st_pdb.atoms.select(&.heavy?).sort_by { |atom| atom_order_map[atom.name] }
       rescue exception
         puts "Jumping #{basename}. Structure Issues in atom name"
         next
       end
-      selection_pdb = sorted_atoms.atoms.select(&.heavy?)
+      selection_pdb = sorted_atoms.select(&.heavy?)
     else
       puts "Jumping #{basename}. Structure Issues."
       next

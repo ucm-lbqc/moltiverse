@@ -118,11 +118,11 @@ pdbs.each do |pdb|
     idxs = idxs.split("\n")
     st_a = Chem::Structure.from_pdb(pdbs[0])
     st_b = Chem::Structure.from_pdb(pdb)
-    if st_b.atoms.select(&.heavy?).n_atoms < st_a.n_atoms
-      puts "PDB #{basename}.pdb has fewer atoms than reference. #{st_b.atoms.n_atoms}/#{st_a.n_atoms} atoms"
+    if st_b.atoms.count(&.heavy?) < st_a.atoms.size
+      puts "PDB #{basename}.pdb has fewer atoms than reference. #{st_b.atoms.size}/#{st_a.atoms.size} atoms"
       next
     else
-      ordered_atoms = idxs[0..st_a.n_atoms - 1]
+      ordered_atoms = idxs[0..st_a.atoms.size - 1]
       atom_order_map = Hash(String, Int32).new
       ordered_atoms.each_with_index do |name, idx|
         atom_order_map[name] = idx
@@ -141,7 +141,7 @@ frames : Array(Chem::Structure) = [] of Chem::Structure
 
 Dir["./*_proc.pdb"].each do |pdb|
   st = Chem::Structure.from_pdb(pdb)
-  puts st.atoms.select(&.heavy?).n_atoms
+  puts st.atoms.count(&.heavy?)
   frames.push(st)
 end
 structure = frames[0]
