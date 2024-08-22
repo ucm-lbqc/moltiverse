@@ -2,7 +2,7 @@ def rand_conf(input_mol : String) : Chem::Structure
   min_lastframe = Chem::Structure.from_mol(input_mol)
   variant = OpenBabel.gen_coords(input_mol)
   index = 0
-  min_lastframe['A'][1].each_atom { |atom|
+  min_lastframe['A'][1].atoms.each { |atom|
     atom.coords = variant.atoms[index].coords
     atom.temperature_factor = 1.0
     index += 1

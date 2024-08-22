@@ -269,8 +269,8 @@ class Ligand
       n_frames = reader.n_entries - 1
       lastframe = reader.read_entry n_frames
       # Ligand geometrical center
-      @lig_center = lastframe['A'][1].coords.center
-      lastframe['A'][1].each_atom { |atom|
+      @lig_center = lastframe['A'][1].atoms.coords.center
+      lastframe['A'][1].atoms.each { |atom|
         atom.temperature_factor = 1.0
       }
       lastframe.to_pdb "min.lastframe.pdb"
