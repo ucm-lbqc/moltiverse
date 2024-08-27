@@ -82,6 +82,7 @@ create_conda_env() {
 
 # Install dependencies
 install_dependencies() {
+    echo "Installing dependencies..."
     conda install -c conda-forge ambertools=23 openbabel xtb -y
 }
 
@@ -189,6 +190,8 @@ main() {
 
     add_to_path
     
+    echo " "
+    echo "=========================================================================="
     echo "Moltiverse has been successfully installed!"
     echo "Please restart your terminal or run 'source ~/.bashrc' to use Moltiverse."
 }
