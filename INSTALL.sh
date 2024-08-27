@@ -7,16 +7,43 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Function to check if Conda (Miniconda or Anaconda) is installed
+conda_check() {
+    if command_exists conda; then
+        echo "Conda is already installed."
+        return 0
+    elif [ -d "$HOME/miniconda3" ]; then
+        echo "Miniconda is installed but not in PATH. Adding to PATH..."
+        export PATH="$HOME/miniconda3/bin:$PATH"
+        return 0
+    elif [ -d "$HOME/anaconda3" ]; then
+        echo "Anaconda is installed but not in PATH. Adding to PATH..."
+        export PATH="$HOME/anaconda3/bin:$PATH"
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Install Miniconda if not already installed
 install_miniconda() {
-    if ! command_exists conda; then
+    if conda_check; then
+        echo "Using existing Conda installation."
+    else
         echo "Installing Miniconda..."
         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-        bash miniconda.sh -b -p $HOME/miniconda
-        export PATH="$HOME/miniconda/bin:$PATH"
-        conda init bash
-        source $HOME/.bashrc
+        bash miniconda.sh -b -p $HOME/miniconda3
+        export PATH="$HOME/miniconda3/bin:$PATH"
     fi
+    
+    # Initialize conda for bash
+    conda init bash
+    
+    # Source the bashrc to apply changes immediately
+    source $HOME/.bashrc
+    
+    # Ensure conda command is available
+    eval "$(conda shell.bash hook)"
 }
 
 # Create and activate Conda environment
