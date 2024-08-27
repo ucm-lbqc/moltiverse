@@ -128,7 +128,7 @@ install_moltiverse_release() {
     
     # Move the built binary to a permanent location
     mkdir -p $HOME/moltiverse/bin
-    mv bin/moltiverse $HOME/moltiverse/bin/
+    mv -f bin/moltiverse $HOME/moltiverse/bin/
     
     # Clean up
     cd $HOME
@@ -138,8 +138,20 @@ install_moltiverse_release() {
 # Clone and build Moltiverse from the main branch
 install_moltiverse_main() {
     echo "Installing Moltiverse from the main branch..."
-    git clone https://github.com/ucm-lbqc/moltiverse.git $HOME/moltiverse
-    cd $HOME/moltiverse
+    
+    # Check if the moltiverse directory exists
+    if [ -d "$HOME/moltiverse" ]; then
+        echo "Existing Moltiverse directory found. Removing it..."
+        rm -rf "$HOME/moltiverse"
+    fi
+    
+    # Clone the repository
+    git clone https://github.com/ucm-lbqc/moltiverse.git "$HOME/moltiverse"
+    
+    # Change to the moltiverse directory
+    cd "$HOME/moltiverse"
+    
+    # Build moltiverse
     shards build moltiverse
 }
 
