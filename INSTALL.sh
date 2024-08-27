@@ -87,7 +87,24 @@ install_dependencies() {
 
 # Install Crystal
 install_crystal() {
-    curl -fsSL https://crystal-lang.org/install.sh | sudo bash
+    if command_exists crystal; then
+        current_version=$(crystal --version | grep Crystal | awk '{print $2}')
+        echo "Crystal version $current_version is already installed."
+        read -p "Do you want to proceed with installation of version 1.13.1? (y/n): " proceed
+        if [[ $proceed != "y" ]]; then
+            echo "Skipping Crystal installation."
+            return
+        fi
+    fi
+
+    echo "Installing Crystal version 1.13.1..."
+    
+    wget https://github.com/crystal-lang/crystal/releases/download/1.13.1/crystal-1.13.1-1-linux-x86_64.tar.gz
+    sudo tar -xvf crystal-1.13.1-1-linux-x86_64.tar.gz -C /opt/
+    sudo ln -sf /opt/crystal-1.13.1-1/bin/crystal /usr/local/bin/crystal
+    rm crystal-1.13.1-1-linux-x86_64.tar.gz
+    
+    echo "Crystal 1.13.1 has been installed successfully."
 }
 
 # Download and install Moltiverse from the latest release
