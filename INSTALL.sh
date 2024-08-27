@@ -74,7 +74,9 @@ create_conda_env() {
     fi
 
     echo "Creating Conda environment '$env_name'..."
-    conda create -n $env_name python=3.9 -y
+    conda create -n $env_name -y
+    # Activate the environment
+    eval "$(conda shell.bash hook)"
     conda activate $env_name
 }
 
