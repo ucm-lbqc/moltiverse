@@ -56,6 +56,11 @@ OptionParser.parse do |parser|
   parser.on("-c", "--check", "Check dependecies") do
     puts check_dependencies
     exit
+  end
+  parser.on("-v", "--version", "Moltiverse version") do
+    puts "Moltiverse #{Moltiverse::VERSION}"
+    exit
+  end
   parser.invalid_option do |flag|
     abort "#{flag} is not a valid option.\n#{parser}"
   end
