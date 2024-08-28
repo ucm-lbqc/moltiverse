@@ -74,7 +74,7 @@ def check_dependencies
     puts "XTB version: #{version}"
     
     # Moltiverse
-    puts "Moltiverse version: #{Moltiverse::VERSION}"
+    puts "Moltiverse version: #{Moltiverse::VERSION} #{Moltiverse::VERSION_TYPE}"
   else
     puts " failed"
     STDERR.puts "There are missing dependencies:".colorize(PURPLE)

@@ -8,7 +8,8 @@ require "./moltiverse/**"
 # TODO: Write documentation for `Moltiverse`
 module Moltiverse
   VERSION = "0.1.0"
-
+  VERSION_TYPE = "MAIN BRANCH"
+  #VERSION_TYPE = "RELEASE"
   # TODO: Put your code here
 end
 
@@ -58,7 +59,7 @@ OptionParser.parse do |parser|
     exit
   end
   parser.on("-v", "--version", "Moltiverse version") do
-    puts "Moltiverse #{Moltiverse::VERSION}"
+    puts "Moltiverse #{Moltiverse::VERSION} #{Moltiverse::VERSION_TYPE}"
     exit
   end
   parser.invalid_option do |flag|
