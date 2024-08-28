@@ -141,7 +141,7 @@ install_moltiverse_release() {
     cd ${TEMP_DIR}/*moltiverse*
     
     # Build Moltiverse
-    shards build moltiverse
+    shards build moltiverse --release
     
     # Move the built binary to a permanent location
     mkdir -p $HOME/moltiverse/bin
@@ -169,7 +169,7 @@ install_moltiverse_main() {
     cd "$HOME/moltiverse"
     
     # Build moltiverse
-    shards build moltiverse
+    shards build moltiverse --release
 }
 
 # Add Moltiverse to PATH
