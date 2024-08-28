@@ -1,5 +1,6 @@
 #!/bin/bash
 
+FORCE_INTERACTIVE=${FORCE_INTERACTIVE:-0}
 set -e
 
 # Function to check if a command exists
@@ -49,28 +50,33 @@ install_miniconda() {
 # Create and activate Conda environment
 create_conda_env() {
     local env_name="moltiverse"
-    
-    if conda info --envs | grep -q "^$env_name "; then
-        echo "Conda environment '$env_name' already exists."
-        echo "Choose an option:"
-        echo "1) Remove existing environment and create a new one"
-        echo "2) Use a different name for the new environment"
-        read -p "Enter your choice (1 or 2): " env_choice
 
-        case $env_choice in
-            1)
-                echo "Removing existing environment..."
-                conda env remove -n $env_name -y
-                ;;
-            2)
-                read -p "Enter a new name for the Conda environment: " new_env_name
-                env_name=$new_env_name
-                ;;
-            *)
-                echo "Invalid choice. Exiting."
-                exit 1
-                ;;
-        esac
+    if conda info --envs | grep -q "^$env_name "; then
+        if [ -t 0 ]; then  # Check if the script is running in an interactive shell
+            echo "Conda environment '$env_name' already exists."
+            echo "Choose an option:"
+            echo "1) Remove existing environment and create a new one"
+            echo "2) Use a different name for the new environment"
+            read -p "Enter your choice (1 or 2): " env_choice
+
+            case $env_choice in
+                1)
+                    echo "Removing existing environment..."
+                    conda env remove -n $env_name -y
+                    ;;
+                2)
+                    read -p "Enter a new name for the Conda environment: " new_env_name
+                    env_name=$new_env_name
+                    ;;
+                *)
+                    echo "Invalid choice. Exiting."
+                    exit 1
+                    ;;
+            esac
+        else
+            echo "Non-interactive mode: Removing existing environment '$env_name' and creating a new one."
+            conda env remove -n $env_name -y
+        fi
     fi
 
     echo "Creating Conda environment '$env_name'..."
@@ -91,10 +97,20 @@ install_crystal() {
     if command_exists crystal; then
         current_version=$(crystal --version | grep Crystal | awk '{print $2}')
         echo "Crystal version $current_version is already installed."
-        read -p "Do you want to proceed with installation of version 1.13.1? (y/n): " proceed
-        if [[ $proceed != "y" ]]; then
-            echo "Skipping Crystal installation."
+        
+        if [ "$current_version" = "1.13.1" ]; then
+            echo "The required version (1.13.1) is already installed. Skipping Crystal installation."
             return
+        fi
+        
+        if [ -t 0 ] || [ "$FORCE_INTERACTIVE" = "1" ]; then
+            read -p "Do you want to proceed with installation of version 1.13.1? (y/n): " proceed
+            if [[ $proceed != "y" ]]; then
+                echo "Skipping Crystal installation."
+                return
+            fi
+        else
+            echo "Non-interactive mode: Proceeding with Crystal 1.13.1 installation."
         fi
     fi
 
@@ -169,27 +185,35 @@ main() {
     install_dependencies
     install_crystal
 
-    # Ask user which version to install
-    echo "Which version of Moltiverse would you like to install?"
-    echo "1) Latest release version (recommended for stability)"
-    echo "2) Main branch version (latest development version)"
-    read -p "Enter your choice (1 or 2): " version_choice
+    if [ -t 0 ] || [ "$FORCE_INTERACTIVE" = "1" ]; then
+        # Interactive mode
+        echo "Which version of Moltiverse would you like to install?"
+        echo "1) Latest release version (recommended for stability)"
+        echo "2) Main branch version (latest development version)"
+        read -p "Enter your choice (1 or 2): " version_choice
 
-    case $version_choice in
-        1)
-            install_moltiverse_release
-            ;;
-        2)
-            install_moltiverse_main
-            ;;
-        *)
-            echo "Invalid choice. Exiting."
-            exit 1
-            ;;
-    esac
+        case $version_choice in
+            1)
+                install_moltiverse_release
+                ;;
+            2)
+                install_moltiverse_main
+                ;;
+            *)
+                echo "Invalid choice. Defaulting to main branch version."
+                install_moltiverse_main
+                ;;
+        esac
+    else
+        # Non-interactive mode
+        # TO:DO: Add a flag to specify the version to install
+        # Defaulting to main branch version for now, but in the future the default should be the latest release version.
+        echo "Non-interactive mode: Installing main branch version of Moltiverse."
+        install_moltiverse_main
+    fi
 
     add_to_path
-    
+
     echo " "
     echo "=========================================================================="
     echo "Moltiverse has been successfully installed!"
