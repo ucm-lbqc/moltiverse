@@ -18,6 +18,63 @@ def check_dependencies
 
   if executables.values.all?
     puts " passed"
+    executables.each do |cmd, path|
+      symbol, color = path ? {"✔", :green} : {"✘", :red}
+      STDERR.puts "#{symbol} #{cmd}".colorize(color)
+    end
+
+    # Check the version of the executables
+    # Antechamber
+    args = ["-L"]
+    output = run_cmd_version("antechamber", args)
+    version = output.split(" ")[3].chomp(":")
+    # print the fourth word of the output
+    puts "Antechamber version: #{version}"
+
+    # NAMD
+    args = ["-h"]
+    output = run_cmd_version("namd2", args)
+    # Search for the first line starting with "NAMD" and capture the third word
+    version = nil
+    architecture = nil
+    output.each_line do |line|
+      if line.includes?("NAMD")
+        words = line.split
+      #if match = /\bNAMD\b\s+\S+\s+(\S+)/.match(line)
+        version = words[2]
+        architecture = words[4]
+        break
+      end
+    end
+    puts "NAMD version: #{version} #{architecture}"
+
+    # OpenBabel
+    args = ["-V"]
+    output = run_cmd_version("obabel", args)
+    output.each_line do |line|
+      if line.includes?("Open Babel")
+        words = line.split
+        version = words[2]
+        break
+      end
+    end
+    puts "Open Babel version: #{version}"
+
+    # XTB
+    args = ["--version"]
+    output = run_cmd_version("xtb", args)
+    # puts output
+    output.each_line do |line|
+      if line.includes?("xtb")
+        words = line.split
+        version = words[3]
+        break
+      end
+    end
+    puts "XTB version: #{version}"
+    
+    # Moltiverse
+    puts "Moltiverse version: #{Moltiverse::VERSION}"
   else
     puts " failed"
     STDERR.puts "There are missing dependencies:".colorize(PURPLE)
