@@ -12,7 +12,7 @@ end
 
 def check_dependencies
   print "Checking dependencies..."
-  executables = %w(antechamber namd2 obabel parmchk2 tleap).to_h do |cmd|
+  executables = %w(antechamber namd2 obabel parmchk2 tleap xtb).to_h do |cmd|
     {cmd, Process.find_executable(cmd)}
   end
 
