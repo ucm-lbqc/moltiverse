@@ -54,7 +54,7 @@ OptionParser.parse do |parser|
     puts parser
     exit
   end
-  parser.on("-c", "--check", "Check dependecies") do
+  parser.on("-c", "--check", "Check dependencies") do
     puts check_dependencies
     exit
   end
