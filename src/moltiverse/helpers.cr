@@ -36,6 +36,14 @@ def n_frames(pdb : String, dcd : String)
   end
 end
 
+def run_cmd_version(cmd : String, args : Array(String)) : String
+  stdout = IO::Memory.new
+  stderr = IO::Memory.new
+  process = Process.run(cmd, args: args, output: stdout, error: stderr)
+  output = stdout.to_s
+end
+
+
 # run_cmd is a function for general purpuse. e.g. To verify dependencies, to execute openbabel and python.
 def run_cmd(cmd : String, args : Array(String), output_file : Nil.class | String, stage : String | Colorize::Object(String), verbose : Bool = true)
   if verbose
