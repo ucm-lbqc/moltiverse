@@ -53,6 +53,9 @@ OptionParser.parse do |parser|
     puts parser
     exit
   end
+  parser.on("-c", "--check", "Check dependecies") do
+    puts check_dependencies
+    exit
   parser.invalid_option do |flag|
     abort "#{flag} is not a valid option.\n#{parser}"
   end
