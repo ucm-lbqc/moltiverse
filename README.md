@@ -61,9 +61,9 @@ External software:
 **NOTE**: This application is still under development and is not ready for production. 
 Please note that we have not yet released a version or documentation. But stay tuned, we will do it soon ;).
 
-1. Check the [data](/data) directory for example input files:
-   - [molecule.smi](/data/molecule.smi): An SMI file containing a single SMILES code and molecule name.
-   - [molecules.smi](/data/molecules.smi): An SMI file with multiple SMILES codes and molecule names.
+1. Check the [examples](/data/moltiverse_v1/examples) directory for example input files:
+   - [molecule.smi](/data/moltiverse_v1/examples/molecule.smi): An SMI file containing a single SMILES code and molecule name.
+   - [molecules.smi](/data/moltiverse_v1/examples/molecules.smi): An SMI file with multiple SMILES codes and molecule names.
 2. You can modify the SMI file with your own molecules. SMILES codes can be obtained from [PubChem](https://pubchem.ncbi.nlm.nih.gov/).
 3. Running the application:
    ```bash
