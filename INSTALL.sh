@@ -8,23 +8,27 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+LIBYAML_MESSAGE_PRINTED=0
+
 # Function to check if libyaml-dev is installed
 check_libyaml_dev() {
+    local print_message=${1:-0}
     # Check using dpkg if available (Debian-based systems)
     if command_exists dpkg; then
         if dpkg -s libyaml-dev >/dev/null 2>&1; then
-        echo "libyaml-dev is installed. (dpkg check)"
+        [ "$print_message" -eq 1 ] && [ "$LIBYAML_MESSAGE_PRINTED" -eq 0 ] && echo "libyaml-dev is installed. (dpkg check)" && LIBYAML_MESSAGE_PRINTED=1
             return 0  # libyaml-dev is installed
         fi
     fi
 
     if [ -f "/usr/include/yaml.h" ]; then
-        echo "libyaml-dev is installed. (yaml.h check)"
+        [ "$print_message" -eq 1 ] && [ "$LIBYAML_MESSAGE_PRINTED" -eq 0 ] && echo "libyaml-dev is installed. (yaml.h check)" && LIBYAML_MESSAGE_PRINTED=1
         return 0  # File exists, libyaml-dev is likely installed
     elif ldconfig -p | grep -q "libyaml"; then
-        echo "libyaml-dev is installed. (ldconfig check)"
+        [ "$print_message" -eq 1 ] && [ "$LIBYAML_MESSAGE_PRINTED" -eq 0 ] && echo "libyaml-dev is installed. (ldconfig check)" && LIBYAML_MESSAGE_PRINTED=1
         return 0  # libyaml is in the library cache
     else
+        echo "libyaml-dev is not installed."
         return 1  # libyaml-dev is likely not installed
     fi
 }
@@ -42,12 +46,12 @@ check_system_dependencies() {
     
     # Check for libyaml-dev
     echo "Checking for libyaml-dev..."
-    if ! check_libyaml_dev; then
+    if ! check_libyaml_dev 1; then
         sudo apt-get install libyaml-dev
     fi
 
     # Check again after installing libyaml-dev
-    if ! check_libyaml_dev; then
+    if ! check_libyaml_dev 1; then
         missing_deps+=("libyaml-dev")
     fi
     
