@@ -129,6 +129,8 @@ create_conda_env() {
                 3)
                     read -p "Enter a new name for the conda environment: " new_env_name
                     env_name=$new_env_name
+                    conda create -n $env_name -y
+                    ;;
                 *)
                     echo "Invalid choice. Exiting."
                     exit 1
