@@ -139,7 +139,6 @@ create_conda_env() {
         fi
     fi
 
-    echo "Creating Conda environment '$env_name'..."
     if ! conda create -n $env_name -y 2> >(tee /tmp/conda_error.log >&2); then
         if grep -q "CondaValueError: prefix already exists:" /tmp/conda_error.log; then
             echo "Error: Conda environment directory already exists."
