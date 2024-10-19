@@ -162,7 +162,37 @@ create_conda_env() {
         echo "Debugging: Environment '$env_name' found in conda env list."
         
         if [ -t 0 ] || [ "$FORCE_INTERACTIVE" = "1" ]; then
-            # ... (interactive mode handling remains the same)
+            echo "Conda environment '$env_name' already exists."
+            echo "Choose an option:"
+            echo "1) Remove existing environment and create a new one"
+            echo "2) Use the existing environment"
+            echo "3) Use a different name for the new environment"
+            read -p "Enter your choice (1, 2, or 3): " env_choice
+
+            case $env_choice in
+                1)
+                    echo "Removing existing environment..."
+                    conda env remove -n $env_name -y
+                    conda create -n $env_name -y
+                    ;;
+                2)
+                    echo "Using existing environment..."
+                    ;;
+                3)
+                    read -p "Enter a new name for the Conda environment: " new_env_name
+                    env_name=$new_env_name
+                    conda create -n $env_name -y
+                    ;;
+                *)
+                    echo "Invalid choice. Exiting."
+                    exit 1
+                    ;;
+            esac
+        else
+            echo "Non-interactive mode: Removing existing environment '$env_name' and creating a new one."
+            conda env remove -n $env_name -y
+            conda create -n $env_name -y
+        fi
         else
             echo "Non-interactive mode: Removing existing environment '$env_name' and creating a new one."
             conda env remove -n $env_name -y
