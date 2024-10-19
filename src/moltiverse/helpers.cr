@@ -77,7 +77,8 @@ def check_dependencies
     puts "Moltiverse version: #{Moltiverse::VERSION} #{Moltiverse::VERSION_TYPE}"
   else
     puts " failed"
-    STDERR.puts "There are missing dependencies:".colorize(PURPLE)
+    STDERR.puts "There are missing dependencies:".colorize(YELLOW)
+    STDERR.puts "Please check that moltiverse environment is correctly set up. (conda activate moltiverse)".colorize(YELLOW)
     executables.each do |cmd, path|
       symbol, color = path ? {"✔", :green} : {"✘", :red}
       STDERR.puts "#{symbol} #{cmd}".colorize(color)
