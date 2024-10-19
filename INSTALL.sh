@@ -134,7 +134,7 @@ create_conda_env() {
                     ;;
             esac
         else
-            echo "Non-interactive mode: Removing existing environment '$env_name' and creating a new one."
+            echo "Non-interactive mode: Removing existing environment '$env_name'"
             conda env remove -n $env_name -y
         fi
     fi
@@ -164,8 +164,6 @@ create_conda_env() {
     eval "$(conda shell.bash hook)"
     conda activate $env_name
 }
-
-
 
 # Install dependencies
 install_dependencies() {
@@ -222,7 +220,7 @@ install_moltiverse_release() {
     # Move to the extracted directory
     cd ${TEMP_DIR}/*moltiverse*
     
-    # Build Moltiverse
+    # Build Moltiverse with release flag
     shards build moltiverse --release
     
     # Move the built binary to a permanent location
