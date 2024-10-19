@@ -19,6 +19,32 @@ check_libyaml_dev() {
     fi
 }
 
+check_system_dependencies() {
+    echo "Checking system dependencies..."
+    local missing_deps=()
+    
+    # Check for commands
+    for cmd in git curl wget; do
+        if ! command_exists "$cmd"; then
+            missing_deps+=("$cmd")
+        fi
+    done
+    
+    # Check for libyaml-dev
+    echo "Checking for libyaml-dev..."
+    if ! check_libyaml_dev; then
+        missing_deps+=("libyaml-dev")
+    fi
+    
+    if [ ${#missing_deps[@]} -ne 0 ]; then
+        echo "The following dependencies are missing: ${missing_deps[*]}"
+        echo "Please install them using your distribution's package manager."
+        echo "For example, on Ubuntu or Debian, you can use:"
+        echo "sudo apt-get update && sudo apt-get install ${missing_deps[*]}"
+        exit 1
+    fi
+}
+
 # Function to check if Conda (Miniconda or Anaconda) is installed
 conda_check() {
     if command_exists conda; then
@@ -192,6 +218,7 @@ add_to_path() {
 
 # Main installation process
 main() {
+    check_system_dependencies
     install_miniconda
     create_conda_env
     install_dependencies
