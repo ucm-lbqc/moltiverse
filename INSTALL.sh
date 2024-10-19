@@ -113,18 +113,22 @@ create_conda_env() {
             echo "Conda environment '$env_name' already exists."
             echo "Choose an option:"
             echo "1) Remove existing environment and create a new one"
-            echo "2) Use a different name for the new environment"
-            read -p "Enter your choice (1 or 2): " env_choice
+            echo "2) Use the existing environment"
+            echo "3) Use a different name for the new environment"
+            read -p "Enter your choice (1, 2 or 3): " env_choice
 
             case $env_choice in
                 1)
                     echo "Removing existing environment..."
                     conda env remove -n $env_name -y
+                    conda create -n $env_name -y
                     ;;
                 2)
-                    read -p "Enter a new name for the Conda environment: " new_env_name
-                    env_name=$new_env_name
+                    echo "Using existing environment..."
                     ;;
+                3)
+                    read -p "Enter a new name for the conda environment: " new_env_name
+                    env_name=$new_env_name
                 *)
                     echo "Invalid choice. Exiting."
                     exit 1
@@ -133,11 +137,12 @@ create_conda_env() {
         else
             echo "Non-interactive mode: Removing existing environment '$env_name' and creating a new one."
             conda env remove -n $env_name -y
+            conda create -n $env_name -y
         fi
+    else
+        echo "Creating conda environment '$env_name'..."
+        conda create -n $env_name -y
     fi
-
-    echo "Creating Conda environment '$env_name'..."
-    conda create -n $env_name -y
     # Activate the environment
     eval "$(conda shell.bash hook)"
     conda activate $env_name
