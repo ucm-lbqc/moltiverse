@@ -43,6 +43,11 @@ check_system_dependencies() {
     # Check for libyaml-dev
     echo "Checking for libyaml-dev..."
     if ! check_libyaml_dev; then
+        sudo apt-get install libyaml-dev
+    fi
+
+    # Check again after installing libyaml-dev
+    if ! check_libyaml_dev; then
         missing_deps+=("libyaml-dev")
     fi
     
