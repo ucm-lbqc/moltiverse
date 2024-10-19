@@ -108,8 +108,8 @@ install_miniconda() {
 create_conda_env() {
     local env_name="moltiverse"
 
-    if conda info --envs | grep -q "^$env_name "; then
-        if [ -t 0 ]|| [ "$FORCE_INTERACTIVE" = "1" ]; then  # Check if the script is running in an interactive shell
+    if conda info --envs | grep -q "$env_name "; then
+        if [ -t 0 ] || [ "$FORCE_INTERACTIVE" = "1" ]; then  # Check if the script is running in an interactive shell
             echo "Conda environment '$env_name' already exists."
             echo "Choose an option:"
             echo "1) Remove existing environment and create a new one"
@@ -143,6 +143,7 @@ create_conda_env() {
         fi
     else
         echo "Creating conda environment '$env_name'..."
+        #conda env remove -n $env_name -y
         conda create -n $env_name -y
     fi
     # Activate the environment
