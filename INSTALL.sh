@@ -10,9 +10,19 @@ command_exists() {
 
 # Function to check if libyaml-dev is installed
 check_libyaml_dev() {
+    # Check using dpkg if available (Debian-based systems)
+    if command_exists dpkg; then
+        if dpkg -s libyaml-dev >/dev/null 2>&1; then
+        echo "libyaml-dev is installed. (dpkg check)"
+            return 0  # libyaml-dev is installed
+        fi
+    fi
+
     if [ -f "/usr/include/yaml.h" ]; then
+        echo "libyaml-dev is installed. (yaml.h check)"
         return 0  # File exists, libyaml-dev is likely installed
     elif ldconfig -p | grep -q "libyaml"; then
+        echo "libyaml-dev is installed. (ldconfig check)"
         return 0  # libyaml is in the library cache
     else
         return 1  # libyaml-dev is likely not installed
@@ -24,7 +34,7 @@ check_system_dependencies() {
     local missing_deps=()
     
     # Check for commands
-    for cmd in git curl wget; do
+    for cmd in git curl wget dpkg; do
         if ! command_exists "$cmd"; then
             missing_deps+=("$cmd")
         fi
