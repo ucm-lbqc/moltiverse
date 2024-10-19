@@ -47,7 +47,8 @@ check_system_dependencies() {
     fi
     
     if [ ${#missing_deps[@]} -ne 0 ]; then
-        echo "The following dependencies are missing: ${missing_deps[*]}"
+        echo ""
+        echo "ERROR: The following dependencies are missing: ${missing_deps[*]}"
         echo "Please install them using your distribution's package manager."
         echo "For example, on Ubuntu or Debian, you can use:"
         echo "sudo apt-get update && sudo apt-get install ${missing_deps[*]}"
