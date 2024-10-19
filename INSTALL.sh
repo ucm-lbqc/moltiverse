@@ -8,6 +8,17 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Function to check if libyaml-dev is installed
+check_libyaml_dev() {
+    if [ -f "/usr/include/yaml.h" ]; then
+        return 0  # File exists, libyaml-dev is likely installed
+    elif ldconfig -p | grep -q "libyaml"; then
+        return 0  # libyaml is in the library cache
+    else
+        return 1  # libyaml-dev is likely not installed
+    fi
+}
+
 # Function to check if Conda (Miniconda or Anaconda) is installed
 conda_check() {
     if command_exists conda; then
