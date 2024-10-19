@@ -58,8 +58,9 @@ External software:
 
 ## Usage
 
-**NOTE**: This application is still under development and is not ready for production. 
-Please note that we have not yet released a version or documentation. But stay tuned, we will do it soon ;).
+> [!IMPORTANT]
+> This application is still under development and is not ready for production. 
+> Please note that we have not yet released a version or documentation. But stay tuned, we will do it soon ;).
 
 1. Check the [examples](/data/moltiverse_v1/examples) directory for example input files:
    - [molecule.smi](/data/moltiverse_v1/examples/molecule.smi): An SMI file containing a single SMILES code and molecule name.
@@ -96,7 +97,7 @@ If you use `moltiverse` in your research, please consider citing the following a
 
 ## Contributing
 
-1. Fork it (<https://github.com/your-github-user/moltiverse/fork>)
+1. Fork it (<https://github.com/ucm-lbqc/moltiverse/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
