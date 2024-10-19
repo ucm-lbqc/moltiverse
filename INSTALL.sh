@@ -193,10 +193,6 @@ create_conda_env() {
             conda env remove -n $env_name -y
             conda create -n $env_name -y
         fi
-        else
-            echo "Non-interactive mode: Removing existing environment '$env_name' and creating a new one."
-            conda env remove -n $env_name -y
-        fi
     else
         echo "Debugging: Environment '$env_name' not found in conda env list."
     fi
