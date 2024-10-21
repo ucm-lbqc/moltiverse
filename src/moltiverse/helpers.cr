@@ -3,7 +3,7 @@ def rand_conf(input_mol : String) : Chem::Structure
   variant = OpenBabel.gen_coords(input_mol)
   index = 0
   min_lastframe['A'][1].atoms.each { |atom|
-    atom.coords = variant.atoms[index].coords
+    atom.pos = variant.atoms[index].pos
     atom.temperature_factor = 1.0
     index += 1
   }
@@ -87,10 +87,9 @@ def check_dependencies
   end
 end
 
-def n_frames(pdb : String, dcd : String)
-  structure = Chem::Structure.from_pdb(pdb)
-  Chem::DCD::Reader.open((dcd), structure) do |reader|
-    n_frames = reader.n_entries
+def n_frames(dcd : String)
+  Chem::DCD::Reader.open(dcd) do |reader|
+    reader.n_entries
   end
 end
 

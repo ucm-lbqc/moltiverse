@@ -107,7 +107,7 @@ class SamplingProtocol
     end
 
     dism = HClust::DistanceMatrix.new(variants.size) do |i, j|
-      variants[i].coords.rmsd variants[j].coords, minimize: true
+      variants[i].pos.rmsd variants[j].pos, minimize: true
     end
     dendrogram = HClust.linkage(dism, :single)
     dendrogram.flatten(count: @n_variants).map do |idxs|
@@ -159,8 +159,8 @@ class SamplingProtocol
 
       if File.exists?("outeabf.#{stem}.dcd")
         path = Path["outeabf.#{stem}.dcd"].expand
-      #if File.exists?(path)
-        frames = n_frames(lig.pdb_system, path.to_s)
+        # if File.exists?(path)
+        frames = n_frames(path.to_s)
         puts "Done. #{frames} frames generated for window #{window}, variant #{variant}"
       else
         puts "No frames were generated in window #{window}".colorize(:yellow)

@@ -54,7 +54,7 @@ colvar {
       atomsColValue 1.0 
     } 
     group2 {
-      <%- center = ref_structure.coords.center.map { |x| x.round 3 } -%>
+      <%- center = ref_structure.pos.center.map { |x| x.round 3 } -%>
       dummyAtom (<%= center.x %>, <%= center.y %>, <%= center.z %>)
     } 
   } 

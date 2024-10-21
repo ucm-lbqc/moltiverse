@@ -166,14 +166,14 @@ class Ligand
     t1 = Time.monotonic
     iterations = 1000
     variant_1 = rand_conf(@file)
-    max_rdgyr = variant_1.coords.rdgyr
+    max_rdgyr = variant_1.pos.rdgyr
     puts "Spreading the molecule structure".colorize(GREEN)
     puts "Initial RDGYR: #{max_rdgyr}"
     # Create first variant in 1000 iterations.
     # The best one will be saved in the variants_st_array.
     (0...iterations).concurrent_each(cpus) do |iteration|
       variant_decoy = rand_conf(@file)
-      actual_rdgyr = variant_decoy.coords.rdgyr
+      actual_rdgyr = variant_decoy.pos.rdgyr
       if actual_rdgyr > max_rdgyr && actual_rdgyr < 15.0
         variant_1 = variant_decoy
         max_rdgyr = actual_rdgyr
@@ -253,9 +253,9 @@ class Ligand
     # Minimize the first random configuration.
     pdb = Chem::Structure.from_pdb(@pdb_system)
     a, b, c = pdb.cell?.try(&.size) || {0, 0, 0}
-    cx = pdb.coords.center.x
-    cy = pdb.coords.center.y
-    cz = pdb.coords.center.z
+    cx = pdb.pos.center.x
+    cy = pdb.pos.center.y
+    cz = pdb.pos.center.z
     NAMD::Input.minimization("min.namd", self)
     print "Runnning minimization..."
     NAMD.run("min.namd", :setcpuaffinity, cores: 1)
@@ -264,12 +264,12 @@ class Ligand
     new_dcd = "#{@basename}.dcd"
     @dcd = Path.new(new_dcd).expand.to_s
     # Write last-frame of the minimization as a reference input for next calculation.
-    pdb = Chem::Structure.from_pdb(@pdb_system)
-    Chem::DCD::Reader.open((@dcd), pdb) do |reader|
+    lastframe = Chem::Structure.from_pdb(@pdb_system)
+    Chem::DCD::Reader.open(@dcd) do |reader|
       n_frames = reader.n_entries - 1
-      lastframe = reader.read_entry n_frames
+      lastframe.pos = reader.read_entry n_frames
       # Ligand geometrical center
-      @lig_center = lastframe['A'][1].atoms.coords.center
+      @lig_center = lastframe['A'][1].atoms.pos.center
       lastframe['A'][1].atoms.each { |atom|
         atom.temperature_factor = 1.0
       }
@@ -295,14 +295,21 @@ class Ligand
     puts "Performing structure clustering".colorize(GREEN)
 
     structure = Chem::Structure.read(@extended_mol)
-    frames = Dir["#{@working_dir}/out*.dcd"].flat_map do |path|
-      Array(Chem::Structure).from_dcd path, structure
+    frames = [] of Chem::Structure
+    Dir["#{@working_dir}/out*.dcd"].each do |path|
+      Chem::DCD::Reader.open(path) do |reader|
+        reader.each do |pos|
+          frame = structure.clone
+          frame.pos = pos
+          frames << frame
+        end
+      end
     end
     abort "Empty trayectories at #{@working_dir}".colorize(:red) if frames.empty?
     puts "Analyzing #{frames.size} total structures generated in the sampling stage..."
 
     puts "Calculating RMSD..."
-    pos = frames.map &.coords.center_at_origin.to_a
+    pos = frames.map &.pos.center_at_origin.to_a
     dism = HClust::DistanceMatrix.new(frames.size) do |i, j|
       _, rmsd = Chem::Spatial.qcp(pos[i], pos[j])
       rmsd
@@ -352,9 +359,10 @@ class Ligand
       NAMD::Input.minimization("min.#{pdb.basename}.namd", pdb)
       NAMD.run("min.#{pdb.basename}.namd", :setcpuaffinity, cores: 1)
       # Extracting last frame of the minimized trajectory
-      Chem::DCD::Reader.open(("min.#{pdb.basename}.dcd"), pdb.structure) do |reader|
+      Chem::DCD::Reader.open("min.#{pdb.basename}.dcd") do |reader|
         n_structures = reader.n_entries - 1
-        st = reader.read_entry n_structures
+        st = pdb.structure.clone
+        st.pos = reader.read_entry n_structures
         mm_refined_structures.push(st)
         st.to_pdb "#{idx}.min.pdb"
       end
@@ -386,7 +394,7 @@ class Ligand
         Dir.mkdir_p workdir
         Dir.cd workdir
         if optimized_structure = XTB.optimize(structure, cycles: 1500, level: :crude)
-          structure.coords = optimized_structure.coords
+          structure.pos = optimized_structure.pos
         end
         results.push({i, structure})
         # current dir may be another workdir, which may have been

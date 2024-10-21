@@ -61,7 +61,7 @@ groups : Array(Array(Chem::Structure)) = [] of Array(Chem::Structure)
 # #    end
 # #    puts "Analyzing dcd with #{dcd_frames.size} frames"
 # #    dism = HClust::DistanceMatrix.new(dcd_frames.size) { |a, b|
-# #      dcd_frames[a].coords.rmsd dcd_frames[b].coords, minimize: true
+# #      dcd_frames[a].pos.rmsd dcd_frames[b].pos, minimize: true
 # #    }
 # #    # puts "Minimum RMSD: #{dism.to_a.min}"
 # #    # puts "Maximum RMSD: #{dism.to_a.max}"
@@ -71,10 +71,11 @@ groups : Array(Array(Chem::Structure)) = [] of Array(Chem::Structure)
 # #end
 puts "Reading dcd files..."
 Dir["#{dcds_path}/out*.dcd"].each do |dcd|
-  Chem::DCD::Reader.open((dcd), structure) do |reader|
+  Chem::DCD::Reader.open(dcd) do |reader|
     n_frames = reader.n_entries - 1
     (0..n_frames).each do |frame|
-      st = reader.read_entry frame
+      st = structure.clone
+      st.pos = reader.read_entry frame
       frames.push(st)
     end
   end
@@ -87,7 +88,7 @@ end
 #    grupito.push(st)
 #    if grupito.size >= 3
 #      dism = HClust::DistanceMatrix.new(grupito.size) { |a, b|
-#        grupito[a].coords.rmsd grupito[b].coords, minimize: true
+#        grupito[a].pos.rmsd grupito[b].pos, minimize: true
 #      }
 #      span = dism.to_a.max - dism.to_a.min
 #      if span > 1.5 || grupito.size >= 200
@@ -119,7 +120,7 @@ def weighted_clustering(frames : Array(Chem::Structure), n_clusters : Int64)
     "other"      => [] of Chem::Structure,
   }
   frames.each_with_index do |st, index|
-    rdgyr_value = st.coords.rdgyr
+    rdgyr_value = st.pos.rdgyr
     case rdgyr_value
     when 0..1
       hash["0.0 - 1.0"] << st
@@ -151,7 +152,7 @@ def weighted_clustering(frames : Array(Chem::Structure), n_clusters : Int64)
   hash.each do |key, structures|
     if structures.size >= 3
       dism = HClust::DistanceMatrix.new(structures.size) { |a, b|
-        structures[a].coords.rmsd structures[b].coords, minimize: true
+        structures[a].pos.rmsd structures[b].pos, minimize: true
       }
       span = dism.to_a.max - dism.to_a.min
       puts "RDGYR range: #{key}, Size: #{structures.size}, span #{span}"
@@ -203,7 +204,7 @@ def subclustering(structures : Array(Chem::Structure), n_clusters : Int32)
   clustering_result : Array(Chem::Structure) = [] of Chem::Structure
 
   dism = HClust::DistanceMatrix.new(structures.size) { |a, b|
-    structures[a].coords.rmsd structures[b].coords, minimize: true
+    structures[a].pos.rmsd structures[b].pos, minimize: true
   }
   dendrogram = HClust.linkage(dism, :single)
   clusters = dendrogram.flatten(count: n_clusters)

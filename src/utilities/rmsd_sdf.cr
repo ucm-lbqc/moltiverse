@@ -129,7 +129,7 @@ File.open("#{output_name}", "w") do |log|
     sdf_structures.map_with_index do |_, idx|
       st = sdf_structures[idx]
       selection_st = st.atoms.select(&.heavy?)
-      rmsd_tmp = selection_pdb.coords.rmsd(selection_st.coords, minimize: true)
+      rmsd_tmp = selection_pdb.pos.rmsd(selection_st.pos, minimize: true)
       if rmsd_tmp < rmsd
         rmsd = rmsd_tmp
       end

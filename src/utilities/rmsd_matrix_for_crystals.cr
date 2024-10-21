@@ -149,7 +149,7 @@ structure = frames[0]
 puts "Analyzing #{frames.size} processed PDB structures"
 
 dism = HClust::DistanceMatrix.new(frames.size) { |a, b|
-  frames[a].coords.rmsd frames[b].coords, minimize: true
+  frames[a].pos.rmsd frames[b].pos, minimize: true
 }
 # ##dendrogram = HClust.linkage(dism, :single)
 # ##clusters = dendrogram.flatten(count: n_clusters)
@@ -164,7 +164,7 @@ dism = HClust::DistanceMatrix.new(frames.size) { |a, b|
 # ##puts "Centroids:"
 # ##centroids.each do |centroid|
 # ##  count += 1
-# ##  puts "Centroid: #{centroid} RDGYR: #{frames[centroid].coords.rdgyr}"
+# ##  puts "Centroid: #{centroid} RDGYR: #{frames[centroid].pos.rdgyr}"
 # ##  frames[centroid].to_pdb("centroid_#{count}.pdb")
 # ##end
 File.open("#{output_name}.dat", "w") do |log|

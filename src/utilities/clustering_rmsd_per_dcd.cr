@@ -34,13 +34,20 @@ end
 
 puts "Reading DCD files..."
 structure = Chem::Structure.from_pdb(ref_pdb)
-frames = Dir["#{dcds_path}/out*.dcd"].flat_map do |path|
-  Array(Chem::Structure).from_dcd path, structure
+frames = [] of Chem::Structure
+Dir["#{dcds_path}/out*.dcd"].each do |path|
+  Chem::DCD::Reader.open(path) do |reader|
+    reader.each do |pos|
+      frame = structure.clone
+      frame.pos = pos
+      frames << frame
+    end
+  end
 end
 puts "Read #{frames.size} structures"
 
 puts "Calculating RMSD..."
-pos = frames.map &.coords.center_at_origin.to_a
+pos = frames.map &.pos.center_at_origin.to_a
 dism = HClust::DistanceMatrix.new(frames.size) do |i, j|
   _, rmsd = Chem::Spatial.qcp(pos[i], pos[j])
   rmsd
