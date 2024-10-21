@@ -51,18 +51,22 @@ OptionParser.parse do |parser|
     cpus = str.to_i.clamp 1..System.cpu_count
   end
   parser.on("-h", "--help", "Show this help") do
+    print_banner
     puts parser
     exit
   end
   parser.on("-c", "--check", "Check dependencies") do
+    print_banner
     puts check_dependencies
     exit
   end
   parser.on("-v", "--version", "Moltiverse version") do
+    print_banner
     puts "Moltiverse #{Moltiverse::VERSION} #{Moltiverse::VERSION_TYPE}"
     exit
   end
   parser.invalid_option do |flag|
+    print_banner
     abort "#{flag} is not a valid option.\n#{parser}"
   end
 end
@@ -73,6 +77,13 @@ if ligand.empty?
 end
 output_name ||= Path[ligand].stem
 
+def print_banner()
+  puts "╔╦╗╔═╗╦ ╔╦╗╦╦  ╦╔═╗╦═╗╔═╗╔═╗"
+  puts "║║║║ ║║  ║ ║╚╗╔╝║╣ ╠╦╝╚═╗║╣ "
+  puts "╩ ╩╚═╝╩═╝╩ ╩ ╚╝ ╚═╝╩╚═╚═╝╚═╝"
+end
+
+print_banner
 check_dependencies
 
 puts "Output folders will have the format: 'output_name'_'smi_ligand_name'".colorize(YELLOW)
