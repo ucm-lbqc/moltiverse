@@ -87,6 +87,7 @@ The testing protocol performs only 0.8 ns of simulaton divided into two RDGYR wi
 The full protocol "v1" performs 24 ns of simulation divided into 12 RDGYR windows, generating ~30000 structures.
 
 5. Visualization
+
 The following [Notebook](https://colab.research.google.com/drive/1YtafWMZsNL-Cyqnyqn5mAmZTKZzPvCEh?usp=sharing) can be useful to quickly visualize an output SDF file and calculate some properties.
 > [!IMPORTANT]
 > The notebook uses RDKit to calculate the properties, and these may differ from those calculated with [chem.cr](https://github.com/franciscoadasme/chem.cr) in our benchmark. The notebook is only for quick visualization and analysis.
