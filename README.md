@@ -2,7 +2,6 @@
 
 [<img align="left" src="./assets/moltiverse_logo_color_hex_transparent.png" width="250" />](./assets/moltiverse_logo_color_hex_transparent.png) Moltiverse is an open-source molecular conformer generator available as a command line application written in the modern Crystal language. 
 
-# Protocol
 Moltiverse uses the robust ecosystem of open-source applications to process the molecules and perform conformational sampling. The conformer generation protocol consists of seven main steps: 
 1. Molecular pre-processing: Conversion of SMILES code into three-dimensional coordinates using Open Babel.
 2. Structure spreading.
@@ -87,6 +86,10 @@ This command executes the entire protocol, creating a folder for each molecule i
 The testing protocol performs only 0.8 ns of simulaton divided into two RDGYR windows, generating ~800 structures.
 The full protocol "v1" performs 24 ns of simulation divided into 12 RDGYR windows, generating ~30000 structures.
 
+5. Visualization
+The following [Notebook](https://colab.research.google.com/drive/1YtafWMZsNL-Cyqnyqn5mAmZTKZzPvCEh?usp=sharing) can be useful to quickly visualize an output SDF file and calculate some properties.
+> [!IMPORTANT]
+> The notebook uses RDKit to calculate the properties, and these may differ from those calculated with [chem.cr](https://github.com/franciscoadasme/chem.cr) in our benchmark. The notebook is only for quick visualization and analysis.
 
 ## Citing
 
