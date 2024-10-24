@@ -45,7 +45,7 @@ moltiverse --version
 To install a specific release or select which dependencies to install, download the 'INSTALL.sh' file and execute it:
 
 ```
-./INSTALL.sh
+bash INSTALL.sh
 ```
 
 ## Requirements
