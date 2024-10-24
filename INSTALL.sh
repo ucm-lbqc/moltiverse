@@ -176,31 +176,22 @@ install_crystal() {
         current_version=$(crystal --version | grep Crystal | awk '{print $2}')
         echo "Crystal version $current_version is already installed."
         
-        if [ "$current_version" = "1.13.1" ]; then
-            echo "The required version (1.13.1) is already installed. Skipping Crystal installation."
-            return
-        fi
-        
         if [ -t 0 ] || [ "$FORCE_INTERACTIVE" = "1" ]; then
-            read -p "Do you want to proceed with installation of version 1.13.1? (y/n): " proceed
+            read -p "Do you want to proceed with the installation of Crystal language? (y/n): " proceed
             if [[ $proceed != "y" ]]; then
                 echo "Skipping Crystal installation."
                 return
             fi
         else
-            echo "Non-interactive mode: Proceeding with Crystal 1.13.1 installation."
+            echo "Non-interactive mode: Proceeding with Crystal language installation."
         fi
     fi
 
-    echo "Installing Crystal version 1.13.1..."
+    echo "Installing Crystal language"
     
-    wget https://github.com/crystal-lang/crystal/releases/download/1.13.1/crystal-1.13.1-1-linux-x86_64.tar.gz
-    sudo tar -xvf crystal-1.13.1-1-linux-x86_64.tar.gz -C /opt/
-    sudo ln -sf /opt/crystal-1.13.1-1/bin/crystal /usr/local/bin/crystal
-    sudo ln -sf /opt/crystal-1.13.1-1/bin/shards /usr/local/bin/shards
-    rm crystal-1.13.1-1-linux-x86_64.tar.gz
-    
-    echo "Crystal 1.13.1 has been installed successfully."
+    curl -fsSL https://crystal-lang.org/install.sh | sudo bash
+    installed_version=$(crystal --version | grep Crystal | awk '{print $2}')
+    echo "Crystal $installed_version has been installed successfully."
 }
 
 # Download and install Moltiverse from the latest release
