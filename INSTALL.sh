@@ -185,6 +185,27 @@ install_crystal() {
         else
             echo "Non-interactive mode: Proceeding with Crystal language installation."
         fi
+
+        # Cleanup previous installation
+        echo "Cleaning up previous Crystal installation..."
+        
+        # Remove symbolic links
+        sudo rm -f /usr/local/bin/crystal
+        sudo rm -f /usr/local/bin/shards
+        
+        # Remove old installation directory (if it exists)
+        if [ -d "/opt/crystal-1.13.1-1" ]; then
+            echo "Removing old Crystal 1.13.1 installation..."
+            sudo rm -rf /opt/crystal-1.13.1-1
+        fi
+        
+        # Check for and remove any other Crystal installations in /opt
+        for dir in /opt/crystal-*; do
+            if [ -d "$dir" ]; then
+                echo "Removing Crystal installation at $dir..."
+                sudo rm -rf "$dir"
+            fi
+        done
     fi
 
     echo "Installing Crystal language"
