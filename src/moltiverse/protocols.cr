@@ -39,7 +39,8 @@ class SamplingProtocol
       colvars: [
         Colvar::Windowed.new(
           Colvar::RadiusOfGyration.new,
-          bounds: 0.0..4.0,
+          lower_bound: 0,
+          upper_bound: 4,
           bin_width: 0.05,
           windows: 2,
           force_constant: 10.0,
@@ -61,7 +62,8 @@ class SamplingProtocol
       colvars: [
         Colvar::Windowed.new(
           Colvar::RadiusOfGyration.new,
-          bounds: 3.0..9.0,
+          lower_bound: 3,
+          upper_bound: 9,
           bin_width: 0.05,
           windows: 12,
           force_constant: 10.0,
