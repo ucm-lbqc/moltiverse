@@ -1,2 +1,2 @@
 require "spec"
-require "../src/moltiverse"
+require "../src/moltiverse/**"

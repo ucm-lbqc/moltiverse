@@ -1,0 +1,16 @@
+colvars:
+  - component:
+      type: rdgyr
+    lower_bound: 0
+    upper_bound: 4
+    bin_width: 0.05
+    windows: 2
+    force_constant: 10.0
+simulation_time: 0.4
+fullsamples: 500
+metadynamics: true
+hillweight: 0.5
+hillwidth: 1.0
+newhillfrequency: 100
+n_variants: 1
+output_frequency: 500

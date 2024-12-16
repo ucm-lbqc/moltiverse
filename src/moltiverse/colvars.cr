@@ -1,4 +1,8 @@
+require "yaml"
+
 class Colvar
+  include YAML::Serializable
+
   property component : Colvar::Component
   property lower_bound : Float64
   property upper_bound : Float64
@@ -23,6 +27,13 @@ class Colvar
 end
 
 abstract struct Colvar::Component
+  include YAML::Serializable
+
+  use_yaml_discriminator "type", {rmsd: RMSD, rdgyr: RadiusOfGyration}
+
+  def initialize
+  end
+
   def keyword : String
     # name.camelcase(lower: true)
     name.upcase

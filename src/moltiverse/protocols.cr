@@ -1,5 +1,9 @@
+require "yaml"
+
 # Define colvar bounds, windows and time for the collective variables.
 class SamplingProtocol
+  include YAML::Serializable
+
   getter colvars : Array(Colvar::Windowed)
   getter n_variants : Int32
   getter metadynamics : Bool
@@ -35,49 +39,11 @@ class SamplingProtocol
   end
 
   def self.test : self
-    new(
-      colvars: [
-        Colvar::Windowed.new(
-          Colvar::RadiusOfGyration.new,
-          lower_bound: 0,
-          upper_bound: 4,
-          bin_width: 0.05,
-          windows: 2,
-          force_constant: 10.0,
-        ),
-      ],
-      simulation_time: 0.4,
-      fullsamples: 500,
-      metadynamics: true,
-      hillweight: 0.5,
-      hillwidth: 1.0,
-      newhillfrequency: 100,
-      n_variants: 1,
-      output_frequency: 500,
-    )
+    from_yaml {{read_file "#{__DIR__}/../../data/test.yml"}}
   end
 
   def self.v1 : self
-    new(
-      colvars: [
-        Colvar::Windowed.new(
-          Colvar::RadiusOfGyration.new,
-          lower_bound: 3,
-          upper_bound: 9,
-          bin_width: 0.05,
-          windows: 12,
-          force_constant: 10.0,
-        ),
-      ],
-      simulation_time: 2,
-      fullsamples: 250,
-      metadynamics: true,
-      hillweight: 3.0,
-      hillwidth: 3.0,
-      newhillfrequency: 50,
-      n_variants: 1,
-      output_frequency: 400,
-    )
+    from_yaml {{read_file "#{__DIR__}/../../data/c1.yml"}}
   end
 
   def describe
