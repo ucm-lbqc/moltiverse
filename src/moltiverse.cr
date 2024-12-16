@@ -14,7 +14,7 @@ module Moltiverse
 end
 
 def abort(message : String, status : Int = 1) : NoReturn
-  Crystal.ignore_stdio_errors { STDERR.puts "Error: #{message}".colorize(:red) }
+  Crystal.ignore_stdio_errors { STDERR.puts "moltiverse: #{message}".colorize.bold.red }
   exit status
 end
 
