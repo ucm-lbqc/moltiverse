@@ -7,9 +7,9 @@ require "./moltiverse/**"
 
 # TODO: Write documentation for `Moltiverse`
 module Moltiverse
-  VERSION = "0.1.0"
+  VERSION      = "0.1.0"
   VERSION_TYPE = "MAIN BRANCH"
-  #VERSION_TYPE = "RELEASE"
+  # VERSION_TYPE = "RELEASE"
   # TODO: Put your code here
 end
 
@@ -20,7 +20,7 @@ end
 
 # Define defaults values for parser variables.
 # Global settings
-protocol = SamplingProtocol.v1
+protocol = SamplingProtocol.c1
 ligand = ""
 output_name = nil
 n_confs = 250
@@ -77,7 +77,7 @@ if ligand.empty?
 end
 output_name ||= Path[ligand].stem
 
-def print_banner()
+def print_banner
   puts "╔╦╗╔═╗╦ ╔╦╗╦╦  ╦╔═╗╦═╗╔═╗╔═╗"
   puts "║║║║ ║║  ║ ║╚╗╔╝║╣ ╠╦╝╚═╗║╣ "
   puts "╩ ╩╚═╝╩═╝╩ ╩ ╚╝ ╚═╝╩╚═╚═╝╚═╝"

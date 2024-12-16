@@ -42,7 +42,7 @@ class SamplingProtocol
     from_yaml {{read_file "#{__DIR__}/../../data/test.yml"}}
   end
 
-  def self.v1 : self
+  def self.c1 : self
     from_yaml {{read_file "#{__DIR__}/../../data/c1.yml"}}
   end
 
