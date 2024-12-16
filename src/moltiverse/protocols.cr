@@ -30,6 +30,12 @@ class SamplingProtocol
     end
   end
 
+  def self.from_file(path : String | Path) : self
+    File.open(path) do |io|
+      from_yaml io
+    end
+  end
+
   def self.new(name : String) : self
     case name
     when "c1"   then from_yaml {{read_file "#{__DIR__}/../../data/c1.yml"}}
