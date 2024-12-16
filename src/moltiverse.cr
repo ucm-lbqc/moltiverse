@@ -20,7 +20,7 @@ end
 
 # Define defaults values for parser variables.
 # Global settings
-protocol = SamplingProtocol.c1
+protocol = SamplingProtocol.new "c1"
 ligand = ""
 output_name = nil
 n_confs = 250

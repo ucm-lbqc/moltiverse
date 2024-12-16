@@ -32,18 +32,25 @@ class SamplingProtocol
 
   def self.new(name : String) : self
     case name
-    when "v1"   then v1
-    when "test" then test
-    else             raise ArgumentError.new("Unknown protocol '#{name}'")
+    when "c1"   then from_yaml {{read_file "#{__DIR__}/../../data/c1.yml"}}
+    when "test" then from_yaml {{read_file "#{__DIR__}/../../data/test.yml"}}
+    else
+      path = "#{name}.yml"
+      found = File.exists?(path)
+      if !found && (dir = ENV["MOLTIVERSE_PROTOCOL_PATH"])
+        path = File.join(dir, "#{name}.yml")
+        found = File.exists?(path)
+      end
+      if found
+        File.open(path) do |io|
+          from_yaml io
+        rescue ex : YAML::ParseException
+          raise ArgumentError.new("Failed to read protocol at #{path}: #{ex}")
+        end
+      else
+        raise ArgumentError.new("Unknown protocol '#{name}'")
+      end
     end
-  end
-
-  def self.test : self
-    from_yaml {{read_file "#{__DIR__}/../../data/test.yml"}}
-  end
-
-  def self.c1 : self
-    from_yaml {{read_file "#{__DIR__}/../../data/c1.yml"}}
   end
 
   def describe
