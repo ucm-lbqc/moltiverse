@@ -31,10 +31,24 @@ OptionParser.parse do |parser|
     abort "Ligand file not found: #{str}" unless File.exists?(str)
     ligand = str
   end
-  parser.on("-p NAME", "--protocol=NAME", "Moltiverse protocol. Default: 'v1'") do |str|
-    protocol = SamplingProtocol.new str
-  rescue ArgumentError
-    abort "The --protocol value must be 'v1' or 'test'. 'v1' and 'test' are the only protocols supported by the current version."
+  parser.on(
+    "-p NAME",
+    "--protocol=NAME",
+    <<-HELP
+      Sampling protocol. Pass either a name or path to a protocol file
+      (*.yml). Name can be 'c1' (cofactor) or 'test', otherwise a file
+      named '<name>.yml' will be looked for at the current directory or
+      in the directory specified in the MOLTIVERSE_PROTOCOL_DIR
+      environment variable if exists. Default: 'c1'.
+      HELP
+  ) do |str|
+    if str =~ /\.yml$/
+      protocol = SamplingProtocol.from_file str
+    else
+      protocol = SamplingProtocol.new str
+    end
+  rescue ex : ArgumentError | File::NotFoundError | YAML::ParseException
+    abort ex.to_s
   end
   parser.on("-o NAME", "--output=NAME", "Output folder name. Default: input ligand's basename") do |str|
     output_name = str
