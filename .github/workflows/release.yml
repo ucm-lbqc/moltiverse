@@ -51,7 +51,8 @@ jobs:
           crystal build --release \
             -o bin/moltiverse-${GITHUB_REF_SLUG}-osx-${ARCH} \
             src/moltiverse.cr
-          zip -rjX ./bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH}.zip ./bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH}
+          zip -rjX ./bin/moltiverse-${GITHUB_REF_SLUG}-osx-${ARCH}.zip \
+            ./bin/moltiverse-${GITHUB_REF_SLUG}-osx-${ARCH}
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
