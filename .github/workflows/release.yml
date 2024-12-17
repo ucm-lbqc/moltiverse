@@ -43,7 +43,7 @@ jobs:
             crystal build --static --release \
             -o bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH} \
             src/moltiverse.cr
-          chmod +x ./bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH}
+          sudo chmod +x ./bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH}
           gzip ./bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH}
       - if: startsWith(matrix.os, 'macos')
         name: Build binary (macOS)
