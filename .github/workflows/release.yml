@@ -35,7 +35,7 @@ jobs:
         name: Build binary (Linux)
         run: |
           mkdir bin
-          docker run --rm -it -v $(pwd):/workspace -w /workspace \
+          docker run --rm -v $(pwd):/workspace -w /workspace \
             crystallang/crystal:latest-alpine \
             crystal build --static --release \
             -o bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH} \
