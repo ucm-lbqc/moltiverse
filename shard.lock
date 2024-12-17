@@ -1,0 +1,18 @@
+version: 2.0
+shards:
+  chem:
+    git: https://github.com/franciscoadasme/chem.cr.git
+    version: 0.6.0+git.commit.2d5e793bb5fe78cec7db007714cd44ec4148d2bf
+
+  hclust:
+    git: https://github.com/franciscoadasme/hclust.git
+    version: 1.0.0+git.commit.e00db0b78361115422ecc3f9aa9d8a54fb525468
+
+  mm:
+    git: https://github.com/franciscoadasme/mm.git
+    version: 0.1.0+git.commit.24425b36dd870a7c379d730f779f1bcacb178a4e
+
+  views:
+    git: https://github.com/franciscoadasme/views.git
+    version: 0.1.0+git.commit.0fdfef2d91ad7cb32dc98651168472f9f9a762ce
+
