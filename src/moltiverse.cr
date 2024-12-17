@@ -7,7 +7,7 @@ require "./moltiverse/**"
 
 # TODO: Write documentation for `Moltiverse`
 module Moltiverse
-  VERSION      = "0.1.0"
+  VERSION      = "0.1.1"
   VERSION_TYPE = "MAIN BRANCH"
   # VERSION_TYPE = "RELEASE"
   # TODO: Put your code here
