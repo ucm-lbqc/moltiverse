@@ -35,6 +35,20 @@ targets:
     main: src/utilities/rmsd_matrix_for_crystals.cr
   check_covalent:
     main: src/utilities/check_covalent.cr
+  rdgyr:
+    main: src/utilities/rdgyr.cr
+  rmsd_matrix_for_sdf:
+    main: src/utilities/rmsd_matrix_for_sdf.cr
+  count_sdf:
+    main: src/utilities/count_sdf.cr
+  singlepoint_jaguar:
+    main: src/utilities/singlepoint_jaguar.cr
+  geometrical_props:
+    main: src/utilities/geometrical_props.cr
+  get_atom_count:
+    main: src/utilities/get_atom_count.cr
+  rmsd_sdf_extract_min:
+    main: src/utilities/rmsd_sdf_extract_min.cr
 
 crystal: 1.10.1
 
