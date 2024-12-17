@@ -65,4 +65,4 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
           file_glob: true
-          file: bin/*.*
+          file: bin/*.{gz,zip}
