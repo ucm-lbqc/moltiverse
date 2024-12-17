@@ -43,6 +43,7 @@ jobs:
             crystal build --static --release \
             -o bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH} \
             src/moltiverse.cr
+          gzip ./bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH}
       - if: startsWith(matrix.os, 'macos')
         name: Build binary (macOS)
         run: |
@@ -50,6 +51,7 @@ jobs:
           crystal build --release \
             -o bin/moltiverse-${GITHUB_REF_SLUG}-osx-${ARCH} \
             src/moltiverse.cr
+          zip -rjX ./bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH}.zip ./bin/moltiverse-${GITHUB_REF_SLUG}-linux-${ARCH}
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -62,4 +64,4 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
           file_glob: true
-          file: bin/*
+          file: bin/*.*
