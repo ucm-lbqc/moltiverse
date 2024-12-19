@@ -2,8 +2,8 @@ name: moltiverse
 version: 0.1.1
 
 authors:
-  - Mauricio Bedoya <maurobedoyat@gmail.com>
-  - Francisco Adasme <francisco.adasme@gmail.com>
+  - Mauricio Bedoya <mbedoya@ucm.cl>
+  - Francisco Adasme <fadasme@ucm.cl>
 
 dependencies:
   chem:
