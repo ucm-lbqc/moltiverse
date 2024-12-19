@@ -94,9 +94,9 @@ The following [Notebook](https://colab.research.google.com/drive/1YtafWMZsNL-Cyq
 
 ## Citing
 
-If you use `moltiverse` in your research, please consider citing the following article:
+If you use `moltiverse` in your research, please consider citing the following preprint:
 
-    To be added
+    Bedoya M, Adasme-Carreño F, Peña-Martínez PA, Muñoz-Gutiérrez C, Peña-Tejo L, Márquez Montesinos JCE, et al. Moltiverse: Molecular Conformer Generation Using Enhanced Sampling Methods. ChemRxiv. 2024; doi:10.26434/chemrxiv-2024-qs0pc-v2  This content is a preprint and has not been peer-reviewed.
 
 
 ## Contributing
