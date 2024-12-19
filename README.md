@@ -4,7 +4,7 @@
 
 Moltiverse uses the robust ecosystem of open-source applications to process the molecules and perform conformational sampling. The conformer generation protocol consists of seven main steps: 
 1. Molecular pre-processing: Conversion of SMILES code into three-dimensional coordinates using Open Babel.
-2. Structure spreading.
+2. Structure stretching.
 3. Molecule parameterization with the GAFF2 force field using Amber Tools.
 4. Energetic minimization.
 5. Molecular sampling in vacuum with the M-eABF method using the NAMD molecular simulation engine.
