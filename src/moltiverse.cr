@@ -5,12 +5,9 @@ require "hclust"
 require "option_parser"
 require "./moltiverse/**"
 
-# TODO: Write documentation for `Moltiverse`
 module Moltiverse
-  VERSION      = "0.1.1"
+  VERSION      = "0.1.8"
   VERSION_TYPE = "MAIN BRANCH"
-  # VERSION_TYPE = "RELEASE"
-  # TODO: Put your code here
 end
 
 def abort(message : String, status : Int = 1) : NoReturn
