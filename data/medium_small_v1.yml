@@ -1,0 +1,19 @@
+name: "medium_small_v1"
+description: "Version 1 protocol for medium-small molecules (47-71 atoms)"
+colvars:
+  - component:
+      type: rdgyr
+    lower_bound: 2.5
+    upper_bound: 9.0
+    bin_width: 0.05
+    windows: 13
+    force_constant: 10.0
+smiles_conversion_timeout: 240  # Max time in seconds for SMILES to 3D conversion
+simulation_time: 0.5            # Simulation time in ns for every window
+fullsamples: 250
+metadynamics: true
+hillweight: 3.0
+hillwidth: 3.0
+newhillfrequency: 50
+output_frequency: 400
+

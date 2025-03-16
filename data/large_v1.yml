@@ -1,0 +1,18 @@
+name: "large_v1"
+description: "Version 1 protocol for large molecules (161-230 atoms)"
+colvars:
+  - component:
+      type: rdgyr
+    lower_bound: 4.0
+    upper_bound: 17.0
+    bin_width: 0.05
+    windows: 26
+    force_constant: 10.0
+smiles_conversion_timeout: 240  # Max time in seconds for SMILES to 3D conversion
+simulation_time: 0.5            # Simulation time in ns for every window
+fullsamples: 250
+metadynamics: true
+hillweight: 3.0
+hillwidth: 3.0
+newhillfrequency: 50
+output_frequency: 400

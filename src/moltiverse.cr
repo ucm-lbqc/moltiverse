@@ -299,20 +299,17 @@ OptionParser.parse do |parser|
     <<-HELP
       Sampling protocol. Pass either a name or path to a protocol file
       (*.yml). Name can be 'c1' (cofactor) or 'test', otherwise a file
-      named '<name>.yml' will be looked for at the current directory or
+      named '<n>.yml' will be looked for at the current directory or
       in the directory specified in the MOLTIVERSE_PROTOCOL_DIR
       environment variable if exists. Default: 'c1'.
       HELP
   ) do |str|
-    if str =~ /\.yml$/
-      protocol = SamplingProtocol.from_file str
-    else
-      protocol = SamplingProtocol.new str
-    end
-  rescue ex : ArgumentError | File::NotFoundError | YAML::ParseException
-    abort ex.to_s
+    # This will store the name, it won't load the protocol yet
+    # Do not modify to avoid loading the protocol before all options are parsed
+    protocol_name = str
+    user_selected_protocol = true
   end
-  parser.on("-o NAME", "--output=NAME", "Output folder name. Default: input ligand's basename") do |str|
+  parser.on("-o NAME", "--output=NAME", "Output folder name. Default: input ligand's basename in the [smi] file") do |str|
     output_name = str
   end
   parser.on("-n N", "--conformers=N", "Number of conformers to generate. Default: #{n_confs}") do |str|
@@ -341,6 +338,18 @@ OptionParser.parse do |parser|
     puts "Moltiverse #{Moltiverse::VERSION} #{Moltiverse::VERSION_TYPE}"
     exit
   end
+  parser.on(
+    "-V NUMBER",
+    "--protocol-version=NUMBER",
+    "Protocol version to use (e.g. 1, 2, 3). Default: 1"
+  ) do |str|
+    protocol_version = str.to_i
+    if protocol_version < 1
+      abort "Invalid protocol version: #{str}. Must be a positive integer."
+    end
+    # Print message to confirm which version was set
+    puts "Setting protocol version to: #{protocol_version}".colorize(:light_blue)
+  end
   parser.invalid_option do |flag|
     print_banner
     abort "#{flag} is not a valid option.\n#{parser}"
@@ -358,6 +367,30 @@ def print_banner
   puts "╩ ╩╚═╝╩═╝╩ ╩ ╚╝ ╚═╝╩╚═╚═╝╚═╝"
 end
 
+main_dir = Dir.current
+new_output_name = output_name
+
+puts "Moltiverse starting up, main directory: #{main_dir}"
+
+# Load the protocol with the correct version after all options are parsed
+#puts "DEBUG: Using protocol version: #{protocol_version}".colorize(:light_blue)
+begin
+  if protocol_name =~ /\.yml$/
+    protocol = SamplingProtocol.from_file protocol_name
+    protocol.version = protocol_version
+  else
+    protocol = SamplingProtocol.new protocol_name, protocol_version
+  end
+  
+  # Set user_selected based on whether the user explicitly provided a protocol
+  protocol.user_selected = user_selected_protocol
+  
+  if user_selected_protocol && !protocol.loaded_from_file
+    puts "Protocol selected: #{protocol.name} (v#{protocol.version})".colorize(GREEN)
+  end
+rescue ex : ArgumentError | File::NotFoundError | YAML::ParseException
+  abort ex.to_s
+end
 
 
 File.each_line(ligand) do |line|

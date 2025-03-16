@@ -1,3 +1,5 @@
+name: "c1_v1"
+description: "Version 1 protocol for cofactor molecules"
 colvars:
   - component:
       type: rdgyr
@@ -6,7 +8,8 @@ colvars:
     bin_width: 0.05
     windows: 12
     force_constant: 10.0
-simulation_time: 2.0
+smiles_conversion_timeout: 240  # Max time in seconds for SMILES to 3D conversion
+simulation_time: 2.0            # Simulation time in ns for every window
 fullsamples: 250
 metadynamics: true
 hillweight: 3.0

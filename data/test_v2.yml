@@ -1,0 +1,18 @@
+name: "test_v2"
+description: "Version 2 protocol for a rapid test of Moltiverse"
+colvars:
+  - component:
+      type: rdgyr
+    lower_bound: 0.0
+    upper_bound: 4.0
+    bin_width: 0.05
+    windows: 2
+    force_constant: 10.0
+smiles_conversion_timeout: 240 # Max time in seconds for SMILES to 3D conversion
+simulation_time: 0.1
+fullsamples: 500
+metadynamics: true
+hillweight: 0.5
+hillwidth: 1.0
+newhillfrequency: 100
+output_frequency: 500
