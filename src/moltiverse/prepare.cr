@@ -147,12 +147,13 @@ class Ligand
     Dir.cd(@output_name)
     @working_dir = Dir.current
     @basename = "#{@output_name}"
-    puts "Running openbabel convertion..."
+    puts "Running structure generation..."
     @format = "mol"
     @extension = ".mol"
     @file = Path.new("#{@basename}#{@extension}").expand.to_s
     begin
-      structure = OpenBabel.convert_smiles(@smile.as(String))
+      structure, properties = @structure_generator.convert_smiles(@smile.as(String), @output_name)
+      @mol_properties = properties
       structure.to_mol @file
       @charge = structure.formal_charge
       puts "Molecule charge: #{@charge}"
@@ -311,7 +312,7 @@ class Ligand
     
     protocol
   end
-
+  
   def parameterize(cpus : Int = System.cpu_count)
     t1 = Time.monotonic
     # Convert to PDB after add_h and structure randomization and write PDB without connectivities
@@ -461,17 +462,17 @@ class Ligand
     structures : Array(Chem::Structure) = [] of Chem::Structure
     pdb_names : Array(String) = [] of String
     mm_refined_structures : Array(Chem::Structure) = [] of Chem::Structure
-
+  
     # VARIABLES
     steps = 300
-
+  
     # Reading previously generated conformers
     sdf_structures = Array(Chem::Structure).from_sdf("#{@output_name}.sdf")
     sdf_structures.map_with_index do |_, idx|
       st = sdf_structures[idx]
       structures.push(st)
     end
-
+  
     # Conformer optimization using MM
     structures.each_with_index do |st, idx|
       idx += 1
