@@ -12,7 +12,16 @@ class SamplingProtocol
   getter hillweight : Float64
   getter hillwidth : Float64
   getter newhillfrequency : Int32
+  property structure_generator : String = "cdpkit"
+  property protonation_ph : Float64 = 7.0
+  property smiles_conversion_timeout : Int32 = 240
+  property name : String = "default"
   property output_frequency : Int32
+  property description : String = ""
+  property loaded_from_file : Bool = false
+  property user_selected : Bool = false
+  property protocol_type : String = "default" # Can be "built-in", "custom-file", or "default"
+  property version : Int32 = 1
 
   def initialize(
     @colvars : Array(Colvar::Windowed),
@@ -23,11 +32,31 @@ class SamplingProtocol
     @hillwidth : Float64,
     @newhillfrequency : Int32,
     @n_variants : Int32,
+    @structure_generator : String = "cdpkit",
+    @protonation_ph : Float64 = 7.0,
+    @name : String = "default",
+    @description : String = "",
     @output_frequency : Int = 500
   )
     unless @colvars.size.in?(1..2)
       raise ArgumentError.new("Invalid number of collective variables")
     end
+
+    unless ["cdpkit"].includes?(@structure_generator.downcase)
+      raise ArgumentError.new("Invalid structure generator: #{@structure_generator}")
+    end
+
+    unless (0.0..14.0).includes?(@protonation_ph)
+      raise ArgumentError.new("pH must be between 0 and 14")
+    end
+
+  end
+
+  def calculate_iterations_and_step : Tuple(Int32, Int32)
+    range = max_confs_per_iteration - min_confs_per_iteration
+    step = (range / extension_iterations).ceil.to_i
+    actual_iterations = (range / step).ceil.to_i
+    {actual_iterations, step}
   end
 
   def self.from_file(path : String | Path) : self
