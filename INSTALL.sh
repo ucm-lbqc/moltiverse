@@ -178,7 +178,7 @@ install_crystal() {
     # Check if crystal is already installed
     if command_exists crystal; then
         current_version=$(crystal --version | grep Crystal | awk '{print $2}')
-        required_version="1.10.1"  # Set your minimum required version
+        required_version="1.15.1"  # Set your minimum required version
         echo "Crystal version $current_version is already installed."
         
         # Compare versions

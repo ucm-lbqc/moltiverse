@@ -50,6 +50,6 @@ targets:
   rmsd_sdf_extract_min:
     main: src/utilities/rmsd_sdf_extract_min.cr
 
-crystal: 1.10.1
+crystal: 1.15.1
 
 license: MIT
