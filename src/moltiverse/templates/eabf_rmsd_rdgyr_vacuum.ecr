@@ -19,15 +19,15 @@ amber                           on          # AMBER IN NAMD
 exclude                         scaled1-4   # AMBER IN NAMD
 oneFourScaling                  0.833333    # AMBER IN NAMD
 switching                       off         # AMBER IN NAMD
-cutoff                          28          # AMBER IN NAMD
-pairListDist                    30          # AMBER IN NAMD
+cutoff                          38          # AMBER IN NAMD
+pairListDist                    40          # AMBER IN NAMD
 #LJcorrection                   on          # AMBER IN NAMD Take care, in alchemical simulations should be on.
 scnb                            2.0         # AMBER IN NAMD
 readexclusions                  yes         # AMBER IN NAMD
 ZeroMomentum                    on          # AMBER IN NAMD
 
 # avoid "periodic cell too small for patch grid" errors
-margin                          5
+margin                          10
 
 # integration
 rigidBonds                      none         # AMBER IN NAMD (water, all or none)
