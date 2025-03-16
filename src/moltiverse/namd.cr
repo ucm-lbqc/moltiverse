@@ -57,5 +57,5 @@ def NAMD.run(
     cli_args << value unless value.is_a?(Bool)
   end
   output = "#{Path[cfg].stem}.out"
-  ::run "namd2", cli_args, output, retries
+  ::run "namd3", cli_args, output, retries
 end

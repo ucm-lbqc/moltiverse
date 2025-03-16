@@ -50,8 +50,9 @@ bash INSTALL.sh
 
 ## Requirements
 External software:
-- [OpenBabel](https://openbabel.org)
-- [Namd](https://www.ks.uiuc.edu/Research/namd/)
+- [Python3](https://www.python.org/)
+- [CDPKit](https://cdpkit.org/)
+- [Namd v3](https://www.ks.uiuc.edu/Research/namd/)
 - [Ambertools](https://ambermd.org/AmberTools.php)
 - [xTB](https://github.com/grimme-lab/xtb)
 
