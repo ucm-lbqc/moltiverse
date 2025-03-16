@@ -333,7 +333,7 @@ OptionParser.parse do |parser|
   end
   parser.on("-c", "--check", "Check dependencies") do
     print_banner
-    puts check_dependencies
+    check_dependencies
     exit
   end
   parser.on("-v", "--version", "Moltiverse version") do
@@ -351,7 +351,6 @@ if ligand.empty?
   LOGGER.err_puts "Usage: moltiverse [OPTIONS] -l FILE"
   exit
 end
-output_name ||= Path[ligand].stem
 
 def print_banner
   puts "╔╦╗╔═╗╦ ╔╦╗╦╦  ╦╔═╗╦═╗╔═╗╔═╗"
@@ -359,17 +358,43 @@ def print_banner
   puts "╩ ╩╚═╝╩═╝╩ ╩ ╚╝ ╚═╝╩╚═╚═╝╚═╝"
 end
 
-print_banner
-check_dependencies
 
-puts "Output folders will have the format: 'output_name'_'smi_ligand_name'".colorize(YELLOW)
 
-log = File.open "#{output_name}_time_per_stage.log", "w"
-main_dir = Dir.current
-t_start_full = Time.monotonic
 File.each_line(ligand) do |line|
   smile_code, name = line.split limit: 2
-  new_output_name = "#{output_name}_#{name}"
+  if output_name
+    new_output_name = "#{output_name}"
+  else
+    new_output_name = "#{name}"
+  end
+
+  # Create the working directory
+  Dir.cd(main_dir)
+  puts "The output folder name will be: #{new_output_name}".colorize(YELLOW)
+
+  # Check if folder exists
+  if Dir.exists?("#{new_output_name}")
+    if remove_folder
+      # Remove folder if it exists and remove_folder is true
+      puts "Removing existing folder #{new_output_name}".colorize(YELLOW)
+      remove_directory_recursive("#{new_output_name}")
+      Dir.mkdir("#{new_output_name}")
+    else
+      # Exit if folder exists and remove_folder is false
+      puts "Folder #{new_output_name} already exists and remove_folder is false. Exiting.".colorize(RED)
+      exit(1)
+    end
+  else
+    # Create folder if it doesn't exist
+    puts "Creating folder #{new_output_name}".colorize(YELLOW)
+    Dir.mkdir("#{new_output_name}")
+  end
+
+  # Create log file
+  log_path = "#{main_dir}/#{new_output_name}/#{new_output_name}.log"
+  puts "Setting up log file at: #{log_path}"
+  LOGGER.set_log_file(log_path)
+  
   puts "SMILE:"
   puts smile_code.colorize(AQUA)
   lig = Ligand.new(ligand, smile_code, new_output_name, protocol, main_dir)
