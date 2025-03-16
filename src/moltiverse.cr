@@ -333,6 +333,10 @@ OptionParser.parse do |parser|
     check_dependencies
     exit
   end
+  # remove folder if exist, by default, false, so, remove_folder = true
+  parser.on("-r", "--remove", "Remove output folder if exists. Default: false") do
+    remove_folder = true
+  end
   parser.on("-v", "--version", "Moltiverse version") do
     print_banner
     puts "Moltiverse #{Moltiverse::VERSION} #{Moltiverse::VERSION_TYPE}"
