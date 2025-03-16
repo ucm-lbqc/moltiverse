@@ -51,6 +51,12 @@ class Ligand
     @pdb_reference = "empty"
     @sampling_protocol = sampling_protocol
     @charge = 0
+    @mol_properties = {} of String => (Int32 | Float64 | Bool | String)
+    @structure_generator = StructureGenerator.create_structure_generator(
+      sampling_protocol.structure_generator,
+      sampling_protocol.protonation_ph,
+      sampling_protocol.smiles_conversion_timeout,
+    )
   end
 
   def file
@@ -109,6 +115,14 @@ class Ligand
     @sampling_protocol
   end
 
+  def mol_properties
+    @mol_properties
+  end
+
+  def update_sampling_protocol(protocol : SamplingProtocol)
+    @sampling_protocol = protocol
+  end
+
   def lig_center
     @lig_center
   end
@@ -149,7 +163,77 @@ class Ligand
       structure.to_mol @file
       @charge = structure.formal_charge
       puts "Molecule charge: #{@charge}"
+      
+      # Print molecular properties
+      puts "Molecule properties:".colorize(GREEN)
+      puts "  Total atoms:                                       [ #{@mol_properties["NumAtoms"]} ]".colorize(AQUA)
+      puts "  Heavy atoms:                                       [ #{@mol_properties["NumHeavyAtoms"]} ]".colorize(AQUA)
+      puts "  Total bonds:                                       [ #{@mol_properties["NumBonds"]} ]".colorize(AQUA)
+      puts "  Rotatable bonds (aliphatic, ring, no-amide bonds): [ #{@mol_properties["NumRotatableBonds"]} ]".colorize(AQUA)
+      puts "  Charge Chem.cr:                                    [ #{@charge} ]".colorize(AQUA)
+      puts "  Charge CDPKit:                                     [ #{@mol_properties["TotalCharge"]} ]".colorize(AQUA)
+      puts "  Ring count:                                        [ #{@mol_properties["RingCount"]} ]".colorize(AQUA)
+      puts "  Largest ring size:                                 [ #{@mol_properties["LargestRingSize"]} ]".colorize(AQUA)
+      puts "  Rotatable bonds in small rings:                    [ #{@mol_properties["NumRotatableBondsInSmallRings"]} ]".colorize(AQUA)
+      puts "  Rotatable bonds without small rings:               [ #{@mol_properties["NumRotatableBondsNoSmallRings"]} ]".colorize(AQUA)
+      
+      # Determine molecule category
+      total_atoms = if @mol_properties["NumAtoms"].is_a?(Int32)
+        @mol_properties["NumAtoms"].as(Int32)
+      else
+        0  # Default value if not an integer
+      end
+      molecule_category = case
+        when total_atoms <= 22                 then "Tiny"
+        when total_atoms >= 23 && total_atoms <= 46   then "Small"
+        when total_atoms >= 47 && total_atoms <= 71   then "Medium-Small" 
+        when total_atoms >= 72 && total_atoms <= 136  then "Medium"
+        when total_atoms >= 137 && total_atoms <= 160 then "Medium-Large"
+        when total_atoms >= 161 && total_atoms <= 230 then "Large"
+        else "Extra-Large"
+      end
+      
+      # Add category to properties
+      @mol_properties["MoleculeCategory"] = molecule_category
+      puts "  Molecule category:                                 [ #{molecule_category} ]".colorize(TURQUOISE)
+  
+      # Write properties to a file for reference and to choose the best protocol
+      log = File.open "#{@working_dir}/#{@output_name}_properties.log", "w"
+      @mol_properties.each do |key, value|
+        log.puts "#{key},#{value}"
+      end
+      log.close
+  
       success = true
+      structure = @structure_generator.temperature_factor_to_one(@file)
+      structure.to_mol("#{@basename}_cv.mol")
+      rdgyr = structure.pos.rdgyr
+      puts "RDGYR of the initial conformation: #{rdgyr.round(4)}".colorize(GREEN)
+      @extension = ".mol"
+      @basename = "#{@basename}_cv"
+      @format = "mol"
+      @extended_mol = "#{@basename}.mol"
+  
+      # Protocol Selection Logic with clearer messaging
+      
+      # Case 1: Protocol was explicitly loaded from a file
+      if @sampling_protocol.loaded_from_file
+        puts "Using custom protocol file: #{@sampling_protocol.name} (v#{@sampling_protocol.version})".colorize(GREEN)
+      # Case 2: User explicitly selected a built-in protocol
+      elsif @sampling_protocol.user_selected
+        puts "Using user-selected protocol: #{@sampling_protocol.name} (v#{@sampling_protocol.version})".colorize(GREEN)
+      # Case 3: No specific protocol selected, auto-select based on molecule properties
+      else
+        puts "Auto-selecting protocol based on molecule properties...".colorize(YELLOW)
+        version = @sampling_protocol.version  # Preserve the version
+        updated_protocol = select_sampling_protocol(@mol_properties, version)
+        if updated_protocol
+          @sampling_protocol = updated_protocol
+          puts "Selected protocol: #{@sampling_protocol.name} (v#{@sampling_protocol.version}) based on #{molecule_category} molecule".colorize(GREEN)
+        else
+          puts "Using default protocol: #{@sampling_protocol.name} (v#{@sampling_protocol.version})".colorize(GREEN)
+        end
+      end
     rescue ex
       puts "SMILES conversion failed due to #{ex}".colorize(RED)
       puts "Please check the input SMILE code:"
@@ -179,6 +263,19 @@ class Ligand
         max_rdgyr = actual_rdgyr
         puts "MAX RDGYR #{max_rdgyr.round(4)}. ITERATION #{iteration}"
       end
+  
+  # Method to select an appropriate sampling protocol based on molecular properties
+  private def select_sampling_protocol(props : Hash(String, Int32 | Float64 | Bool | String), version : Int32 = 1) : SamplingProtocol?
+    # Default to the current protocol if no specific rules are met
+    protocol = @sampling_protocol
+  
+    protocol_version = version
+    
+    # Safe way to access total atom count (including hydrogens)
+    total_atoms = if props["NumAtoms"].is_a?(Int32)
+      props["NumAtoms"].as(Int32)
+    else
+      20  # Default value if not an integer
     end
 
     variant_1.to_mol("#{@basename}_rand.mol")
@@ -189,6 +286,37 @@ class Ligand
     @extended_mol = "#{@basename}.mol"
     t2 = Time.monotonic
     t2 - t1
+  
+    # Categorize the molecule based on total atom count
+    category = case total_atoms
+    when 0..22
+      "tiny"
+    when 23..46
+      "small"
+    when 47..71
+      "medium_small"
+    when 72..136
+      "medium"
+    when 137..160
+      "medium_large"
+    when 161..230
+      "large"
+    else  # greater than 230
+      "extra_large"
+    end
+    
+    # Try to load the appropriate protocol for the category
+    begin
+      # No need to log attempts here as it's done within SamplingProtocol.new
+      protocol = SamplingProtocol.new(category, protocol_version)
+      protocol.user_selected = false  # This is auto-selected, not user-selected
+    rescue ex : ArgumentError
+      # If we can't load the protocol, report the error but don't crash
+      puts "Warning: #{ex.message}".colorize(YELLOW)
+      puts "Using default protocol instead".colorize(YELLOW)
+    end
+    
+    protocol
   end
 
   def parameterize(cpus : Int = System.cpu_count)
@@ -283,7 +411,7 @@ class Ligand
   def sampling(cpus : Int = System.cpu_count)
     t1 = Time.monotonic
     # Print protocol description
-    puts sampling_protocol.describe
+    sampling_protocol.describe
     # Generate variants, and perform sampling
     sampling_protocol.execute(self, cpus)
     t2 = Time.monotonic
