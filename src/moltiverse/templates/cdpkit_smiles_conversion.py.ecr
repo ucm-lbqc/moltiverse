@@ -1,0 +1,186 @@
+# Template: cdpkit_smiles_conversion.py.ecr
+import os
+import sys
+import time
+import random
+import traceback
+import json
+from pathlib import Path
+import CDPL.Chem as Chem
+import CDPL.ConfGen as ConfGen
+import CDPL.MolProp as MolProp
+
+def read_smiles_from_file(file_path):
+    try:
+        with open(file_path, 'r') as f:
+            line = f.readline().strip()
+            # SMI format is typically: SMILES string + space + name
+            parts = line.split(None, 1)
+            if parts:
+                return parts[0]  # Return just the SMILES part
+            return ""
+    except Exception as e:
+        print(f"Error reading SMI file: {e}")
+        return ""
+
+def convert_smiles_to_3d(smiles: str, output_path: str, props_path: str, ph: float = 7.4, molecule_name: str = "", max_time = 240) -> None:
+    if not output_path:
+        raise ValueError("Output path cannot be empty")
+    try:
+        properties = {}
+        mol = Chem.BasicMolecule()
+        if not Chem.parseSMILES(smiles, mol):
+            raise Exception(f"Failed to parse SMILES: {smiles}")
+
+        Chem.calcImplicitHydrogenCounts(mol, False)
+        Chem.makeHydrogenComplete(mol)
+        Chem.perceiveHybridizationStates(mol, False)
+        Chem.perceiveSSSR(mol, False)
+        Chem.setRingFlags(mol, False)
+        Chem.setAromaticityFlags(mol, False)
+        ConfGen.prepareForConformerGeneration(mol)
+        Chem.calcBasicProperties(mol, False)
+
+        # Get molecule name
+        if molecule_name:
+            properties['Name'] = molecule_name
+        else:
+            mol_name = Chem.getName(mol).strip()
+            if not mol_name:
+                mol_name = "Unknown"
+            properties['Name'] = mol_name
+
+        # 1. Number of atoms
+        properties['NumAtoms'] = mol.getNumAtoms()
+
+        # 2. Number of heavy atoms (non-hydrogen)
+        #heavy_atoms_count = 0
+        #for atom in mol.atoms:
+        #    if atom.getAtomicNumber() != 1:  # 1 is the atomic number of hydrogen
+        #        heavy_atoms_count += 1
+        #properties['NumHeavyAtoms'] = heavy_atoms_count
+        properties['NumHeavyAtoms'] = MolProp.getHeavyAtomCount(mol)
+
+        # 3. Number of bonds
+        properties['NumBonds'] = mol.getNumBonds()
+
+        # 4. For rotatable bonds - calculate using MolProp.isRotatable
+        # def isRotatable(bond: Chem.Bond, molgraph: Chem.MolecularGraph, h_rotors: bool, ring_bonds: bool, amide_bonds: bool)
+        rotatable_bonds = 0
+        for bond in mol.bonds:
+            if MolProp.isRotatable(bond, mol, False, True, False):
+                rotatable_bonds += 1
+        properties['NumRotatableBonds'] = rotatable_bonds
+
+        # 5. Total formal charge
+        total_charge = 0
+        for atom in mol.atoms:
+            total_charge += Chem.getFormalCharge(atom)
+        properties['TotalCharge'] = total_charge
+
+        # 6. Calculate ring count
+        rings = Chem.getSSSR(mol)
+        properties['RingCount'] = len(rings)
+
+        # 7. Calculate largest ring size
+        max_ring_size = 0
+        for ring in rings:
+            ring_size = 0
+            for _ in ring.atoms:
+                ring_size += 1
+            if ring_size > max_ring_size:
+                max_ring_size = ring_size
+        properties['LargestRingSize'] = max_ring_size
+
+        # 8. Count rotatable bonds in rings of size 9 or smaller
+        # First, identify rings of size 9 or smaller
+        small_rings = []
+        for ring in rings:
+            ring_size = 0
+            for _ in ring.atoms:
+                ring_size += 1
+            if ring_size <= 9:
+                small_rings.append(ring)
+
+        # Track rotatable bonds that appear in small rings
+        rotatable_small_ring_bonds = set()
+        for ring in small_rings:
+            for bond in ring.bonds:
+                # Check if this bond is rotatable
+                if MolProp.isRotatable(bond, mol, False, True, False):
+                    # Store a tuple of atom indices to uniquely identify the bond
+                    atom1_idx = bond.getAtom(0).getIndex()
+                    atom2_idx = bond.getAtom(1).getIndex()
+                    bond_id = tuple(sorted([atom1_idx, atom2_idx]))
+                    rotatable_small_ring_bonds.add(bond_id)
+
+        num_rotatable_small_ring_bonds = len(rotatable_small_ring_bonds)
+        properties['NumRotatableBondsInSmallRings'] = num_rotatable_small_ring_bonds
+
+        # 9. Calculate number of rotatable bonds not in small rings
+        properties['NumRotatableBondsNoSmallRings'] = rotatable_bonds - num_rotatable_small_ring_bonds
+
+        # 10. Define a macrocycle (molecule with a ring of size >= 12)
+        macrocycle_size_threshold = 10
+        is_macrocycle = max_ring_size >= macrocycle_size_threshold
+        properties['IsMacrocycle'] = is_macrocycle  # This will be True or False
+
+        # Write properties to a file
+        if props_path:
+            with open(props_path, 'w') as f:
+                for key, value in properties.items():
+                    f.write(f"{key}: {value}\n")
+
+        # Create structure generator
+        struct_gen = ConfGen.StructureGenerator()
+        struct_gen.settings.timeout = max_time * 1000  # timeout is in milliseconds, and max_time is in seconds
+        
+        # Generate 3D structure
+        status = struct_gen.generate(mol)
+
+        if status != ConfGen.ReturnCode.SUCCESS:
+            status_to_str = {
+                ConfGen.ReturnCode.UNINITIALIZED: 'uninitialized',
+                ConfGen.ReturnCode.TIMEOUT: 'max. processing time exceeded',
+                ConfGen.ReturnCode.ABORTED: 'aborted',
+                ConfGen.ReturnCode.FORCEFIELD_SETUP_FAILED: 'force field setup failed',
+                ConfGen.ReturnCode.FORCEFIELD_MINIMIZATION_FAILED: 'force field structure refinement failed',
+                ConfGen.ReturnCode.FRAGMENT_LIBRARY_NOT_SET: 'fragment library not available',
+                ConfGen.ReturnCode.FRAGMENT_CONF_GEN_FAILED: 'fragment conformer generation failed',
+                ConfGen.ReturnCode.FRAGMENT_CONF_GEN_TIMEOUT: 'fragment conformer generation timeout',
+                ConfGen.ReturnCode.FRAGMENT_ALREADY_PROCESSED: 'fragment already processed',
+                ConfGen.ReturnCode.TORSION_DRIVING_FAILED: 'torsion driving failed',
+                ConfGen.ReturnCode.CONF_GEN_FAILED: 'conformer generation failed'
+            }
+            return False, f"3D structure generation failed with status: {status_to_str.get(status, status)}"
+
+        # Set coordinates and ensure 3D format 
+        struct_gen.setCoordinates(mol)
+        Chem.setMDLDimensionality(mol, 3)
+
+        # Write molecule to file
+        writer = Chem.MolecularGraphWriter(output_path)
+        if not writer.write(mol):
+            raise Exception(f"Failed to write molecule to {output_path}")
+        writer.close()
+        
+    except Exception as e:
+        print(f"Error converting SMILES to 3D: {str(e)}", file=sys.stderr)
+        print(f"Traceback: {traceback.format_exc()}", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    smi_file = "<%= params["smi_file"] %>"
+    output_path = "<%= params["output_path"] %>"
+    props_path = "<%= params["props_path"] %>"
+    ph = <%= params["ph"] %>  # pH value for the molecule
+    molecule_name = "<%= params["molecule_name"] %>"
+    max_time = <%= params["timeout"] %>  # Timeout in seconds
+    
+    # Read the SMILES string from the file
+    smiles = read_smiles_from_file(smi_file)
+
+    if not smiles:
+        print("Error: Empty SMILES string read from file.")
+        sys.exit(1)
+    convert_smiles_to_3d(smiles, output_path, props_path, ph, molecule_name, max_time)
