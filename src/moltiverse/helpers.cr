@@ -42,7 +42,7 @@ def check_dependencies
   python_deps_status["CDPKit"] = cdpl_available
 
   # Check system executables
-  executables = %w(antechamber namd3 parmchk2 tleap xtb python3).to_h do |cmd|
+  executables = %w(crystal antechamber namd3 parmchk2 tleap xtb python3).to_h do |cmd|
     {cmd, Process.find_executable(cmd)}
   end
 
