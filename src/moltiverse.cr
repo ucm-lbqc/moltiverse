@@ -270,10 +270,6 @@ def print(message)
   LOGGER.print(message)
 end
 
-# Print banner
-print_banner
-dependency_versions = check_dependencies
-
 # Define defaults values for parser variables.
 # Global settings
 protocol = nil
@@ -370,6 +366,10 @@ def print_banner
   puts "║║║║ ║║  ║ ║╚╗╔╝║╣ ╠╦╝╚═╗║╣ "
   puts "╩ ╩╚═╝╩═╝╩ ╩ ╚╝ ╚═╝╩╚═╚═╝╚═╝"
 end
+
+# Print banner
+print_banner
+dependency_versions = check_dependencies
 
 main_dir = Dir.current
 new_output_name = output_name
