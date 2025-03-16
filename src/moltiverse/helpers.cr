@@ -227,18 +227,32 @@ def run_cmd(cmd : String, args : Array(String), output_file : Nil.class | String
       status = Process.run(cmd, args: args, output: logfile, error: stderr)
       if status.success?
       else
-        puts stderr
-        puts "Error in the #{stage} stage. Check the #{output_file} file"
+        begin
+          LOGGER.err_puts stderr.to_s
+          LOGGER.err_puts "Error in the #{stage} stage. Check the #{output_file} file"
+        rescue exception
+          puts stderr
+          puts "Error in the #{stage} stage. Check the #{output_file} file"
+        end
         exit
       end
       logfile.close
     else
       status = Process.run(cmd, args: args, output: stdout, error: stderr)
       if status.success?
-        puts stdout
+        begin
+          LOGGER.puts stdout.to_s
+        rescue exception
+          puts stdout
+        end
       else
-        puts stderr
-        puts "Error in the #{stage} stage. Check the *.log files"
+        begin
+          LOGGER.err_puts stderr.to_s
+          LOGGER.err_puts "Error in the #{stage} stage. Check the *.log files"
+        rescue exception
+          puts stderr
+          puts "Error in the #{stage} stage. Check the *.log files"
+        end
       end
     end
     stdout.close
@@ -251,14 +265,26 @@ def run_cmd(cmd : String, args : Array(String), output_file : Nil.class | String
       logfile = File.new("#{output_file}", "w")
       status = Process.run(cmd, args: args, output: logfile, error: stderr)
       if status.success?
-        puts stage
+        begin
+          LOGGER.puts stage
+        rescue exception
+          puts stage
+        end
       else
-        puts stderr.colorize(:red)
+        begin
+          LOGGER.err_puts stderr.to_s.colorize(:red)
+        rescue exception
+          puts stderr.colorize(:red)
+        end
       end
       logfile.close
     else
       status = Process.run(cmd, args: args, output: stdout, error: stderr)
-      puts stage
+      begin
+        LOGGER.puts stage
+      rescue exception
+        puts stage
+      end
     end
     stdout.close
     stderr.close
@@ -274,11 +300,19 @@ def run_namd(cmd : String, args : Array(String), output_file : String, stage : S
 
   if status.success?
   else
-    puts stderr.colorize(YELLOW)
+    begin
+      LOGGER.err_puts stderr.to_s.colorize(YELLOW)
+    rescue exception
+      puts stderr.colorize(YELLOW)
+    end
     count = 0
     while count < 5
       # TO:DO Insted of restart the simulation, try to continue it.
-      puts "Warning: Some instabilities were found in window #{window}. Re-starting the simulation.".colorize(YELLOW)
+      begin
+        LOGGER.puts "Warning: Some instabilities were found in window #{window}. Re-starting the simulation.".colorize(YELLOW)
+      rescue exception
+        puts "Warning: Some instabilities were found in window #{window}. Re-starting the simulation.".colorize(YELLOW)
+      end
       status = Process.run(cmd, args: args, output: logfile, error: stderr)
       if status.success?
         count = 6
@@ -287,9 +321,17 @@ def run_namd(cmd : String, args : Array(String), output_file : String, stage : S
       end
     end
     if status.success?
-      puts ""
+      begin
+        LOGGER.puts ""
+      rescue exception
+        puts ""
+      end
     else
-      puts "Error: The maximum attempt limit has been reached. Window '#{window}' could not be simulated correctly. Jumping to the next window.".colorize(RED)
+      begin
+        LOGGER.err_puts "Error: The maximum attempt limit has been reached. Window '#{window}' could not be simulated correctly. Jumping to the next window.".colorize(RED)
+      rescue exception
+        puts "Error: The maximum attempt limit has been reached. Window '#{window}' could not be simulated correctly. Jumping to the next window.".colorize(RED)
+      end
     end
   end
   logfile.close
@@ -306,7 +348,11 @@ def run_cmd_silent(cmd : String, args : Array(String), output_file : Nil.class |
     if status.success?
       # puts stage
     else
-      puts stderr.colorize(:red)
+      begin
+        LOGGER.err_puts stderr.to_s.colorize(:red)
+      rescue exception
+        puts stderr.colorize(:red)
+      end
     end
     logfile.close
   else
@@ -328,7 +374,11 @@ def run(
   status = nil
   cmdline = "#{cmd} #{args.join(' ')}"
   retries.times do |i|
-    STDERR.puts "Retrying `#{cmdline}` (#{i})...".colorize(:blue) if i > 0
+    begin
+      LOGGER.err_puts "Retrying `#{cmdline}` (#{i})...".colorize(:blue) if i > 0
+    rescue exception
+      STDERR.puts "Retrying `#{cmdline}` (#{i})...".colorize(:blue) if i > 0
+    end
     # puts "Running `#{cmdline}`..."
     process = Process.new(cmd, args.map(&.to_s), output: output_file, error: :pipe, env: env)
     stderr = process.error.gets_to_end
@@ -336,8 +386,13 @@ def run(
     break if status.success?
     stdout = output_file.is_a?(IO) ? output_file.rewind.gets_to_end : File.read(output_file)
     stdout = stdout.lines.last(5).join("\n")
-    STDERR.puts "Process #{cmdline} failed due to:".colorize(:yellow)
-    STDERR.puts (stdout + stderr).gsub(/^/m, "> ").chomp.colorize(:dark_gray)
+    begin
+      LOGGER.err_puts "Process #{cmdline} failed due to:".colorize(:yellow)
+      LOGGER.err_puts (stdout + stderr).gsub(/^/m, "> ").chomp.colorize(:dark_gray)
+    rescue exception
+      STDERR.puts "Process #{cmdline} failed due to:".colorize(:yellow)
+      STDERR.puts (stdout + stderr).gsub(/^/m, "> ").chomp.colorize(:dark_gray)
+    end
   end
 
   case status
@@ -348,10 +403,49 @@ def run(
   else
     if retries > 1
       message = "Maximum number of retries was reached for `#{cmdline}`"
-      STDERR.puts message.colorize(:red)
+      begin
+        LOGGER.err_puts message.colorize(:red)
+      rescue exception
+        STDERR.puts message.colorize(:red)
+      end
     end
     false
   end
 ensure
   output_file.try &.close
+end
+
+# Helper function to recursively remove a directory and all its contents
+def remove_directory_recursive(path : String)
+  # First check if path exists
+  return unless Dir.exists?(path) || File.exists?(path)
+  
+  if File.exists?(path) && !Dir.exists?(path)
+    # It's a regular file, just delete it
+    File.delete(path)
+    return
+  end
+  
+  # It's a directory, process all contents first
+  Dir.each_child(path) do |entry|
+    full_path = File.join(path, entry)
+    if Dir.exists?(full_path)
+      # Recursively handle subdirectories
+      remove_directory_recursive(full_path)
+    else
+      # Delete files
+      begin
+        File.delete(full_path)
+      rescue ex : Exception
+        puts "Warning: Failed to delete file #{full_path}: #{ex.message}"
+      end
+    end
+  end
+  
+  # Now remove the (empty) directory itself
+  begin
+    Dir.delete(path)
+  rescue ex : Exception
+    puts "Warning: Failed to delete directory #{path}: #{ex.message}"
+  end
 end
