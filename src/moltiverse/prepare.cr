@@ -381,8 +381,39 @@ class Ligand
     sampling_protocol.describe
     # Generate variants, and perform sampling
     sampling_protocol.execute(self, cpus)
+    cleanup_backup_files()
     t2 = Time.monotonic
     t2 - t1
+  end
+
+  def cleanup_backup_files
+    puts "Cleaning up backup files...".colorize(YELLOW)
+    
+    # Count files before cleanup
+    old_files = Dir.glob("**/*.old")
+    bak_files = Dir.glob("**/*.BAK")
+    total_before = old_files.size + bak_files.size
+    
+    # Delete .old files
+    old_files.each do |file|
+      begin
+        File.delete(file)
+      rescue ex
+        puts "Warning: Could not delete #{file}: #{ex.message}".colorize(YELLOW)
+      end
+    end
+    
+    # Delete .BAK files
+    bak_files.each do |file|
+      begin
+        File.delete(file)
+      rescue ex
+        puts "Warning: Could not delete #{file}: #{ex.message}".colorize(YELLOW)
+      end
+    end
+    
+    # Report results
+    puts "Removed #{total_before} backup files.".colorize(GREEN) if total_before > 0
   end
 
   def clustering(n_confs : Int)
@@ -462,12 +493,30 @@ class Ligand
         mm_refined_structures.push(st)
         st.to_pdb "#{idx}.min.pdb"
       end
-      # Delete files
+      
+      # Delete only the specific temporary files we created
       File.delete("#{idx}.pdb") if File.exists?("#{idx}.pdb")
       File.delete("#{idx}.min.pdb") if File.exists?("#{idx}.min.pdb")
-      Dir["./*.#{idx}*"].each do |temporary_file|
-        File.delete(temporary_file) if File.exists?(temporary_file)
+      # Delete temporary NAMD files
+      namd_patterns = [
+        "min.#{idx}.namd",
+        "min.#{idx}.restart.*",
+        "min.#{idx}.out",
+        "min.#{idx}.*coor*",
+        "min.#{idx}.*vel*",
+        "min.#{idx}.*xsc*",
+        "min.#{idx}.xst"
+      ]
+      
+      namd_patterns.each do |pattern|
+        Dir.glob(pattern).each do |file|
+          File.delete(file) if File.exists?(file)
+        end
       end
+      # Only delete the DCD file after we've finished using it
+      File.delete(min_dcd_file) if File.exists?(min_dcd_file)
+    end
+    
     end
     # Export new SDF file with the optimized structures
     mm_refined_structures.to_sdf "#{@output_name}_mm.sdf"
