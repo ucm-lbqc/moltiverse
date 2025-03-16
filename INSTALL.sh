@@ -175,34 +175,44 @@ install_dependencies() {
 
 # Install Crystal
 install_crystal() {
+    # Check if crystal is already installed
     if command_exists crystal; then
         current_version=$(crystal --version | grep Crystal | awk '{print $2}')
+        required_version="1.10.1"  # Set your minimum required version
         echo "Crystal version $current_version is already installed."
         
-        if [ -t 0 ] || [ "$FORCE_INTERACTIVE" = "1" ]; then
-            read -p "Do you want to proceed with the installation of Crystal language? (y/n): " proceed
-            if [[ $proceed != "y" ]]; then
-                echo "Skipping Crystal installation."
-                return
+        # Compare versions
+        if [ "$(printf '%s\n' "$required_version" "$current_version" | sort -V | head -n1)" = "$required_version" ]; then
+            # Current version meets or exceeds requirements
+            if [ -t 0 ] || [ "$FORCE_INTERACTIVE" = "1" ]; then
+                echo "Crystal $current_version meets the minimum version requirement ($required_version)."
+                read -p "Do you still want to reinstall Crystal? (y/n): " proceed
+                if [[ $proceed != "y" ]]; then
+                    echo "Skipping Crystal installation."
+                    return 0
+                fi
+            else
+                echo "Non-interactive mode: Crystal $current_version already meets requirements. Skipping reinstallation."
+                return 0
             fi
         else
-            echo "Non-interactive mode: Proceeding with Crystal language installation."
+            # Current version is older than required
+            echo "Crystal $current_version is installed but version $required_version or newer is required."
+            echo "Will attempt to upgrade Crystal."
         fi
+    fi
 
-        # Cleanup previous installation
+    echo "Installing Crystal language..."
+    
+    # Cleanup previous installation if needed
+    if command_exists crystal; then
         echo "Cleaning up previous Crystal installation..."
         
         # Remove symbolic links
         sudo rm -f /usr/local/bin/crystal
         sudo rm -f /usr/local/bin/shards
         
-        # Remove old installation directory (if it exists)
-        if [ -d "/opt/crystal-1.13.1-1" ]; then
-            echo "Removing old Crystal 1.13.1 installation..."
-            sudo rm -rf /opt/crystal-1.13.1-1
-        fi
-        
-        # Check for and remove any other Crystal installations in /opt
+        # Remove old installation directories
         for dir in /opt/crystal-*; do
             if [ -d "$dir" ]; then
                 echo "Removing Crystal installation at $dir..."
@@ -210,12 +220,33 @@ install_crystal() {
             fi
         done
     fi
-
-    echo "Installing Crystal language"
     
-    curl -fsSL https://crystal-lang.org/install.sh | sudo bash
-    installed_version=$(crystal --version | grep Crystal | awk '{print $2}')
-    echo "Crystal $installed_version has been installed successfully."
+    # Detect package manager
+    if command_exists apt; then
+        # Debian/Ubuntu based
+        curl -fsSL https://crystal-lang.org/install.sh | sudo bash || {
+            echo "WARNING: Standard Crystal installation failed, trying alternative method..."
+            sudo apt-get install -y crystal
+        }
+    elif command_exists dnf; then
+        # Fedora/RHEL based
+        curl -fsSL https://crystal-lang.org/install.sh | sudo bash
+    elif command_exists pacman; then
+        # Arch based
+        sudo pacman -S crystal --noconfirm
+    else
+        echo "ERROR: Unsupported package manager. Please install Crystal manually."
+        return 1
+    fi
+
+    # Verify installation
+    if command_exists crystal; then
+        installed_version=$(crystal --version | grep Crystal | awk '{print $2}')
+        echo "Crystal $installed_version has been installed successfully."
+    else
+        echo "ERROR: Crystal installation failed."
+        return 1
+    fi
 }
 
 # Download and install Moltiverse from the latest release
