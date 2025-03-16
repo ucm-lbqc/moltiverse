@@ -239,24 +239,6 @@ class Ligand
     time = t2 - t1
     return success, time
   end
-
-  def extend_structure(cpus : Int = System.cpu_count)
-    t1 = Time.monotonic
-    iterations = 1000
-    variant_1 = rand_conf(@file)
-    max_rdgyr = variant_1.pos.rdgyr
-    puts "Spreading the molecule structure".colorize(GREEN)
-    puts "Initial RDGYR: #{max_rdgyr}"
-    # Create first variant in 1000 iterations.
-    # The best one will be saved in the variants_st_array.
-    (0...iterations).concurrent_each(cpus) do |iteration|
-      variant_decoy = rand_conf(@file)
-      actual_rdgyr = variant_decoy.pos.rdgyr
-      if actual_rdgyr > max_rdgyr && actual_rdgyr < 15.0
-        variant_1 = variant_decoy
-        max_rdgyr = actual_rdgyr
-        puts "MAX RDGYR #{max_rdgyr.round(4)}. ITERATION #{iteration}"
-      end
   
   # Method to select an appropriate sampling protocol based on molecular properties
   private def select_sampling_protocol(props : Hash(String, Int32 | Float64 | Bool | String), version : Int32 = 1) : SamplingProtocol?
@@ -271,15 +253,6 @@ class Ligand
     else
       20  # Default value if not an integer
     end
-
-    variant_1.to_mol("#{@basename}_rand.mol")
-    puts "RDGYR of the conformation: #{max_rdgyr}".colorize(GREEN)
-    @extension = ".mol"
-    @basename = "#{@basename}_rand"
-    @format = "mol"
-    @extended_mol = "#{@basename}.mol"
-    t2 = Time.monotonic
-    t2 - t1
   
     # Categorize the molecule based on total atom count
     category = case total_atoms
