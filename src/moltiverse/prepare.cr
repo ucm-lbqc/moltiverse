@@ -454,6 +454,13 @@ class Ligand
 
     puts "#{centroids.size} conformers were generated".colorize(GREEN)
     puts "Output file: '#{@output_name}_raw.[sdf,pdb]'".colorize(TURQUOISE)
+
+    # Set title to the structures
+    centroids.each do |structure|
+      structure.residues[0].name = @output_name if structure.residues[0].name == "UNK"
+    end
+
+
     centroids.to_sdf "#{@output_name}_raw.sdf"
     centroids.to_pdb "#{@output_name}_raw.pdb", bonds: :all
     t2 = Time.monotonic
@@ -517,7 +524,11 @@ class Ligand
       File.delete(min_dcd_file) if File.exists?(min_dcd_file)
     end
     
+    # Set title to the structures
+    mm_refined_structures.each do |structure|
+      structure.residues[0].name = @output_name if structure.residues[0].name == "UNK"
     end
+    
     # Export new SDF file with the optimized structures
     mm_refined_structures.to_sdf "#{@output_name}_mm.sdf"
     mm_refined_structures.to_pdb "#{@output_name}_mm.pdb", bonds: :all
@@ -552,6 +563,10 @@ class Ligand
 
     Dir.cd cwd
     qm_refined_structures = results.sort_by! { |i, _| i }.map { |_, st| st }
+    # Set title to the structures
+    qm_refined_structures.each do |structure|
+      structure.residues[0].name = @output_name if structure.residues[0].name == "UNK"
+    end
     qm_refined_structures.to_sdf "#{@output_name}_qm.sdf"
     qm_refined_structures.to_pdb "#{@output_name}_qm.pdb", bonds: :all
     puts "Output file: '#{@output_name}_qm.[sdf,pdb]'".colorize(TURQUOISE)
