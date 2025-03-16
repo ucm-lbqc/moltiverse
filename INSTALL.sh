@@ -167,7 +167,7 @@ create_conda_env() {
 # Install dependencies
 install_dependencies() {
     echo "Installing dependencies..."
-    conda install -c conda-forge ambertools=24.8 xtb python=3.10 -y
+    conda install -c conda-forge ambertools=23 xtb python=3.9 -y
     # Install CDPKit via pip
     echo "Installing CDPKit..."
     pip install cdpkit==1.2.2
