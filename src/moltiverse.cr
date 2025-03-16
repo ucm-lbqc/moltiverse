@@ -1,3 +1,4 @@
+t_start_full = Time.monotonic
 require "chem"
 require "colorize"
 require "ecr"
@@ -347,7 +348,7 @@ OptionParser.parse do |parser|
 end
 
 if ligand.empty?
-  STDERR.puts "Usage: moltiverse [OPTIONS] -l FILE"
+  LOGGER.err_puts "Usage: moltiverse [OPTIONS] -l FILE"
   exit
 end
 output_name ||= Path[ligand].stem
@@ -372,35 +373,37 @@ File.each_line(ligand) do |line|
   puts "SMILE:"
   puts smile_code.colorize(AQUA)
   lig = Ligand.new(ligand, smile_code, new_output_name, protocol, main_dir)
-  t_start = Time.monotonic
-  success, proccess_time = lig.proccess_input
+  success, processing_time = lig.process_input(cpus, remove_folder) 
+  time_log_path = "#{main_dir}/#{new_output_name}/#{new_output_name}_time_per_stage.log"
   if success
-    log.puts "#{name},proccess_time,#{proccess_time}"
-    extend_structure_time = lig.extend_structure cpus
-    log.puts "#{name},structure_spreading_time,#{extend_structure_time}"
+    log = File.open time_log_path, "w"
+    log.puts "#{name},processing_time,#{processing_time.total_seconds}"
     parameterization_time = lig.parameterize cpus
-    log.puts "#{name},parameterization_time,#{parameterization_time}"
+    log.puts "#{name},parameterization_time,#{parameterization_time.total_seconds}"
     minimization_time = lig.minimize
-    log.puts "#{name},minimization_time,#{minimization_time}"
+    log.puts "#{name},minimization_time,#{minimization_time.total_seconds}"
     sampling_time = lig.sampling cpus
-    log.puts "#{name},sampling_time,#{sampling_time}"
+    log.puts "#{name},sampling_time,#{sampling_time.total_seconds}"
     clustering_time = lig.clustering n_confs
-    log.puts "#{name},clustering_time,#{clustering_time}"
+    log.puts "#{name},clustering_time,#{clustering_time.total_seconds}"
     mm_refinement_time = lig.mm_refinement
-    log.puts "#{name},mm_refinement_time,#{mm_refinement_time}"
+    log.puts "#{name},mm_refinement_time,#{mm_refinement_time.total_seconds}"
     qm_refinement_time = lig.qm_refinement cpus
-    log.puts "#{name},qm_refinement_time,#{qm_refinement_time}"
-    t_final = Time.monotonic
-    log.puts "#{name},total_time,#{t_final - t_start}"
+    log.puts "#{name},qm_refinement_time,#{qm_refinement_time.total_seconds}"
+    total_time = Time.monotonic - t_start_full
+    log.puts "#{name},total_time,#{total_time.total_seconds}"
+    puts "Process completed successfully".colorize(GREEN)
   else
+    log = File.open time_log_path, "w"
     log.puts "#{name},failed"
+    puts "Process failed".colorize(RED)
   end
+  log.close
+  LOGGER.print_time_summary(time_log_path)
+  LOGGER.add_time_log_to_summary(time_log_path)
+  LOGGER.close
+  puts "Log file closed."
 end
-log.close
-puts "Process completed".colorize(GREEN)
 
-elapsed = Time.monotonic - t_start_full
-Dir.cd(main_dir)
-File.open("#{output_name}_total_proc_time.txt", "w") do |log|
-  log.puts "#{File.basename ligand},#{elapsed}"
-end
+puts "Moltiverse execution completed."
+puts "_____________________________________________________".colorize(YELLOW)
