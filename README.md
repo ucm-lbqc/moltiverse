@@ -17,7 +17,7 @@ Moltiverse uses the robust ecosystem of open-source applications to process the 
 
 ### Prerequisites
 
-- NAMD 2.14 multicore software must be installed and the `namd2` executable should be in the system path.
+- NAMD 3.0.1 multicore software must be installed and the `namd3` executable should be in the system path.
 
 ### Quick Install
 
