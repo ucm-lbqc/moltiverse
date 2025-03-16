@@ -453,9 +453,9 @@ class Ligand
     end
 
     puts "#{centroids.size} conformers were generated".colorize(GREEN)
-    puts "Output file: #{@output_name}.sdf".colorize(TURQUOISE)
-    centroids.to_sdf "#{@output_name}.sdf"
-    centroids.to_pdb "#{@output_name}.pdb", bonds: :all
+    puts "Output file: '#{@output_name}_raw.[sdf,pdb]'".colorize(TURQUOISE)
+    centroids.to_sdf "#{@output_name}_raw.sdf"
+    centroids.to_pdb "#{@output_name}_raw.pdb", bonds: :all
     t2 = Time.monotonic
     t2 - t1
   end
@@ -471,7 +471,7 @@ class Ligand
     steps = 300
   
     # Reading previously generated conformers
-    sdf_structures = Array(Chem::Structure).from_sdf("#{@output_name}.sdf")
+    sdf_structures = Array(Chem::Structure).from_sdf("#{@output_name}_raw.sdf")
     sdf_structures.map_with_index do |_, idx|
       st = sdf_structures[idx]
       structures.push(st)
