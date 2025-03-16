@@ -94,11 +94,33 @@ def check_dependencies
         STDERR.puts "pip install cdpkit=1.2.2\n".colorize(YELLOW)
       end
     end
+
+    if !executables["crystal"]
+      begin
+        LOGGER.err_puts "\nCrystal language is missing:".colorize(YELLOW)
+        LOGGER.err_puts "Please install it using:".colorize(YELLOW)
+        LOGGER.err_puts "curl -fsSL https://crystal-lang.org/install.sh | sudo bash\n".colorize(YELLOW)
+      rescue exception
+        STDERR.puts "\nCrystal language is missing:".colorize(YELLOW)
+        STDERR.puts "Please install it using:".colorize(YELLOW)
+        STDERR.puts "curl -fsSL https://crystal-lang.org/install.sh | sudo bash\n".colorize(YELLOW)
+      end
+    end
     exit 1
   end
 
   # Only continue with version checking if all dependencies are available
   versions = {} of String => String
+
+    # Crystal
+    args = ["--version"]
+    output = run_cmd_version("crystal", args)
+    output.each_line do |line|
+      if line.includes?("Crystal")
+        versions["crystal"] = line.split[1]
+        break
+      end
+    end
 
   # Get Python version
   python_version_script = <<-PYTHON
@@ -124,7 +146,6 @@ def check_dependencies
     versions["python3"] = python_version.try(&.split("VERSION:").last?.try(&.strip)) || "unknown"
   end
 
-  # Check other executable versions
   # Antechamber
   args = ["-L"]
   output = run_cmd_version("antechamber", args)
