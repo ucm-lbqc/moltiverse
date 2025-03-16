@@ -272,6 +272,18 @@ add_to_path() {
     source $HOME/.bashrc
 }
 
+# Function to ensure protocol files are in place
+setup_protocol_files() {
+    echo "Setting up protocol files environment..."
+    
+    # Set the MOLTIVERSE_PROTOCOL_PATH environment variable
+    if ! grep -q "MOLTIVERSE_PROTOCOL_PATH" $HOME/.bashrc; then
+        echo 'export MOLTIVERSE_PROTOCOL_PATH="$HOME/moltiverse/data"' >> $HOME/.bashrc
+    fi
+    
+    echo "Protocol files setup complete."
+}
+
 # Main installation process
 main() {
     check_system_dependencies
@@ -308,11 +320,14 @@ main() {
     fi
 
     add_to_path
+    setup_protocol_files
 
     echo " "
     echo "=========================================================================="
     echo "Moltiverse has been successfully installed!"
     echo "Please restart your terminal or run 'source ~/.bashrc' to use Moltiverse."
+    echo "The environment variable MOLTIVERSE_PROTOCOL_PATH has been set to point to"
+    echo "the protocol files directory at $HOME/moltiverse/data"
 }
 
 main
