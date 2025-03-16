@@ -58,9 +58,12 @@ class SamplingProtocol
   end
 
   def self.from_file(path : String | Path) : self
-    File.open(path) do |io|
+    protocol = File.open(path) do |io|
       from_yaml io
     end
+    protocol.loaded_from_file = true
+    protocol.name = Path[path].basename.rchop(".yml")
+    protocol
   end
 
   # Create a new protocol based on the properties of a molecule
@@ -397,7 +400,7 @@ class SamplingProtocol
       puts "Wall force constant:                [ #{cv.force_constant} ]"
       puts "Simulation time:                    [ #{@simulation_time * cv.windows} ns ]"
     end
-    puts
+    puts ""
     puts "Simulation time per window:         [ #{@simulation_time} ns ]"
     puts "Total simulation time:              [ #{total_time} ns ]"
     puts "Sampling method:                    [ #{@metadynamics ? "M-eABF" : "eABF"} ]"
