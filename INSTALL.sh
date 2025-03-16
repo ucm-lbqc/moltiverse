@@ -204,29 +204,56 @@ install_crystal() {
 
     echo "Installing Crystal language..."
     
-    # Cleanup previous installation if needed
-    if command_exists crystal; then
-        echo "Cleaning up previous Crystal installation..."
+    # Completely remove any existing Crystal packages before installing new one
+    if command_exists dpkg; then
+        echo "Removing any existing Crystal packages..."
         
-        # Remove symbolic links
-        sudo rm -f /usr/local/bin/crystal
-        sudo rm -f /usr/local/bin/shards
+        # Find all crystal-related packages
+        crystal_packages=$(dpkg -l | grep -E 'crystal[0-9\.]*' | awk '{print $2}')
         
-        # Remove old installation directories
-        for dir in /opt/crystal-*; do
-            if [ -d "$dir" ]; then
-                echo "Removing Crystal installation at $dir..."
-                sudo rm -rf "$dir"
-            fi
-        done
+        if [ -n "$crystal_packages" ]; then
+            echo "Found packages to remove: $crystal_packages"
+            for pkg in $crystal_packages; do
+                echo "Removing package: $pkg"
+                sudo dpkg --remove --force-all $pkg || sudo apt-get remove -y --purge $pkg || true
+            done
+        fi
+        
+        # Also clean up any leftover files
+        sudo rm -f /usr/bin/crystal /usr/bin/shards
     fi
+    
+    # Clean up previous Crystal installation directories if any
+    for dir in /opt/crystal-*; do
+        if [ -d "$dir" ]; then
+            echo "Removing Crystal installation at $dir..."
+            sudo rm -rf "$dir"
+        fi
+    done
+    
+    # Clean apt cache to avoid using cached packages
+    sudo apt-get clean
     
     # Detect package manager
     if command_exists apt; then
         # Debian/Ubuntu based
-        curl -fsSL https://crystal-lang.org/install.sh | sudo bash || {
-            echo "WARNING: Standard Crystal installation failed, trying alternative method..."
-            sudo apt-get install -y crystal
+        # First add the repository if needed
+        if [ ! -f /etc/apt/sources.list.d/crystal.list ]; then
+            echo "Adding Crystal repository..."
+            curl -fsSL https://crystal-lang.org/install.sh | sudo bash || true
+        fi
+        
+        # Try to install directly with apt
+        echo "Installing Crystal with apt..."
+        sudo apt-get update
+        sudo apt-get install -y --allow-downgrades --reinstall crystal || {
+            echo "WARNING: Standard Crystal installation failed, trying with --force-overwrite..."
+            sudo apt-get install -y --allow-downgrades --reinstall --force-overwrite crystal || {
+                echo "WARNING: Still failing, trying direct dpkg method..."
+                sudo apt-get download crystal
+                sudo dpkg -i --force-overwrite crystal*.deb
+                sudo apt-get install -f -y
+            }
         }
     elif command_exists dnf; then
         # Fedora/RHEL based
