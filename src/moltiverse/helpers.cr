@@ -1,18 +1,5 @@
-def rand_conf(input_mol : String) : Chem::Structure
-  min_lastframe = Chem::Structure.from_mol(input_mol)
-  variant = OpenBabel.gen_coords(input_mol)
-  index = 0
-  min_lastframe['A'][1].atoms.each { |atom|
-    atom.pos = variant.atoms[index].pos
-    atom.temperature_factor = 1.0
-    index += 1
-  }
-  min_lastframe
-end
-
 def check_dependencies
   print "Checking dependencies..."
-  executables = %w(antechamber namd2 obabel parmchk2 tleap xtb).to_h do |cmd|
     {cmd, Process.find_executable(cmd)}
   end
 
@@ -48,28 +35,23 @@ def check_dependencies
     end
     puts "NAMD version: #{version} #{architecture}"
 
-    # OpenBabel
-    args = ["-V"]
-    output = run_cmd_version("obabel", args)
-    output.each_line do |line|
-      if line.includes?("Open Babel")
-        words = line.split
-        version = words[2]
-        break
-      end
+  # Show executable status
+  executables.each do |cmd, path|
+    symbol, color = path ? {"✔", :green} : {"✘", :red}
+    begin
+      LOGGER.puts "#{symbol} #{cmd}".colorize(color)
+    rescue exception
+      puts "#{symbol} #{cmd}".colorize(color)
     end
-    puts "Open Babel version: #{version}"
+  end
 
-    # XTB
-    args = ["--version"]
-    output = run_cmd_version("xtb", args)
-    # puts output
-    output.each_line do |line|
-      if line.includes?("xtb")
-        words = line.split
-        version = words[3]
-        break
-      end
+  # Show Python deps status
+  python_deps_status.each do |dep, status|
+    symbol, color = status ? {"✔", :green} : {"✘", :red}
+    begin
+      LOGGER.puts "#{symbol} #{dep}".colorize(color)
+    rescue exception
+      puts "#{symbol} #{dep}".colorize(color)
     end
     puts "XTB version: #{version}"
     
