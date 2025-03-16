@@ -139,20 +139,13 @@ class Ligand
     @extended_mol
   end
 
-  def proccess_input
+  def process_input(cpus : Int = System.cpu_count, remove_folder : Bool = false)
     t1 = Time.monotonic
     success = false
-    Dir.cd(@main_dir)
-    puts "The output folder name will be: #{@output_name}"
-    if Dir.exists?("#{@output_name}")
-      Dir.cd(@output_name)
-      @working_dir = Dir.current
-    else
-      puts "Creating folder #{@output_name}"
-      Dir.mkdir(@output_name)
-      Dir.cd(@output_name)
-      @working_dir = Dir.current
-    end
+  
+    # Change to the working directory
+    Dir.cd(@output_name)
+    @working_dir = Dir.current
     @basename = "#{@output_name}"
     puts "Running openbabel convertion..."
     @format = "mol"
