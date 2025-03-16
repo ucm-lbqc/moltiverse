@@ -493,12 +493,17 @@ class Ligand
       NAMD.run("min.#{pdb.basename}.namd", :setcpuaffinity, cores: 1)
       
       # Extracting last frame of the minimized trajectory
-      Chem::DCD::Reader.open("min.#{pdb.basename}.dcd") do |reader|
-        n_structures = reader.n_entries - 1
-        st = pdb.structure.clone
-        st.pos = reader.read_entry n_structures
-        mm_refined_structures.push(st)
-        st.to_pdb "#{idx}.min.pdb"
+      min_dcd_file = "min.#{pdb.basename}.dcd"
+      if File.exists?(min_dcd_file)
+        Chem::DCD::Reader.open(min_dcd_file) do |reader|
+          n_structures = reader.n_entries - 1
+          st = pdb.structure.clone
+          st.pos = reader.read_entry n_structures
+          mm_refined_structures.push(st)
+          st.to_pdb "#{idx}.min.pdb"
+        end
+      else
+        puts "Warning: DCD file #{min_dcd_file} not found".colorize(YELLOW)
       end
       
       # Delete only the specific temporary files we created
