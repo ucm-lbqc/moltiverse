@@ -275,11 +275,17 @@ dependency_versions = check_dependencies
 
 # Define defaults values for parser variables.
 # Global settings
-protocol = SamplingProtocol.new "c1"
+protocol = nil
+protocol_name = "test" 
+user_selected_protocol = false
 ligand = ""
 output_name = nil
 n_confs = 250
-cpus = System.cpu_count
+#cpus = System.cpu_count
+cpus = 1
+remove_folder = false
+protocol_version = 1
+
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
   parser.on("-l FILE", "--ligand=FILE", "A SMILES file containing one or more molecules.") do |str|
