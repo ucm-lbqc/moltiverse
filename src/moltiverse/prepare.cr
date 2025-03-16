@@ -156,7 +156,6 @@ class Ligand
       @mol_properties = properties
       structure.to_mol @file
       @charge = structure.formal_charge
-      puts "Molecule charge: #{@charge}"
       
       # Print molecular properties
       puts "Molecule properties:".colorize(GREEN)
@@ -234,7 +233,6 @@ class Ligand
       puts @smile.colorize(AQUA)
       # exit(1)
     end
-
     t2 = Time.monotonic
     time = t2 - t1
     return success, time
@@ -337,7 +335,9 @@ class Ligand
 
     @basename = "#{@basename}_prep"
     @pdb_system = "#{@basename}.pdb"
-    puts "SYSTEM INFO: ".colorize(GREEN), Chem::Structure.from_pdb(@pdb_system)
+    # In future versions, this line could be useful to print the system information after
+    # the preparation stage. For instance, if water molecules are added to the system.
+    #puts "SYSTEM INFO: ".colorize(GREEN), Chem::Structure.from_pdb(@pdb_system)
 
     t2 = Time.monotonic
     t2 - t1
@@ -352,7 +352,7 @@ class Ligand
     cy = pdb.pos.center.y
     cz = pdb.pos.center.z
     NAMD::Input.minimization("min.namd", self)
-    print "Runnning minimization..."
+    print "Running minimization..."
     NAMD.run("min.namd", :setcpuaffinity, cores: 1)
     puts " done"
     @basename = "min.#{@basename}"
@@ -453,6 +453,7 @@ class Ligand
       pdb = Conformer.new("#{idx}.pdb", "#{@topology_file}", steps)
       NAMD::Input.minimization("min.#{pdb.basename}.namd", pdb)
       NAMD.run("min.#{pdb.basename}.namd", :setcpuaffinity, cores: 1)
+      
       # Extracting last frame of the minimized trajectory
       Chem::DCD::Reader.open("min.#{pdb.basename}.dcd") do |reader|
         n_structures = reader.n_entries - 1
@@ -505,7 +506,6 @@ class Ligand
     qm_refined_structures.to_sdf "#{@output_name}_qm.sdf"
     qm_refined_structures.to_pdb "#{@output_name}_qm.pdb", bonds: :all
     puts "Output file: '#{@output_name}_qm.[sdf,pdb]'".colorize(TURQUOISE)
-    puts "_____________________________________________________".colorize(YELLOW)
     t2 = Time.monotonic
     t2 - t1
   end
