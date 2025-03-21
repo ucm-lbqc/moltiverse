@@ -41,7 +41,7 @@ end
 def NAMD.run(
   cfg : Path | String,
   *args,
-  cores : Int = System.cpu_count,
+  cores : Int = 1,
   use_gpu : Bool = false,
   retries : Int = 1,
   **options
