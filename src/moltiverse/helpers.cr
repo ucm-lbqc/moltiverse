@@ -87,11 +87,11 @@ def check_dependencies
       begin
         LOGGER.err_puts "\nCDPKit package is missing:".colorize(YELLOW)
         LOGGER.err_puts "Please install it using:".colorize(YELLOW)
-        LOGGER.err_puts "pip install cdpkit=1.2.2\n".colorize(YELLOW)
+        LOGGER.err_puts "pip install cdpkit==1.2.2\n".colorize(YELLOW)
       rescue exception
         STDERR.puts "\nCDPKit package is missing:".colorize(YELLOW)
         STDERR.puts "Please install it using:".colorize(YELLOW)
-        STDERR.puts "pip install cdpkit=1.2.2\n".colorize(YELLOW)
+        STDERR.puts "pip install cdpkit==1.2.2\n".colorize(YELLOW)
       end
     end
 
