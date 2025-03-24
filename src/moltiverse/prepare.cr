@@ -295,7 +295,8 @@ class Ligand
     @file = Path.new(new_file).expand.to_s
     @path = Path.new(new_file).expand.parent
     antechamber_exec = "antechamber"
-    arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "bcc", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2"]
+    #arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "bcc", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2"]
+    arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "abcg2", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2"]
     puts "Parameterizing ligand with tleap ..."
     run("antechamber", arguments, env: {"OMP_NUM_THREADS" => "#{cpus},1"})
     puts "Parameterization stage 1 ✔".colorize(GREEN)
