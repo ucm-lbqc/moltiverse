@@ -146,10 +146,23 @@ def check_dependencies
     versions["python3"] = python_version.try(&.split("VERSION:").last?.try(&.strip)) || "unknown"
   end
 
-  # Antechamber
-  args = ["-L"]
-  output = run_cmd_version("antechamber", args)
-  versions["antechamber"] = output.split(" ")[3].chomp(":")
+  ## Antechamber ## in ambertools 24 version, antechamber version is not available with -L option
+  #args = ["-L"]
+  #output = run_cmd_version("antechamber", args)
+  #versions["antechamber"] = output.split(" ")[3].chomp(":")
+
+  # AmberTools (using conda list)
+  args = ["list", "ambertools"]
+  output = run_cmd_version("conda", args)
+  output.each_line do |line|
+    if line.includes?("ambertools")
+      parts = line.split
+      if parts.size >= 2 && !parts[1].empty?
+        versions["ambertools"] = parts[1]
+        break
+      end
+    end
+  end
 
   # NAMD
   args = ["-h"]
