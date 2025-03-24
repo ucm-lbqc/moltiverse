@@ -558,7 +558,8 @@ class Ligand
         workdir = cwd / ("%05d" % (i + 1))
         Dir.mkdir_p workdir
         Dir.cd workdir
-        if optimized_structure = XTB.optimize(structure, cycles: 1500, level: :crude)
+        #if optimized_structure = XTB.optimize(structure, cycles: 1500, level: :crude)
+        if optimized_structure = XTB.optimize(structure, cycles: 100, level: :crude)
           structure.pos = optimized_structure.pos
         end
         results.push({i, structure})
