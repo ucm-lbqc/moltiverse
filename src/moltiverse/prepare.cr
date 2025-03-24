@@ -296,7 +296,10 @@ class Ligand
     @path = Path.new(new_file).expand.parent
     antechamber_exec = "antechamber"
     #arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "bcc", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2"]
-    arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "abcg2", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2"]
+    #arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "abcg2", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2"]
+    # -j     atom type and bond type prediction index, default is 4. 5  --> atom and part bond type.
+    arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "abcg2", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2", "-j", "5"]
+
     puts "Parameterizing ligand with tleap ..."
     run("antechamber", arguments, env: {"OMP_NUM_THREADS" => "#{cpus},1"})
     puts "Parameterization stage 1 ✔".colorize(GREEN)
