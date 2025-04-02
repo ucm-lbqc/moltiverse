@@ -295,13 +295,49 @@ class Ligand
     @file = Path.new(new_file).expand.to_s
     @path = Path.new(new_file).expand.parent
     antechamber_exec = "antechamber"
-    #arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "bcc", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2"]
-    #arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "abcg2", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2"]
-    # -j     atom type and bond type prediction index, default is 4. 5  --> atom and part bond type.
-    arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", "-c", "abcg2", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2", "-j", "5"]
 
-    puts "Parameterizing ligand with tleap ..."
-    run("antechamber", arguments, env: {"OMP_NUM_THREADS" => "#{cpus},1"})
+    # Define a series of parameter sets to try, in order of increasing "aggressiveness"
+    param_sets = [
+      # First attempt - original parameters
+      "qm_theory='AM1', grms_tol=0.0005, scfconv=1.d-10, ndiis_attempts=700",
+      "qm_theory='AM1', grms_tol=0.0005, scfconv=1.d-8, ndiis_attempts=1000",
+      "qm_theory='PM3', scfconv=1.d-8, errconv=1.d-1, maxcyc=1000, ndiis_attempts=700",
+      "qm_theory='PM6', grms_tol=0.0005, scfconv=1.d-10, ndiis_attempts=1000",
+      "qm_theory='PM6', grms_tol=0.001, scfconv=1.d-8, ndiis_attempts=1000",
+      # Last attempt without minimization
+      "maxcyc=0",
+    ]
+
+    success = false
+    param_sets.each_with_index do |ek_settings, i|
+      # Update arguments with current parameter set
+      # -j     atom type and bond type prediction index, default is 4. 
+      # 5  --> atom and part bond type.
+      arguments = ["-i", "#{file}", "-fi", "pdb", "-o", "#{basename}_prep.mol2", "-fo", "mol2", 
+                   "-c", "abcg2", "-nc", "#{@charge}", "-rn", "LIG", "-at", "gaff2", 
+                   "-j", "5", "-ek", "#{ek_settings}"]
+
+      # Log the current attempt
+      if i == 0
+        puts "Parameterizing ligand with tleap ...".colorize(GREEN)
+      else
+        puts "Antechamber attempt #{i+1} with modified parameters:".colorize(YELLOW)
+      end
+      puts "Antechamber command: #{antechamber_exec} #{arguments.join(" ")}".colorize(i == 0 ? GREEN : YELLOW)
+
+      # Try running with current parameter set
+      success = run("antechamber", arguments, env: {"OMP_NUM_THREADS" => "#{cpus},1"})
+
+      # If successful, break out of the loop
+      if success
+        break
+      elsif i < param_sets.size - 1
+        puts "Antechamber attempt #{i+1} failed. Trying different parameters...".colorize(YELLOW)
+      else
+        puts "All antechamber parameterization attempts failed.".colorize(RED)
+        exit(1)
+      end
+    end
     puts "Parameterization stage 1 ✔".colorize(GREEN)
     parmchk2_exec = "parmchk2"
     arguments = ["-i", "#{basename}_prep.mol2", "-f", "mol2", "-o", "#{basename}_prep.frcmod", "-s", "gaff2"]
