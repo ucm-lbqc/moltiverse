@@ -295,10 +295,19 @@ OptionParser.parse do |parser|
     "--protocol=NAME",
     <<-HELP
       Sampling protocol. Pass either a name or path to a protocol file
-      (*.yml). Name can be 'c1' (cofactor) or 'test', otherwise a file
-      named '<n>.yml' will be looked for at the current directory or
-      in the directory specified in the MOLTIVERSE_PROTOCOL_DIR
-      environment variable if exists. Default: 'c1'.
+      (*.yml). Default: automatic. Options: 'c1' (cofactor), 'test', or molecular categories, 
+      otherwise a file named '<n>.yml' will be looked for at the current 
+      directory or in the directory specified in the MOLTIVERSE_PROTOCOL_DIR
+      environment variable if exists.
+      Usage examples:
+      # For only generates unrefined conformers:
+      moltiverse -l mol.smi -m raw
+      # For MM optimization:
+      moltiverse -l mol.smi -m mm
+      # For QM optimization:
+      moltiverse -l mol.smi -m qm
+      # or
+      moltiverse -l mol.smi
       HELP
   ) do |str|
     # This will store the name, it won't load the protocol yet
