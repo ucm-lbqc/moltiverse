@@ -312,10 +312,14 @@ OptionParser.parse do |parser|
     n_confs = str.to_i32
     abort "Invalid conformers: #{str}" unless 1 <= n_confs <= 4000
   end
+  #parser.on(
+  #  "-P N",
+  #  "--procs=N",
+  #  "Total number of CPUs to use. Default: available CPUs."
+  #) do |str|
+  #  cpus = str.to_i.clamp 1..System.cpu_count
+  #end
   parser.on(
-    "-P N",
-    "--procs=N",
-    "Total number of CPUs to use. Default: available CPUs."
   ) do |str|
     cpus = str.to_i.clamp 1..System.cpu_count
   end
