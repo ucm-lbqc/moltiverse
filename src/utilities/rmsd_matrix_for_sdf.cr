@@ -35,7 +35,7 @@ OptionParser.parse do |parser|
   parser.on("-o NAME", "--output_name=NAME", "Basename for the output file [.dat]. Default: rmsd_matrix") do |str|
     output_name = str
   end
-  parser.on("-h STRING", "--hydrogen=STRING", "Include hydrogen atoms for analysis. Default: 'false'.") do |str|
+  parser.on("-H STRING", "--hydrogen=STRING", "Include hydrogen atoms for analysis. Default: 'false'.") do |str|
     case str
     when "true"  then hydrogen = true
     when "false" then hydrogen = false
@@ -43,6 +43,10 @@ OptionParser.parse do |parser|
       puts "The --hydrogen value must be 'true' or 'false'"
       exit
     end
+  end
+  parser.on("-h", "--help", "Show this help") do
+    puts parser
+    exit
   end
   parser.invalid_option do |flag|
     STDERR.puts "ERROR: #{flag} is not a valid option."
