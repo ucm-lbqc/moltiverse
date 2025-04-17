@@ -4,9 +4,9 @@ colvars:
   - component:
       type: rdgyr
     lower_bound: 4.0
-    upper_bound: 17.0
+    upper_bound: 25.0
     bin_width: 0.05
-    windows: 26
+    windows: 42
     force_constant: 10.0
 smiles_conversion_timeout: 240  # Max time in seconds for SMILES to 3D conversion
 simulation_time: 0.5            # Simulation time in ns for every window
