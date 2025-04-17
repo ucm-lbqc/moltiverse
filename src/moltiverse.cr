@@ -7,7 +7,7 @@ require "option_parser"
 require "./moltiverse/**"
 
 module Moltiverse
-  VERSION      = "0.2.0"
+  VERSION      = "0.3.0"
   VERSION_TYPE = "MAIN BRANCH"
 end
 
