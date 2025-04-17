@@ -282,6 +282,7 @@ n_confs = 250
 cpus = 1
 remove_folder = false
 protocol_version = 1
+execution_mode = "qm"
 
 OptionParser.parse do |parser|
   parser.banner = "Usage: crystal moltiverse.cr [OPTIONS]"
@@ -320,8 +321,17 @@ OptionParser.parse do |parser|
   #  cpus = str.to_i.clamp 1..System.cpu_count
   #end
   parser.on(
+    "-m MODE",
+    "--mode=MODE",
+    "Execution mode: 'raw' (stop after clustering), 'mm' (stop after MM refinement), 'qm' (full pipeline). Default: qm"
   ) do |str|
-    cpus = str.to_i.clamp 1..System.cpu_count
+    # Validate the mode value
+    unless ["raw", "mm", "qm"].includes?(str.downcase)
+      abort "Invalid execution mode: #{str}. Must be 'raw', 'mm', or 'qm'."
+    end
+    execution_mode = str.downcase
+    # Print message to confirm mode
+    puts "Setting execution mode to: #{execution_mode}".colorize(:light_blue)
   end
   parser.on("-h", "--help", "Show this help") do
     print_banner
@@ -452,12 +462,26 @@ File.each_line(ligand) do |line|
     log.puts "#{name},sampling_time,#{sampling_time.total_seconds}"
     clustering_time = lig.clustering n_confs
     log.puts "#{name},clustering_time,#{clustering_time.total_seconds}"
-    mm_refinement_time = lig.mm_refinement
-    log.puts "#{name},mm_refinement_time,#{mm_refinement_time.total_seconds}"
-    qm_refinement_time = lig.qm_refinement cpus
-    log.puts "#{name},qm_refinement_time,#{qm_refinement_time.total_seconds}"
-    total_time = Time.monotonic - t_start_full
-    log.puts "#{name},total_time,#{total_time.total_seconds}"
+    # Modes
+    if execution_mode == "raw"
+      puts "Execution mode 'raw' selected. Stopping after clustering stage.".colorize(GREEN)
+      total_time = Time.monotonic - t_start_full
+      log.puts "#{name},total_time,#{total_time.total_seconds}"
+    else
+      mm_refinement_time = lig.mm_refinement
+      log.puts "#{name},mm_refinement_time,#{mm_refinement_time.total_seconds}"
+      
+      if execution_mode == "mm"
+        puts "Execution mode 'mm' selected. Stopping after MM refinement stage.".colorize(GREEN)
+        total_time = Time.monotonic - t_start_full
+        log.puts "#{name},total_time,#{total_time.total_seconds}"
+      else # qm mode
+        qm_refinement_time = lig.qm_refinement cpus
+        log.puts "#{name},qm_refinement_time,#{qm_refinement_time.total_seconds}"
+        total_time = Time.monotonic - t_start_full
+        log.puts "#{name},total_time,#{total_time.total_seconds}"
+      end
+    end
     puts "Process completed successfully".colorize(GREEN)
   else
     log = File.open time_log_path, "w"

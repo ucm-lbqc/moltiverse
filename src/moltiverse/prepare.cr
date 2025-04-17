@@ -296,7 +296,7 @@ class Ligand
     @path = Path.new(new_file).expand.parent
     antechamber_exec = "antechamber"
 
-    # Define a series of parameter sets to try, in order of increasing "aggressiveness"
+    # Define a series of parameter sets to try
     param_sets = [
       # First attempt - original parameters
       "qm_theory='AM1', grms_tol=0.0005, scfconv=1.d-10, ndiis_attempts=700",
