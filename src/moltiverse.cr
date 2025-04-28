@@ -280,6 +280,7 @@ output_name = nil
 n_confs = 250
 #cpus = System.cpu_count
 cpus = 1
+sampling_cpus = 1
 remove_folder = false
 protocol_version = 1
 execution_mode = "qm"
@@ -467,7 +468,7 @@ File.each_line(ligand) do |line|
     log.puts "#{name},parameterization_time,#{parameterization_time.total_seconds}"
     minimization_time = lig.minimize
     log.puts "#{name},minimization_time,#{minimization_time.total_seconds}"
-    sampling_time = lig.sampling cpus
+    sampling_time = lig.sampling sampling_cpus
     log.puts "#{name},sampling_time,#{sampling_time.total_seconds}"
     clustering_time = lig.clustering n_confs
     log.puts "#{name},clustering_time,#{clustering_time.total_seconds}"
