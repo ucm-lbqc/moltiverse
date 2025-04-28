@@ -3,12 +3,12 @@
 [<img align="left" src="./assets/moltiverse_logo_color_hex_transparent.png" width="250" />](./assets/moltiverse_logo_color_hex_transparent.png) Moltiverse is an open-source molecular conformer generator available as a command line application written in the modern Crystal language. 
 
 Moltiverse uses the robust ecosystem of open-source applications to process the molecules and perform conformational sampling. The conformer generation protocol consists of seven main steps: 
-1. Molecular pre-processing: Conversion of SMILES code into three-dimensional coordinates using Open Babel.
-2. Structure stretching.
-3. Molecule parameterization with the GAFF2 force field using Amber Tools.
-4. Energetic minimization.
-5. Molecular sampling in vacuum with the M-eABF method using the NAMD molecular simulation engine.
-6. Structure clustering.
+1. Molecular pre-processing: Conversion of SMILES code into three-dimensional coordinates using CDPKit.
+2. Molecule parameterization with the GAFF2 force field using Amber Tools.
+3. Energetic minimization.
+4. Molecular sampling in vacuum with the M-eABF method using the NAMD molecular simulation engine.
+5. Structure clustering.
+6. Conformer ensemble refinement using molecular mechanics (Force field-based).
 7. Conformer ensemble refinement using electronic structure optimization calculations with XTB software.
 
 
@@ -77,7 +77,7 @@ This command executes the entire protocol, creating a folder for each molecule i
 - `*qm.pdb` and `*qm.sdf`: Final conformers after quantum mechanics (QM) optimization. These represent the end result of the protocol.
 - `*.pdb` and `*.sdf` (without suffix): Raw conformers. These are primarily for development purposes and should be avoided for analysis.
 
-**Note**: For most analyses and applications, use the `*qm.pdb` or `*qm.sdf` files, as they represent the final, optimized conformers. The `-P` or `--procs` option assigns processor cores to run the protocol. For laptops or modest computers we recommend to use a small amount of cores (1 to 4) to avoid failures. For computing clusters, a higher number of cores is preferred.
+**Note**: For most analyses and applications, use the `*qm.pdb` or `*qm.sdf` files, as they represent the final, optimized conformers. The `-P` or `--procs` option assigns processor cores to run the protocol. For laptops or modest computers we recommend to use a small amount of cores (1 to 4) to avoid failures. For computing clusters, a higher number of cores is preferred. Note that the number of processors will only parallelize the clustering and refinement steps. In the current version, sampling will be performed on only one processor per calculation.
 
 4. To test moltiverse with a short testing protocol (not for production, just for testing), use:
 
@@ -95,8 +95,8 @@ The following [Notebook](https://colab.research.google.com/drive/1YtafWMZsNL-Cyq
 
 6. Developing a new protocol
 
-The [c1.yml](/data/c1.yml) configuration file defines essential collective variables that govern the C1 protocol's behavior.
-When adapting the protocol to larger molecules, such as peptides or macrocycles, it is necessary to modify the upper and lower limits of the radius of gyration, along with other relevant variables as needed. Then pass the new protocol file to the -p option, as:
+The [c1.yml](/data/c1.yml) configuration file defines essential collective variables that govern an example protocol's behavior.
+When adapting the protocol to larger molecules, such as peptides, it is necessary to modify the upper and lower limits of the radius of gyration, along with other relevant variables as needed. Then pass the new protocol file to the -p option, as:
 
    ```bash
    moltiverse -l molecule.smi --procs 2 -p path-to-new_protocol.yml
@@ -119,7 +119,6 @@ metadynamics: true
 hillweight: 3.0
 hillwidth: 3.0
 newhillfrequency: 50
-n_variants: 1
 output_frequency: 400
 ```
 
