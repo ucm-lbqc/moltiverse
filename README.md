@@ -77,7 +77,7 @@ This command executes the entire protocol, creating a folder for each molecule i
 - `*qm.pdb` and `*qm.sdf`: Final conformers after quantum mechanics (QM) optimization. These represent the end result of the protocol.
 - `*.pdb` and `*.sdf` (without suffix): Raw conformers. These are primarily for development purposes and should be avoided for analysis.
 
-**Note**: For most analyses and applications, use the `*qm.pdb` or `*qm.sdf` files, as they represent the final, optimized conformers. The `-P` or `--procs` option assigns processor cores to run the protocol. For laptops or modest computers we recommend to use a small amount of cores (1 to 4) to avoid failures. For computing clusters, a higher number of cores is preferred. Note that the number of processors will only parallelize the clustering and refinement steps. In the current version, sampling will be performed on only one processor per calculation.
+**Note**: For most analyses and applications, use the `*qm.pdb` or `*qm.sdf` files, as they represent the final, optimized conformers. The `-P` or `--procs` option assigns processor cores to run the protocol. For laptops or modest computers we recommend to use a small amount of cores (1 to 4) to avoid failures. For computing clusters, a higher number of cores is preferred. Note that the number of processors will only parallelize the parameterization, clustering and QM refinement. In the current version, sampling will be performed on only one processor *per* calculation.
 
 4. To test moltiverse with a short testing protocol (not for production, just for testing), use:
 
@@ -85,7 +85,19 @@ This command executes the entire protocol, creating a folder for each molecule i
    moltiverse -l molecule.smi --procs 2 -p test
    ```
 The testing protocol performs only 0.8 ns of simulaton divided into two RDGYR windows, generating ~800 structures.
-The full protocol "c1" performs 24 ns of simulation divided into 12 RDGYR windows, generating ~30000 structures.
+The default (automatic) protocol will select specified RDGYR upper and lower bounds according to the molecule size as follows:
+
+| Category | Number of atoms<sup>a</sup> | RDGYR - lower bound<sup>b</sup> | RDGYR - upper bound<sup>b</sup> | Number of windows | Simulation time<sup>c</sup> |
+|----------|------------------------|-------------------|-------------------|-------------------|----------------|
+| Tiny | < 22 | 1.0 | 5.0 | 8 | 4.0 |
+| Small | 23 - 46 | 1.5 | 7.5 | 12 | 6.0 |
+| Medium-Small | 47 - 71 | 2.5 | 9.0 | 13 | 6.5 |
+| Medium | 72 - 136 | 3.0 | 11.0 | 16 | 8.0 |
+| Medium-Large | 137 - 160 | 4.0 | 13.0 | 18 | 9.0 |
+| Large | 161 - 230 | 4.0 | 17.0 | 26 | 13.0 |
+| Extra-Large | > 231 | 4.0 | 25.0 | 42 | 21.0 |
+
+<sup>a</sup>The number of atoms also includes hydrogen atoms. <sup>b</sup>Units are Angstroms. <sup>c</sup>Units are nanoseconds.
 
 5. Visualization
 
