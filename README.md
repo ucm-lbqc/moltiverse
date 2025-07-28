@@ -58,10 +58,6 @@ External software:
 
 ## Usage
 
-> [!IMPORTANT]
-> This application is still under development and is not ready for production. 
-> Please note that we have not yet released a version or documentation. But stay tuned, we will do it soon ;).
-
 1. Check the [examples](/data/moltiverse_c1/examples) directory for example input files:
    - [molecule.smi](/data/moltiverse_c1/examples/molecule.smi): An SMI file containing a single SMILES code and molecule name.
    - [molecules.smi](/data/moltiverse_c1/examples/molecules.smi): An SMI file with multiple SMILES codes and molecule names.
@@ -136,13 +132,13 @@ output_frequency: 400
 
 ## Citing
 
-If you use `moltiverse` in your research, please consider citing the following [preprint](https://doi.org/10.26434/chemrxiv-2024-qs0pc-v2):
+If you use `moltiverse` in your research, please reference the following [publication](https://pubs.acs.org/doi/10.1021/acs.jcim.5c00871):
 
-    Bedoya M, Adasme-Carreño F, Peña-Martínez PA, Muñoz-Gutiérrez C, Peña-Tejo L, Márquez Montesinos JCE, et al. Moltiverse: Molecular Conformer Generation Using Enhanced Sampling Methods. ChemRxiv. 2024; doi:10.26434/chemrxiv-2024-qs0pc-v2  This content is a preprint and has not been peer-reviewed.
+    Bedoya, M.; Adasme-Carreño, F.; Peña-Martínez, P. A.; Muñoz-Gutiérrez, C.; Peña-Tejo, L.; Montesinos, J. C. E. M.; Hernández-Rodríguez, E. W.; González, W.; Martínez, L.; Alzate-Morales, J. Moltiverse: Molecular Conformer Generation Using Enhanced Sampling Methods. J. Chem. Inf. Model. 2025, 65 (12), 5998–6013. https://doi.org/10.1021/acs.jcim.5c00871.
 
 ## Supplementary data
 
-[https://doi.org/10.6084/m9.figshare.27346974.v3](https://doi.org/10.6084/m9.figshare.27346974.v3)
+[https://doi.org/10.6084/m9.figshare.27346974.v4](https://doi.org/10.6084/m9.figshare.27346974.v4)
 
 ## Contributing
 
